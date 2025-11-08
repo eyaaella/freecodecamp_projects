@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WARAP - Audit et Logs</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 15px;
+      color: #333;
+    }
+
+    .container {
+      max-width: 100%;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 20px;
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .stat-card.danger {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .stat-card.warning {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+
+    .stat-card.success {
+      background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+    }
+
+    .stat-card .value {
+      font-size: 32px;
+      font-weight: bold;
+      margin: 5px 0;
+    }
+
+    .stat-card .label {
+      font-size: 11px;
+      opacity: 0.9;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a237e;
+      margin-bottom: 10px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 2px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 5px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 13px;
+      transition: all 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f5f5f5;
+      color: #666;
+      margin-top: 10px;
+    }
+
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+      margin-top: 10px;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(56, 239, 125, 0.4);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+      color: white;
+      margin-top: 10px;
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(235, 51, 73, 0.4);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .log-list {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      background: #fafafa;
+    }
+
+    .log-item {
+      padding: 12px;
+      border-bottom: 1px solid #e0e0e0;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .log-item:hover {
+      background: #f0f0f0;
+    }
+
+    .log-item:last-child {
+      border-bottom: none;
+    }
+
+    .log-item.error {
+      border-left: 4px solid #f44336;
+    }
+
+    .log-item.warning {
+      border-left: 4px solid #ff9800;
+    }
+
+    .log-item.success {
+      border-left: 4px solid #4caf50;
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .log-type {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background: #e0e0e0;
+      color: #666;
+    }
+
+    .log-type.creation { background: #c8e6c9; color: #2e7d32; }
+    .log-type.modification { background: #bbdefb; color: #1565c0; }
+    .log-type.suppression { background: #ffcdd2; color: #c62828; }
+    .log-type.connexion { background: #d1c4e9; color: #4527a0; }
+    .log-type.erreur { background: #ffcdd2; color: #b71c1c; }
+    .log-type.alerte { background: #ffe0b2; color: #e65100; }
+
+    .log-timestamp {
+      font-size: 10px;
+      color: #999;
+    }
+
+    .log-body {
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .log-module {
+      font-weight: 600;
+      color: #667eea;
+    }
+
+    .log-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      color: #999;
+    }
+
+    .log-user {
+      max-width: 60%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .badge {
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge.critical { background: #ffebee; color: #c62828; }
+    .badge.private { background: #fff3e0; color: #e65100; }
+    .badge.confidential { background: #fce4ec; color: #880e4f; }
+    .badge.public { background: #e8f5e9; color: #2e7d32; }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+
+    .loading::after {
+      content: '...';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
+    }
+
+    .alert {
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 12px;
+    }
+
+    .alert-warning {
+      background: #fff3e0;
+      border-left: 4px solid #ff9800;
+      color: #e65100;
+    }
+
+    .alert-danger {
+      background: #ffebee;
+      border-left: 4px solid #f44336;
+      color: #c62828;
+    }
+
+    .alert-info {
+      background: #e3f2fd;
+      border-left: 4px solid #2196f3;
+      color: #1565c0;
+    }
+
+    .suspicious-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .suspicious-item {
+      padding: 10px;
+      background: #ffebee;
+      border-left: 4px solid #f44336;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    .suspicious-item strong {
+      display: block;
+      color: #c62828;
+      margin-bottom: 3px;
+    }
+
+    .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 5px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .checkbox-label input[type="checkbox"] {
+      width: auto;
+      cursor: pointer;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+
+    .empty-state svg {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 10px;
+      opacity: 0.3;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📊 Audit et Logs</h1>
+      <p>Surveillance et analyse d'activité WARAP</p>
+    </div>
+
+    <div class="content">
+      <!-- Statistiques -->
+      <div class="section">
+        <div class="section-title">Statistiques en temps réel</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="label">Aujourd'hui</div>
+            <div class="value" id="statToday">0</div>
+          </div>
+          <div class="stat-card warning">
+            <div class="label">Cette semaine</div>
+            <div class="value" id="statWeek">0</div>
+          </div>
+          <div class="stat-card danger">
+            <div class="label">Erreurs</div>
+            <div class="value" id="statErrors">0</div>
+          </div>
+          <div class="stat-card success">
+            <div class="label">Total</div>
+            <div class="value" id="statTotal">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alertes d'activité suspecte -->
+      <div class="section" id="suspiciousSection" style="display: none;">
+        <div class="section-title">⚠️ Activités suspectes détectées</div>
+        <ul class="suspicious-list" id="suspiciousList"></ul>
+        <button class="btn btn-danger" onclick="viewSuspiciousDetails()">Analyser en détail</button>
+      </div>
+
+      <!-- Filtres avancés -->
+      <div class="section">
+        <div class="section-title">Filtres de recherche</div>
+
+        <div class="form-group">
+          <label>Période</label>
+          <div class="form-row">
+            <input type="date" id="dateDebut" placeholder="Date début">
+            <input type="date" id="dateFin" placeholder="Date fin">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Type d'événement</label>
+          <div class="checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" value="Création" checked> Création
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" value="Modification" checked> Modification
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" value="Suppression" checked> Suppression
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" value="Connexion" checked> Connexion
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" value="Erreur" checked> Erreur
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" value="Alerte" checked> Alerte
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Module</label>
+          <select id="filterModule">
+            <option value="">Tous les modules</option>
+            <option value="Clients">Clients</option>
+            <option value="Prestataires">Prestataires</option>
+            <option value="Annonces">Annonces</option>
+            <option value="Transactions">Transactions</option>
+            <option value="Matching">Matching</option>
+            <option value="Paiements">Paiements</option>
+            <option value="Messages">Messages</option>
+            <option value="Notifications">Notifications</option>
+            <option value="Utilisateurs">Utilisateurs</option>
+            <option value="Sécurité">Sécurité</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Utilisateur</label>
+          <input type="email" id="filterUser" placeholder="email@example.com">
+        </div>
+
+        <div class="form-group">
+          <label>Statut</label>
+          <select id="filterStatut">
+            <option value="">Tous les statuts</option>
+            <option value="Succès">Succès</option>
+            <option value="Erreur">Erreur</option>
+            <option value="Avertissement">Avertissement</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Niveau de sécurité</label>
+          <select id="filterSecurite">
+            <option value="">Tous les niveaux</option>
+            <option value="Public">Public</option>
+            <option value="Privé">Privé</option>
+            <option value="Confidentiel">Confidentiel</option>
+            <option value="Critique">Critique</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Recherche textuelle</label>
+          <input type="text" id="searchText" placeholder="Rechercher dans les logs...">
+        </div>
+
+        <button class="btn btn-primary" onclick="searchLogs()">🔍 Rechercher</button>
+        <button class="btn btn-secondary" onclick="resetFilters()">↺ Réinitialiser</button>
+      </div>
+
+      <!-- Résultats -->
+      <div class="section">
+        <div class="section-title">Résultats (<span id="resultCount">0</span>)</div>
+        <div class="log-list" id="logList">
+          <div class="loading">Chargement des logs</div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="section">
+        <button class="btn btn-success" onclick="exportLogs()">📥 Exporter (CSV)</button>
+        <button class="btn btn-secondary" onclick="analyzeActivity()">📈 Analyser activité</button>
+        <button class="btn btn-secondary" onclick="refreshLogs()">↻ Actualiser</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentLogs = [];
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', function() {
+      loadStatistics();
+      checkSuspiciousActivity();
+      loadRecentLogs();
+    });
+
+    // Charge les statistiques
+    function loadStatistics() {
+      google.script.run
+        .withSuccessHandler(function(stats) {
+          document.getElementById('statToday').textContent = stats.today || 0;
+          document.getElementById('statWeek').textContent = stats.thisWeek || 0;
+          document.getElementById('statErrors').textContent = stats.byStatus?.Erreur || 0;
+          document.getElementById('statTotal').textContent = stats.total || 0;
+        })
+        .withFailureHandler(showError)
+        .getLogsStatistics();
+    }
+
+    // Vérifie les activités suspectes
+    function checkSuspiciousActivity() {
+      google.script.run
+        .withSuccessHandler(function(suspicious) {
+          if (suspicious && suspicious.length > 0) {
+            document.getElementById('suspiciousSection').style.display = 'block';
+            const list = document.getElementById('suspiciousList');
+            list.innerHTML = '';
+
+            suspicious.forEach(item => {
+              const li = document.createElement('li');
+              li.className = 'suspicious-item';
+              li.innerHTML = `
+                <strong>${item.type}</strong>
+                ${item.email}: ${item.details}
+              `;
+              list.appendChild(li);
+            });
+          }
+        })
+        .withFailureHandler(showError)
+        .detectSuspiciousActivity();
+    }
+
+    // Charge les logs récents
+    function loadRecentLogs() {
+      const filters = {};
+      searchLogsWithFilters(filters);
+    }
+
+    // Recherche avec filtres
+    function searchLogs() {
+      const filters = {
+        dateDebut: document.getElementById('dateDebut').value,
+        dateFin: document.getElementById('dateFin').value,
+        module: document.getElementById('filterModule').value,
+        utilisateur: document.getElementById('filterUser').value,
+        statut: document.getElementById('filterStatut').value,
+        niveauSecurite: document.getElementById('filterSecurite').value,
+        searchText: document.getElementById('searchText').value
+      };
+
+      // Filtrer les valeurs vides
+      Object.keys(filters).forEach(key => {
+        if (!filters[key]) delete filters[key];
+      });
+
+      searchLogsWithFilters(filters);
+    }
+
+    // Exécute la recherche
+    function searchLogsWithFilters(filters) {
+      document.getElementById('logList').innerHTML = '<div class="loading">Recherche en cours</div>';
+
+      google.script.run
+        .withSuccessHandler(function(logs) {
+          currentLogs = logs;
+          displayLogs(logs);
+        })
+        .withFailureHandler(showError)
+        .searchLogs(filters);
+    }
+
+    // Affiche les logs
+    function displayLogs(logs) {
+      const container = document.getElementById('logList');
+      document.getElementById('resultCount').textContent = logs.length;
+
+      if (logs.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <svg fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+              <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+            </svg>
+            <p>Aucun log trouvé</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = '';
+      logs.forEach(log => {
+        const item = createLogItem(log);
+        container.appendChild(item);
+      });
+    }
+
+    // Crée un élément de log
+    function createLogItem(log) {
+      const div = document.createElement('div');
+      div.className = 'log-item';
+
+      if (log.statut === 'Erreur') div.classList.add('error');
+      else if (log.statut === 'Avertissement') div.classList.add('warning');
+      else div.classList.add('success');
+
+      const typeClass = log.typeEvenement.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      const timestamp = new Date(log.timestamp);
+      const formattedDate = timestamp.toLocaleString('fr-FR');
+
+      div.innerHTML = `
+        <div class="log-header">
+          <span class="log-type ${typeClass}">${log.typeEvenement}</span>
+          <span class="log-timestamp">${formattedDate}</span>
+        </div>
+        <div class="log-body">
+          <span class="log-module">${log.module}</span> - ${log.action}
+        </div>
+        <div class="log-footer">
+          <span class="log-user" title="${log.utilisateurEmail}">
+            👤 ${log.utilisateurEmail}
+          </span>
+          <span class="badge ${log.niveauSecurite.toLowerCase()}">${log.niveauSecurite}</span>
+        </div>
+      `;
+
+      div.onclick = () => showLogDetails(log);
+      return div;
+    }
+
+    // Affiche les détails d'un log
+    function showLogDetails(log) {
+      google.script.run
+        .withSuccessHandler(function(html) {
+          const ui = HtmlService.createHtmlOutput(html)
+            .setWidth(600)
+            .setHeight(700);
+          SpreadsheetApp.getUi().showModalDialog(ui, 'Détails du log');
+        })
+        .withFailureHandler(showError)
+        .getLogDetailsModal(log);
+    }
+
+    // Réinitialise les filtres
+    function resetFilters() {
+      document.getElementById('dateDebut').value = '';
+      document.getElementById('dateFin').value = '';
+      document.getElementById('filterModule').value = '';
+      document.getElementById('filterUser').value = '';
+      document.getElementById('filterStatut').value = '';
+      document.getElementById('filterSecurite').value = '';
+      document.getElementById('searchText').value = '';
+
+      // Réinitialiser les checkboxes
+      document.querySelectorAll('.checkbox-group input[type="checkbox"]').forEach(cb => {
+        cb.checked = true;
+      });
+
+      loadRecentLogs();
+    }
+
+    // Exporte les logs
+    function exportLogs() {
+      if (currentLogs.length === 0) {
+        alert('Aucun log à exporter');
+        return;
+      }
+
+      const filters = getCurrentFilters();
+
+      google.script.run
+        .withSuccessHandler(function(csv) {
+          downloadCSV(csv, 'warap_logs_' + new Date().toISOString().split('T')[0] + '.csv');
+          alert('Export réussi ! ' + currentLogs.length + ' logs exportés.');
+        })
+        .withFailureHandler(showError)
+        .exportLogsToCSV(filters);
+    }
+
+    // Télécharge le CSV
+    function downloadCSV(csv, filename) {
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Analyse l'activité
+    function analyzeActivity() {
+      const email = document.getElementById('filterUser').value;
+
+      if (!email) {
+        alert('Veuillez spécifier un email utilisateur pour l\'analyse');
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function(stats) {
+          showActivityAnalysis(email, stats);
+        })
+        .withFailureHandler(showError)
+        .analyzeUserActivity(email);
+    }
+
+    // Affiche l'analyse d'activité
+    function showActivityAnalysis(email, stats) {
+      let message = `Analyse d'activité pour: ${email}\n\n`;
+      message += `Total d'actions: ${stats.totalActions}\n`;
+      message += `Erreurs: ${stats.errors}\n`;
+      message += `Avertissements: ${stats.warnings}\n`;
+      message += `Module le plus actif: ${stats.mostActiveModule}\n`;
+      message += `Dernière activité: ${new Date(stats.lastActivity).toLocaleString('fr-FR')}\n\n`;
+
+      message += `Actions par type:\n`;
+      for (const [type, count] of Object.entries(stats.actionsByType)) {
+        message += `  - ${type}: ${count}\n`;
+      }
+
+      alert(message);
+    }
+
+    // Actualise les logs
+    function refreshLogs() {
+      loadStatistics();
+      checkSuspiciousActivity();
+      searchLogs();
+    }
+
+    // Récupère les filtres actuels
+    function getCurrentFilters() {
+      const filters = {
+        dateDebut: document.getElementById('dateDebut').value,
+        dateFin: document.getElementById('dateFin').value,
+        module: document.getElementById('filterModule').value,
+        utilisateur: document.getElementById('filterUser').value,
+        statut: document.getElementById('filterStatut').value,
+        niveauSecurite: document.getElementById('filterSecurite').value,
+        searchText: document.getElementById('searchText').value
+      };
+
+      Object.keys(filters).forEach(key => {
+        if (!filters[key]) delete filters[key];
+      });
+
+      return filters;
+    }
+
+    // Affiche les détails des activités suspectes
+    function viewSuspiciousDetails() {
+      alert('Cette fonctionnalité permettra d\'analyser en détail les activités suspectes et de prendre des mesures appropriées.');
+    }
+
+    // Gestion des erreurs
+    function showError(error) {
+      console.error('Erreur:', error);
+      alert('Erreur: ' + error.message);
+    }
+  </script>
+</body>
+</html>

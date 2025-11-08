@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Détails du Log</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      color: #333;
+    }
+
+    .modal-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      overflow: hidden;
+      max-width: 100%;
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .close-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .close-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: rotate(90deg);
+    }
+
+    .modal-body {
+      padding: 20px;
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
+    }
+
+    .status-banner {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .status-banner.success {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+    }
+
+    .status-banner.error {
+      background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+      color: white;
+    }
+
+    .status-banner.warning {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+
+    .status-icon {
+      font-size: 24px;
+    }
+
+    .info-section {
+      margin-bottom: 25px;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a237e;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 4px;
+      height: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 2px;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .info-item {
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+
+    .info-item.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .info-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+
+    .info-value {
+      font-size: 14px;
+      color: #333;
+      word-wrap: break-word;
+    }
+
+    .info-value.large {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a237e;
+    }
+
+    .info-value.monospace {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      background: white;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge.type-creation { background: #c8e6c9; color: #2e7d32; }
+    .badge.type-modification { background: #bbdefb; color: #1565c0; }
+    .badge.type-suppression { background: #ffcdd2; color: #c62828; }
+    .badge.type-connexion { background: #d1c4e9; color: #4527a0; }
+    .badge.type-erreur { background: #ffcdd2; color: #b71c1c; }
+    .badge.type-alerte { background: #ffe0b2; color: #e65100; }
+
+    .badge.security-public { background: #e8f5e9; color: #2e7d32; }
+    .badge.security-prive { background: #fff3e0; color: #e65100; }
+    .badge.security-confidentiel { background: #fce4ec; color: #880e4f; }
+    .badge.security-critique { background: #ffebee; color: #c62828; }
+
+    .json-viewer {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      overflow-x: auto;
+      max-height: 200px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+
+    .json-viewer.empty {
+      background: #f5f5f5;
+      color: #999;
+      text-align: center;
+      font-style: italic;
+    }
+
+    .json-key {
+      color: #9cdcfe;
+    }
+
+    .json-string {
+      color: #ce9178;
+    }
+
+    .json-number {
+      color: #b5cea8;
+    }
+
+    .json-boolean {
+      color: #569cd6;
+    }
+
+    .json-null {
+      color: #569cd6;
+    }
+
+    .diff-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .diff-panel {
+      background: #f8f9fa;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .diff-header {
+      padding: 10px;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .diff-header.old {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    .diff-header.new {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .diff-content {
+      padding: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 30px;
+      margin-top: 10px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -24px;
+      top: 15px;
+      width: 12px;
+      height: 12px;
+      background: #667eea;
+      border-radius: 50%;
+      border: 2px solid white;
+      box-shadow: 0 0 0 2px #667eea;
+    }
+
+    .timeline-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+
+    .timeline-value {
+      font-size: 13px;
+      color: #333;
+    }
+
+    .error-box {
+      background: #ffebee;
+      border-left: 4px solid #f44336;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    .error-title {
+      font-weight: 600;
+      color: #c62828;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .error-message {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #666;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .context-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .context-item {
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .context-label {
+      font-size: 10px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .context-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px solid #e0e0e0;
+    }
+
+    .btn {
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f5f5f5;
+      color: #666;
+    }
+
+    .btn-secondary:hover {
+      background: #e0e0e0;
+    }
+
+    .entity-link {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .entity-link:hover {
+      text-decoration: underline;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555;
+    }
+
+    @media (max-width: 600px) {
+      .info-grid,
+      .diff-container,
+      .context-grid,
+      .action-buttons {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2>
+        <span>🔍</span>
+        <span>Détails de l'événement</span>
+      </h2>
+      <button class="close-btn" onclick="google.script.host.close()">×</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Bannière de statut -->
+      <div class="status-banner" id="statusBanner">
+        <span class="status-icon" id="statusIcon"></span>
+        <span id="statusText"></span>
+      </div>
+
+      <!-- Informations principales -->
+      <div class="info-section">
+        <div class="section-title">Informations générales</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">ID du Log</div>
+            <div class="info-value monospace" id="logId"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Type d'événement</div>
+            <div class="info-value">
+              <span class="badge" id="eventType"></span>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Module</div>
+            <div class="info-value large" id="module"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Niveau de sécurité</div>
+            <div class="info-value">
+              <span class="badge" id="securityLevel"></span>
+            </div>
+          </div>
+          <div class="info-item full-width">
+            <div class="info-label">Action effectuée</div>
+            <div class="info-value" id="action"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="info-section">
+        <div class="section-title">⏰ Chronologie</div>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-label">Date et heure précises</div>
+            <div class="timeline-value" id="timestamp"></div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-label">Il y a</div>
+            <div class="timeline-value" id="timeAgo"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Utilisateur -->
+      <div class="info-section">
+        <div class="section-title">👤 Utilisateur concerné</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Email</div>
+            <div class="info-value" id="userEmail"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Rôle</div>
+            <div class="info-value" id="userRole"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Entité concernée -->
+      <div class="info-section" id="entitySection">
+        <div class="section-title">📦 Entité concernée</div>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="info-label">Type</div>
+            <div class="info-value" id="entityType"></div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">ID</div>
+            <div class="info-value">
+              <a href="#" class="entity-link" id="entityId" onclick="viewEntity(); return false;">
+                <span id="entityIdValue"></span>
+                <span>→</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modifications (Diff) -->
+      <div class="info-section" id="diffSection" style="display: none;">
+        <div class="section-title">🔄 Modifications apportées</div>
+        <div class="diff-container">
+          <div class="diff-panel">
+            <div class="diff-header old">❌ Anciennes valeurs</div>
+            <div class="diff-content">
+              <div class="json-viewer" id="oldValues"></div>
+            </div>
+          </div>
+          <div class="diff-panel">
+            <div class="diff-header new">✅ Nouvelles valeurs</div>
+            <div class="diff-content">
+              <div class="json-viewer" id="newValues"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contexte technique -->
+      <div class="info-section">
+        <div class="section-title">🖥️ Contexte technique</div>
+        <div class="context-grid">
+          <div class="context-item">
+            <div class="context-label">Adresse IP</div>
+            <div class="context-value" id="ipAddress"></div>
+          </div>
+          <div class="context-item">
+            <div class="context-label">Navigateur</div>
+            <div class="context-value" id="browserAgent"></div>
+          </div>
+          <div class="context-item">
+            <div class="context-label">Statut</div>
+            <div class="context-value" id="status"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message d'erreur -->
+      <div class="info-section" id="errorSection" style="display: none;">
+        <div class="section-title">⚠️ Détails de l'erreur</div>
+        <div class="error-box">
+          <div class="error-title">
+            <span>🔴</span>
+            <span>Message d'erreur</span>
+          </div>
+          <div class="error-message" id="errorMessage"></div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="action-buttons">
+        <button class="btn btn-primary" onclick="exportLog()">📥 Exporter ce log</button>
+        <button class="btn btn-secondary" onclick="viewRelatedLogs()">🔗 Logs liés</button>
+        <button class="btn btn-secondary" onclick="copyLogId()">📋 Copier ID</button>
+        <button class="btn btn-secondary" onclick="google.script.host.close()">✕ Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Données du log (injectées par le serveur)
+    let logData = <?= JSON.stringify(logData) ?>;
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', function() {
+      displayLogDetails(logData);
+    });
+
+    // Affiche les détails du log
+    function displayLogDetails(log) {
+      // Statut banner
+      const statusBanner = document.getElementById('statusBanner');
+      const statusIcon = document.getElementById('statusIcon');
+      const statusText = document.getElementById('statusText');
+
+      if (log.statut === 'Succès') {
+        statusBanner.className = 'status-banner success';
+        statusIcon.textContent = '✅';
+        statusText.textContent = 'Opération réussie';
+      } else if (log.statut === 'Erreur') {
+        statusBanner.className = 'status-banner error';
+        statusIcon.textContent = '❌';
+        statusText.textContent = 'Erreur détectée';
+      } else {
+        statusBanner.className = 'status-banner warning';
+        statusIcon.textContent = '⚠️';
+        statusText.textContent = 'Avertissement';
+      }
+
+      // Informations principales
+      document.getElementById('logId').textContent = log.idLog;
+
+      const eventTypeBadge = document.getElementById('eventType');
+      eventTypeBadge.textContent = log.typeEvenement;
+      eventTypeBadge.className = 'badge type-' + normalizeString(log.typeEvenement);
+
+      document.getElementById('module').textContent = log.module;
+
+      const securityBadge = document.getElementById('securityLevel');
+      securityBadge.textContent = log.niveauSecurite;
+      securityBadge.className = 'badge security-' + normalizeString(log.niveauSecurite);
+
+      document.getElementById('action').textContent = log.action;
+
+      // Timeline
+      const timestamp = new Date(log.timestamp);
+      document.getElementById('timestamp').textContent = formatDateTime(timestamp);
+      document.getElementById('timeAgo').textContent = getTimeAgo(timestamp);
+
+      // Utilisateur
+      document.getElementById('userEmail').textContent = log.utilisateurEmail;
+      document.getElementById('userRole').textContent = log.utilisateurRole || 'Non défini';
+
+      // Entité
+      if (log.entiteType && log.entiteId) {
+        document.getElementById('entityType').textContent = log.entiteType;
+        document.getElementById('entityIdValue').textContent = log.entiteId;
+        document.getElementById('entitySection').style.display = 'block';
+      } else {
+        document.getElementById('entitySection').style.display = 'none';
+      }
+
+      // Diff (modifications)
+      if (log.anciennesValeurs || log.nouvellesValeurs) {
+        document.getElementById('diffSection').style.display = 'block';
+
+        const oldValuesDiv = document.getElementById('oldValues');
+        if (log.anciennesValeurs) {
+          oldValuesDiv.innerHTML = formatJSON(log.anciennesValeurs);
+        } else {
+          oldValuesDiv.className = 'json-viewer empty';
+          oldValuesDiv.textContent = 'Aucune valeur';
+        }
+
+        const newValuesDiv = document.getElementById('newValues');
+        if (log.nouvellesValeurs) {
+          newValuesDiv.innerHTML = formatJSON(log.nouvellesValeurs);
+        } else {
+          newValuesDiv.className = 'json-viewer empty';
+          newValuesDiv.textContent = 'Aucune valeur';
+        }
+      }
+
+      // Contexte technique
+      document.getElementById('ipAddress').textContent = log.ipAdresse || 'N/A';
+      document.getElementById('browserAgent').textContent = log.navigateurAgent || 'N/A';
+      document.getElementById('status').textContent = log.statut;
+
+      // Message d'erreur
+      if (log.messageErreur && log.messageErreur.trim() !== '') {
+        document.getElementById('errorSection').style.display = 'block';
+        document.getElementById('errorMessage').textContent = log.messageErreur;
+      }
+    }
+
+    // Formate une date/heure
+    function formatDateTime(date) {
+      const options = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      };
+      return date.toLocaleDateString('fr-FR', options);
+    }
+
+    // Calcule le temps écoulé
+    function getTimeAgo(date) {
+      const now = new Date();
+      const diff = now - date;
+      const seconds = Math.floor(diff / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      const days = Math.floor(hours / 24);
+
+      if (days > 0) return days + ' jour' + (days > 1 ? 's' : '');
+      if (hours > 0) return hours + ' heure' + (hours > 1 ? 's' : '');
+      if (minutes > 0) return minutes + ' minute' + (minutes > 1 ? 's' : '');
+      return seconds + ' seconde' + (seconds > 1 ? 's' : '');
+    }
+
+    // Formate du JSON avec coloration syntaxique
+    function formatJSON(jsonString) {
+      try {
+        const obj = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
+        const formatted = JSON.stringify(obj, null, 2);
+
+        return formatted
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
+          .replace(/: "([^"]*)"/g, ': <span class="json-string">"$1"</span>')
+          .replace(/: (\d+)/g, ': <span class="json-number">$1</span>')
+          .replace(/: (true|false)/g, ': <span class="json-boolean">$1</span>')
+          .replace(/: null/g, ': <span class="json-null">null</span>');
+      } catch (e) {
+        return jsonString;
+      }
+    }
+
+    // Normalise une chaîne pour les classes CSS
+    function normalizeString(str) {
+      return str.toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '-');
+    }
+
+    // Exporte ce log
+    function exportLog() {
+      const csv = convertLogToCSV(logData);
+      const filename = 'log_' + logData.idLog + '.csv';
+      downloadCSV(csv, filename);
+      alert('Log exporté avec succès !');
+    }
+
+    // Convertit un log en CSV
+    function convertLogToCSV(log) {
+      const headers = ['Champ', 'Valeur'];
+      const rows = [
+        ['ID Log', log.idLog],
+        ['Timestamp', new Date(log.timestamp).toLocaleString('fr-FR')],
+        ['Type Événement', log.typeEvenement],
+        ['Module', log.module],
+        ['Action', log.action],
+        ['Utilisateur Email', log.utilisateurEmail],
+        ['Utilisateur Rôle', log.utilisateurRole],
+        ['Entité Type', log.entiteType],
+        ['Entité ID', log.entiteId],
+        ['Anciennes Valeurs', log.anciennesValeurs],
+        ['Nouvelles Valeurs', log.nouvellesValeurs],
+        ['IP Adresse', log.ipAdresse],
+        ['Navigateur Agent', log.navigateurAgent],
+        ['Statut', log.statut],
+        ['Message Erreur', log.messageErreur],
+        ['Niveau Sécurité', log.niveauSecurite]
+      ];
+
+      let csv = headers.join(',') + '\n';
+      rows.forEach(row => {
+        csv += '"' + row[0] + '","' + (row[1] || '').replace(/"/g, '""') + '"\n';
+      });
+
+      return csv;
+    }
+
+    // Télécharge un fichier CSV
+    function downloadCSV(csv, filename) {
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Voir les logs liés
+    function viewRelatedLogs() {
+      const filters = {
+        module: logData.module,
+        entiteType: logData.entiteType,
+        entiteId: logData.entiteId
+      };
+
+      alert('Recherche des logs liés...\n\n' +
+            'Module: ' + logData.module + '\n' +
+            'Type: ' + logData.entiteType + '\n' +
+            'ID: ' + logData.entiteId + '\n\n' +
+            'Cette fonctionnalité ouvrira la sidebar avec ces filtres appliqués.');
+    }
+
+    // Copie l'ID du log
+    function copyLogId() {
+      const tempInput = document.createElement('input');
+      tempInput.value = logData.idLog;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+      alert('ID du log copié: ' + logData.idLog);
+    }
+
+    // Voir l'entité
+    function viewEntity() {
+      alert('Navigation vers l\'entité:\n\n' +
+            'Type: ' + logData.entiteType + '\n' +
+            'ID: ' + logData.entiteId + '\n\n' +
+            'Cette fonctionnalité ouvrira le module approprié avec l\'entité sélectionnée.');
+    }
+  </script>
+</body>
+</html>
