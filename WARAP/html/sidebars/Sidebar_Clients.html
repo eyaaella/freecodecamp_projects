@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clients WARAP</title>
+
+  <style>
+    :root {
+      --warap-primary: #4f46e5;
+      --warap-primary-dark: #4338ca;
+      --success: #10B981;
+      --warning: #F59E0B;
+      --error: #EF4444;
+      --bg-light: #f9fafb;
+      --border: #e5e7eb;
+      --text-dark: #111827;
+      --text-gray: #6b7280;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      color: var(--text-dark);
+      background: var(--bg-light);
+      line-height: 1.5;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      padding: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .header-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .user-info {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    /* KPI Cards */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .kpi-card {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+    }
+
+    .kpi-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--warap-primary);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      color: var(--text-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Filtres */
+    .filters {
+      background: white;
+      margin: 0 16px;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      margin-bottom: 16px;
+    }
+
+    .filter-group {
+      margin-bottom: 12px;
+    }
+
+    .filter-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .filter-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-gray);
+      margin-bottom: 4px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--warap-primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: var(--warap-primary);
+      border: 1px solid var(--warap-primary);
+      width: 100%;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(79, 70, 229, 0.05);
+    }
+
+    /* Actions */
+    .actions {
+      padding: 0 16px 16px;
+    }
+
+    /* Liste Clients */
+    .clients-list {
+      padding: 0 16px 16px;
+    }
+
+    .client-card {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      border: 1px solid var(--border);
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .client-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-color: var(--warap-primary);
+      transform: translateY(-2px);
+    }
+
+    .client-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+
+    .client-name {
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text-dark);
+      margin-bottom: 4px;
+    }
+
+    .client-id {
+      font-size: 11px;
+      color: var(--text-gray);
+      font-family: 'Courier New', monospace;
+    }
+
+    .client-segment {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .segment-vip {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .segment-fidele {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .segment-actif {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .segment-nouveau {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .client-details {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-gray);
+    }
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-gray);
+    }
+
+    .spinner {
+      border: 3px solid var(--border);
+      border-top-color: var(--warap-primary);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-gray);
+    }
+
+    .empty-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+      font-size: 14px;
+      font-weight: 500;
+      z-index: 1000;
+      animation: slideIn 0.3s ease-out;
+      max-width: 300px;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .toast-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .toast-error {
+      background: var(--error);
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="header-title">
+      <span>👥</span>
+      <span>Clients WARAP</span>
+    </div>
+    <div class="user-info">
+      <span id="userEmail">Chargement...</span>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <span class="kpi-value" id="totalClients">-</span>
+      <span class="kpi-label">Total Clients</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-value" id="clientsActifs">-</span>
+      <span class="kpi-label">Actifs</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-value" id="clientsVIP">-</span>
+      <span class="kpi-label">VIP</span>
+    </div>
+    <div class="kpi-card">
+      <span class="kpi-value" id="nouveaux7j">-</span>
+      <span class="kpi-label">Nouveaux 7j</span>
+    </div>
+  </div>
+
+  <!-- Filtres -->
+  <div class="filters">
+    <div class="filter-group">
+      <label class="filter-label">Recherche</label>
+      <input type="text" id="searchInput" placeholder="Nom, email, téléphone..." oninput="applyFilters()">
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Statut</label>
+      <select id="filterStatut" onchange="applyFilters()">
+        <option value="">Tous</option>
+        <option value="Actif">Actif</option>
+        <option value="Inactif">Inactif</option>
+        <option value="Suspendu">Suspendu</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label class="filter-label">Segment</label>
+      <select id="filterSegment" onchange="applyFilters()">
+        <option value="">Tous</option>
+        <option value="VIP">VIP</option>
+        <option value="Fidèle">Fidèle</option>
+        <option value="Actif">Actif</option>
+        <option value="Nouveau">Nouveau</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <button class="btn btn-primary" onclick="createNewClient()">
+      <span>➕</span>
+      <span>Nouveau Client</span>
+    </button>
+    <button class="btn btn-secondary" onclick="exportClients()">
+      <span>📥</span>
+      <span>Exporter</span>
+    </button>
+  </div>
+
+  <!-- Liste des clients -->
+  <div id="clientsList" class="clients-list">
+    <div class="loading">
+      <div class="spinner"></div>
+      <div>Chargement des clients...</div>
+    </div>
+  </div>
+
+  <script>
+    let allClients = [];
+    let filteredClients = [];
+
+    // Initialisation
+    window.onload = function() {
+      loadUserInfo();
+      loadClients();
+    };
+
+    function loadUserInfo() {
+      google.script.run
+        .withSuccessHandler(displayUserInfo)
+        .withFailureHandler(handleError)
+        .getCurrentUser();
+    }
+
+    function displayUserInfo(user) {
+      document.getElementById('userEmail').textContent = user.email + ' (' + user.role + ')';
+    }
+
+    function loadClients() {
+      google.script.run
+        .withSuccessHandler(displayClients)
+        .withFailureHandler(handleError)
+        .getClientsForUser();
+    }
+
+    function displayClients(data) {
+      allClients = data.clients || [];
+      filteredClients = [...allClients];
+
+      // Mettre à jour KPIs
+      updateKPIs(data.stats || {});
+
+      // Afficher liste
+      renderClientsList();
+    }
+
+    function updateKPIs(stats) {
+      document.getElementById('totalClients').textContent = stats.total || 0;
+      document.getElementById('clientsActifs').textContent = stats.actifs || 0;
+      document.getElementById('clientsVIP').textContent = stats.vip || 0;
+      document.getElementById('nouveaux7j').textContent = stats.nouveaux7j || 0;
+    }
+
+    function renderClientsList() {
+      const container = document.getElementById('clientsList');
+
+      if (filteredClients.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">👥</div>
+            <div>Aucun client trouvé</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filteredClients.map(client => `
+        <div class="client-card" onclick="openClientDetails('${client.ID_Client}')">
+          <div class="client-header">
+            <div>
+              <div class="client-name">${client.Nom_Complet || 'Sans nom'}</div>
+              <div class="client-id">${client.ID_Client}</div>
+            </div>
+            <span class="client-segment segment-${getSegmentClass(client.Segment_RFM)}">
+              ${client.Segment_RFM || 'Nouveau'}
+            </span>
+          </div>
+
+          <div class="client-details">
+            <div class="detail-item">
+              <span>📧</span>
+              <span>${client.Email || '-'}</span>
+            </div>
+            <div class="detail-item">
+              <span>📱</span>
+              <span>${client.Telephone_Principal || '-'}</span>
+            </div>
+            <div class="detail-item">
+              <span>📍</span>
+              <span>${client.Commune || '-'}</span>
+            </div>
+            <div class="detail-item">
+              <span>💰</span>
+              <span>${formatCFA(client.CA_Total)}</span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function applyFilters() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const statut = document.getElementById('filterStatut').value;
+      const segment = document.getElementById('filterSegment').value;
+
+      filteredClients = allClients.filter(client => {
+        // Recherche textuelle
+        if (search) {
+          const searchFields = [
+            client.Nom_Complet,
+            client.Email,
+            client.Telephone_Principal,
+            client.ID_Client
+          ].join(' ').toLowerCase();
+
+          if (!searchFields.includes(search)) return false;
+        }
+
+        // Filtre statut
+        if (statut && client.Statut !== statut) return false;
+
+        // Filtre segment
+        if (segment && client.Segment_RFM !== segment) return false;
+
+        return true;
+      });
+
+      renderClientsList();
+    }
+
+    function getSegmentClass(segment) {
+      if (!segment) return 'nouveau';
+      const s = segment.toLowerCase();
+      if (s === 'vip') return 'vip';
+      if (s === 'fidèle' || s === 'fidele') return 'fidele';
+      if (s === 'actif') return 'actif';
+      return 'nouveau';
+    }
+
+    function formatCFA(montant) {
+      if (!montant || isNaN(montant)) return '0 FCFA';
+      return new Intl.NumberFormat('fr-CM', {
+        minimumFractionDigits: 0
+      }).format(montant) + ' FCFA';
+    }
+
+    function openClientDetails(clientId) {
+      showToast('Détails client à venir...', 'success');
+    }
+
+    function createNewClient() {
+      showToast('Création client à venir...', 'success');
+    }
+
+    function exportClients() {
+      showToast('Export en cours...', 'success');
+      google.script.run
+        .withSuccessHandler(function(url) {
+          showToast('✅ Export réussi !', 'success');
+        })
+        .withFailureHandler(handleError)
+        .exportClientsData([]);
+    }
+
+    function showToast(message, type) {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+
+    function handleError(error) {
+      console.error('Erreur:', error);
+      showToast('❌ ' + error.message, 'error');
+    }
+  </script>
+</body>
+</html>
