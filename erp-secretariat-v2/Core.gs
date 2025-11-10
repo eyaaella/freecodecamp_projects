@@ -14,7 +14,7 @@ const ERP = {
   cache: CacheService.getScriptCache(),
   CACHE_TTL: 600, // 10 minutes
 
-  // Configuration
+  // Configuration - Initialisée avec config par défaut
   config: null,
 
   // Logs
@@ -27,10 +27,19 @@ const ERP = {
   init: function() {
     try {
       this.log('INFO', 'Initialisation ERP v' + this.VERSION);
+      // Initialiser avec config par défaut si null
+      if (!this.config) {
+        this.config = getDefaultConfig();
+      }
+      // Puis charger la config depuis la feuille si elle existe
       this.config = this.getConfig();
       return true;
     } catch (error) {
-      this.handleError(error, 'init');
+      // En cas d'erreur, s'assurer qu'on a au moins la config par défaut
+      if (!this.config) {
+        this.config = getDefaultConfig();
+      }
+      this.log('ERROR', 'Erreur init: ' + error.toString());
       return false;
     }
   },
@@ -144,10 +153,20 @@ const ERP = {
     const cached = this.cacheGet('config');
     if (cached) return cached;
 
-    // Sinon charger depuis la feuille
+    // Sinon charger depuis la feuille (ou config par défaut)
     const config = loadConfigFromSheet();
     this.cacheSet('config', config);
     return config;
+  },
+
+  /**
+   * Obtient la configuration de manière sûre (toujours valide)
+   */
+  getSafeConfig: function() {
+    if (!this.config) {
+      this.config = getDefaultConfig();
+    }
+    return this.config;
   },
 
   /**
@@ -155,7 +174,8 @@ const ERP = {
    */
   formatDate: function(date) {
     if (!date) date = new Date();
-    return Utilities.formatDate(date, this.config.timezone || 'Africa/Douala', 'dd/MM/yyyy');
+    const config = this.getSafeConfig();
+    return Utilities.formatDate(date, config.timezone || 'Africa/Douala', 'dd/MM/yyyy');
   },
 
   /**
@@ -163,7 +183,8 @@ const ERP = {
    */
   formatDateTime: function(date) {
     if (!date) date = new Date();
-    return Utilities.formatDate(date, this.config.timezone || 'Africa/Douala', 'dd/MM/yyyy HH:mm:ss');
+    const config = this.getSafeConfig();
+    return Utilities.formatDate(date, config.timezone || 'Africa/Douala', 'dd/MM/yyyy HH:mm:ss');
   },
 
   /**
@@ -408,19 +429,25 @@ function showAbout() {
  * Vérifie et affiche les notifications au démarrage
  */
 function checkAndShowNotifications() {
-  if (!ERP.config.options.enableNotifications) return;
+  try {
+    const config = ERP.getSafeConfig();
+    if (!config.options.enableNotifications) return;
 
-  const notifications = getActiveNotifications();
+    const notifications = getActiveNotifications();
 
-  if (notifications.length > 0) {
-    // Afficher un badge ou une alerte discrète
-    const ui = SpreadsheetApp.getUi();
-    ui.alert(
-      '🔔 Notifications',
-      `Vous avez ${notifications.length} notification(s) en attente.\n\n` +
-      'Accédez au Centre de notifications pour les consulter.',
-      ui.ButtonSet.OK
-    );
+    if (notifications.length > 0) {
+      // Afficher un badge ou une alerte discrète
+      const ui = SpreadsheetApp.getUi();
+      ui.alert(
+        '🔔 Notifications',
+        `Vous avez ${notifications.length} notification(s) en attente.\n\n` +
+        'Accédez au Centre de notifications pour les consulter.',
+        ui.ButtonSet.OK
+      );
+    }
+  } catch (error) {
+    // Ignorer les erreurs de notification au démarrage
+    console.log('Erreur notifications: ' + error);
   }
 }
 

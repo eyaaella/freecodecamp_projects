@@ -6,6 +6,11 @@
  * Initialise toutes les feuilles
  */
 function initializeERP() {
+  // Initialiser ERP avec config par défaut AVANT de créer les feuilles
+  if (!ERP.config) {
+    ERP.config = getDefaultConfig();
+  }
+
   const ui = SpreadsheetApp.getUi();
   const response = ui.alert(
     'Initialisation ERP v2.0',
@@ -51,7 +56,7 @@ function initializeERP() {
  */
 function createConfigSheet() {
   const sheet = ERP.getOrCreateSheet('Configuration');
-  const config = ERP.config;
+  const config = ERP.getSafeConfig();
 
   sheet.clear();
 
@@ -120,7 +125,7 @@ function createConfigSheet() {
  */
 function createClientsSheet() {
   const sheet = ERP.getOrCreateSheet('Clients');
-  const config = ERP.config;
+  const config = ERP.getSafeConfig();
 
   sheet.clear();
 
@@ -191,7 +196,7 @@ function createClientsSheet() {
  */
 function createFournisseursSheet() {
   const sheet = ERP.getOrCreateSheet('Fournisseurs');
-  const config = ERP.config;
+  const config = ERP.getSafeConfig();
 
   sheet.clear();
 
@@ -277,7 +282,7 @@ function addClient(clientData) {
       throw new Error('La feuille Clients n\'existe pas.');
     }
 
-    const config = ERP.config;
+    const config = ERP.getSafeConfig();
     const numeroClient = ERP.getNextNumber(config.prefixes.client, 'Clients');
     const dateCreation = ERP.formatDate(new Date());
 
@@ -339,7 +344,7 @@ function addFournisseur(fournisseurData) {
       throw new Error('La feuille Fournisseurs n\'existe pas.');
     }
 
-    const config = ERP.config;
+    const config = ERP.getSafeConfig();
     const numeroFournisseur = ERP.getNextNumber(config.prefixes.fournisseur, 'Fournisseurs');
     const dateCreation = ERP.formatDate(new Date());
 
@@ -518,7 +523,7 @@ function showContactStats() {
  */
 function createAuditSheet() {
   const sheet = ERP.getOrCreateSheet('_Audit');
-  const config = ERP.config;
+  const config = ERP.getSafeConfig();
 
   if (sheet.getLastRow() === 0) {
     sheet.getRange('A1:F1').setValues([[
@@ -550,7 +555,7 @@ function createAuditSheet() {
  */
 function createNotificationsSheet() {
   const sheet = ERP.getOrCreateSheet('_Notifications');
-  const config = ERP.config;
+  const config = ERP.getSafeConfig();
 
   if (sheet.getLastRow() === 0) {
     sheet.getRange('A1:F1').setValues([[
