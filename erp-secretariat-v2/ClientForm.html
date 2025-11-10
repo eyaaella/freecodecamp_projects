@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      * { box-sizing: border-box; }
+      body { font-family: 'Segoe UI', Arial, sans-serif; padding: 20px; margin: 0; background: #f5f5f5; }
+      .container { max-width: 600px; margin: 0 auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+      h2 { margin: 0 0 20px 0; color: #1A73E8; font-size: 24px; }
+      .form-group { margin-bottom: 18px; }
+      label { display: block; margin-bottom: 6px; font-weight: 600; color: #333; font-size: 14px; }
+      input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; transition: border 0.3s; }
+      input:focus, select:focus, textarea:focus { outline: none; border-color: #4285F4; }
+      textarea { height: 70px; resize: vertical; font-family: Arial, sans-serif; }
+      .required { color: #EA4335; }
+      .btn-group { display: flex; gap: 10px; margin-top: 25px; }
+      button { flex: 1; padding: 12px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 15px; font-weight: 600; transition: all 0.3s; }
+      .btn-primary { background: #4285F4; color: white; }
+      .btn-primary:hover { background: #3367D6; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(66, 133, 244, 0.3); }
+      .btn-cancel { background: #9AA0A6; color: white; }
+      .btn-cancel:hover { background: #5F6368; }
+      .error { color: #EA4335; font-size: 13px; margin-top: 5px; display: none; }
+      .loading { text-align: center; padding: 20px; display: none; }
+      .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #4285F4; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto; }
+      @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>➕ Nouveau Client</h2>
+
+      <form id="clientForm">
+        <div class="form-group">
+          <label>Type de client <span class="required">*</span></label>
+          <select id="type" required>
+            <option value="">Sélectionner...</option>
+            <option value="Particulier">Particulier</option>
+            <option value="Entreprise">Entreprise</option>
+            <option value="Administration">Administration</option>
+            <option value="ONG">ONG</option>
+          </select>
+          <div class="error" id="typeError">Veuillez sélectionner un type</div>
+        </div>
+
+        <div class="form-group">
+          <label>Nom / Raison Sociale <span class="required">*</span></label>
+          <input type="text" id="nom" required placeholder="Ex: SARL Exemple">
+          <div class="error" id="nomError">Le nom est obligatoire</div>
+        </div>
+
+        <div class="form-group">
+          <label>Téléphone <span class="required">*</span></label>
+          <input type="tel" id="telephone" placeholder="+237 6XX XXX XXX" required>
+          <div class="error" id="telephoneError">Numéro invalide (format: +237 6XX XXX XXX)</div>
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="contact@exemple.cm">
+          <div class="error" id="emailError">Email invalide</div>
+        </div>
+
+        <div class="form-group">
+          <label>Adresse</label>
+          <textarea id="adresse" placeholder="Adresse complète"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Ville</label>
+          <input type="text" id="ville" value="Yaoundé">
+        </div>
+
+        <div class="form-group">
+          <label>Contact Principal</label>
+          <input type="text" id="contact" placeholder="Nom du contact">
+        </div>
+
+        <div class="form-group">
+          <label>Statut</label>
+          <select id="statut">
+            <option value="Actif" selected>Actif</option>
+            <option value="Inactif">Inactif</option>
+            <option value="Suspendu">Suspendu</option>
+            <option value="VIP">VIP</option>
+          </select>
+        </div>
+
+        <div class="btn-group">
+          <button type="submit" class="btn-primary">Enregistrer</button>
+          <button type="button" class="btn-cancel" onclick="google.script.host.close()">Annuler</button>
+        </div>
+      </form>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Enregistrement en cours...</p>
+      </div>
+    </div>
+
+    <script>
+      document.getElementById('clientForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Validation
+        let isValid = true;
+        document.querySelectorAll('.error').forEach(el => el.style.display = 'none');
+
+        const nom = document.getElementById('nom').value.trim();
+        const type = document.getElementById('type').value;
+        const telephone = document.getElementById('telephone').value.trim();
+        const email = document.getElementById('email').value.trim();
+
+        if (!type) {
+          document.getElementById('typeError').style.display = 'block';
+          isValid = false;
+        }
+
+        if (!nom) {
+          document.getElementById('nomError').style.display = 'block';
+          isValid = false;
+        }
+
+        if (!telephone) {
+          document.getElementById('telephoneError').style.display = 'block';
+          isValid = false;
+        }
+
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          document.getElementById('emailError').style.display = 'block';
+          isValid = false;
+        }
+
+        if (!isValid) return;
+
+        // Afficher loading
+        document.getElementById('clientForm').style.display = 'none';
+        document.getElementById('loading').style.display = 'block';
+
+        const clientData = {
+          type: type,
+          nom: nom,
+          telephone: telephone,
+          email: email,
+          adresse: document.getElementById('adresse').value,
+          ville: document.getElementById('ville').value,
+          contact: document.getElementById('contact').value,
+          statut: document.getElementById('statut').value
+        };
+
+        google.script.run
+          .withSuccessHandler(function(result) {
+            if (result.success) {
+              alert('✅ Client ' + result.numero + ' créé avec succès !');
+              google.script.host.close();
+            } else {
+              document.getElementById('loading').style.display = 'none';
+              document.getElementById('clientForm').style.display = 'block';
+              alert('❌ Erreur: ' + (result.errors ? result.errors.join('\n') : result.error));
+            }
+          })
+          .withFailureHandler(function(error) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('clientForm').style.display = 'block';
+            alert('❌ Erreur: ' + error);
+          })
+          .addClient(clientData);
+      });
+    </script>
+  </body>
+</html>
