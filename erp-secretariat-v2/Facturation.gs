@@ -4,7 +4,7 @@
 
 function createDevisSheet() {
   const sheet = ERP.getOrCreateSheet('Devis');
-  const config = ERP.config;
+  const config = ERP.getSafeConfig();
 
   sheet.clear();
 
@@ -41,7 +41,7 @@ function createDevisSheet() {
 
 function createFacturesSheet() {
   const sheet = ERP.getOrCreateSheet('Factures');
-  const config = ERP.config;
+  const config = ERP.getSafeConfig();
 
   sheet.clear();
 
@@ -78,7 +78,7 @@ function createFacturesSheet() {
 
 function createPaiementsSheet() {
   const sheet = ERP.getOrCreateSheet('Paiements');
-  const config = ERP.config;
+  const config = ERP.getSafeConfig();
 
   sheet.clear();
 
@@ -131,7 +131,7 @@ function createFacture(factureData) {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Factures');
     if (!sheet) throw new Error('La feuille Factures n\'existe pas.');
 
-    const config = ERP.config;
+    const config = ERP.getSafeConfig();
     const numeroFacture = ERP.getNextNumber(config.prefixes.facture, 'Factures');
     const date = ERP.formatDate(new Date());
 
@@ -196,7 +196,7 @@ function addPaiement(paiementData) {
     const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Paiements');
     if (!sheet) throw new Error('La feuille Paiements n\'existe pas.');
 
-    const config = ERP.config;
+    const config = ERP.getSafeConfig();
 
     const newRow = [
       paiementData.date || ERP.formatDate(new Date()),
@@ -238,7 +238,7 @@ function updateFactureStatusAfterPayment(numeroFacture, montantPaye) {
     if (!sheet) return;
 
     const data = sheet.getDataRange().getValues();
-    const config = ERP.config;
+    const config = ERP.getSafeConfig();
 
     for (let i = 2; i < data.length; i++) {
       if (data[i][0] === numeroFacture) {

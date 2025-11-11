@@ -504,6 +504,23 @@ function getActiveNotifications() {
   return notifications;
 }
 
+// ============================================================================
+// FONCTIONS GLOBALES POUR COMPATIBILITÉ
+// ============================================================================
+
+/**
+ * Fonction globale getOrCreateSheet pour compatibilité
+ * @param {string} name
+ * @return {Sheet}
+ */
+function getOrCreateSheet(name) {
+  return ERP.getOrCreateSheet(name);
+}
+
+// ============================================================================
+// FONCTIONS DE NOTIFICATION
+// ============================================================================
+
 /**
  * Fonctions de comptage pour notifications
  */

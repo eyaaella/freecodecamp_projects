@@ -6,7 +6,7 @@
 
 function createCourrierEntrantSheet() {
   const sheet = ERP.getOrCreateSheet('Courrier Entrant');
-  const config = ERP.config;
+  const config = ERP.getSafeConfig();
 
   sheet.clear();
 
@@ -44,7 +44,7 @@ function createCourrierEntrantSheet() {
 
 function createCourrierSortantSheet() {
   const sheet = ERP.getOrCreateSheet('Courrier Sortant');
-  const config = ERP.config;
+  const config = ERP.getSafeConfig();
 
   sheet.clear();
 
@@ -101,7 +101,7 @@ function showCourrierStats() {
 
 function createAgendaSheet() {
   const sheet = ERP.getOrCreateSheet('Agenda');
-  const config = ERP.config;
+  const config = ERP.getSafeConfig();
 
   sheet.clear();
 
@@ -129,7 +129,7 @@ function createAgendaSheet() {
 
 function createTachesSheet() {
   const sheet = ERP.getOrCreateSheet('Tâches');
-  const config = ERP.config;
+  const config = ERP.getSafeConfig();
 
   sheet.clear();
 
@@ -230,7 +230,7 @@ function showUrgentTasks() {
 
 function createStockSheet() {
   const sheet = ERP.getOrCreateSheet('Stock');
-  const config = ERP.config;
+  const config = ERP.getSafeConfig();
 
   sheet.clear();
 
@@ -261,7 +261,7 @@ function createStockSheet() {
 
 function createMouvementsStockSheet() {
   const sheet = ERP.getOrCreateSheet('Mouvements Stock');
-  const config = ERP.config;
+  const config = ERP.getSafeConfig();
 
   sheet.clear();
 
@@ -337,7 +337,7 @@ function showStockStats() {
 
 function createPersonnelSheet() {
   const sheet = ERP.getOrCreateSheet('Personnel');
-  const config = ERP.config;
+  const config = ERP.getSafeConfig();
 
   sheet.clear();
 
@@ -365,7 +365,7 @@ function createPersonnelSheet() {
 
 function createPresencesSheet() {
   const sheet = ERP.getOrCreateSheet('Présences');
-  const config = ERP.config;
+  const config = ERP.getSafeConfig();
 
   sheet.clear();
 
@@ -412,7 +412,7 @@ function showMonthlyAttendance() {
 
 function createDashboardSheet() {
   const sheet = ERP.getOrCreateSheet('📊 Tableau de Bord');
-  const config = ERP.config;
+  const config = ERP.getSafeConfig();
 
   sheet.clear();
 
@@ -480,9 +480,9 @@ function refreshDashboard() {
 
     const statsFactures = getFactureStats();
     sheet.getRange('B10').setValue(statsFactures.totalMois);
-    sheet.getRange('B11').setValue(statsFactures.caMois + ' ' + ERP.config.devise);
+    sheet.getRange('B11').setValue(statsFactures.caMois + ' ' + ERP.getSafeConfig().devise);
     sheet.getRange('B12').setValue(getUnpaidInvoicesCount());
-    sheet.getRange('B13').setValue(statsFactures.enAttente + ' ' + ERP.config.devise);
+    sheet.getRange('B13').setValue(statsFactures.enAttente + ' ' + ERP.getSafeConfig().devise);
 
     sheet.getRange('B16').setValue(DataManager.getData('Stock').length);
     sheet.getRange('B17').setValue(getLowStockCount());
