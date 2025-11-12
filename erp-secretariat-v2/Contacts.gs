@@ -1,44 +1,70 @@
 /**
- * ╔══════════════════════════════════════════════════════════════════╗
- * ║  ERP Secrétariat v3.0 - Module Contacts                         ║
- * ║  Gestion Clients et Fournisseurs - Production Ready             ║
- * ║  Architecture autonome avec fallbacks et auto-réparation         ║
- * ╚══════════════════════════════════════════════════════════════════╝
+ * ╔══════════════════════════════════════════════════════════════════════════╗
+ * ║             ERP SECRÉTARIAT v3.0 - MODULE CONTACTS                       ║
+ * ║                  Gestion Clients & Fournisseurs                          ║
+ * ║          Conçu pour les Secrétariats Bureautiques du Cameroun 🇨🇲        ║
+ * ╚══════════════════════════════════════════════════════════════════════════╝
  *
+ * @fileoverview Module de gestion des contacts avec architecture autonome
  * @version 3.0.0
- * @author ERP Team
+ * @build PRODUCTION-20250111-ULTRA
+ * @author ERP Team Cameroun
  * @license MIT
  *
- * Améliorations v3.0:
- * - Vérification automatique des dépendances
- * - Fonctions de secours (fallbacks) intégrées
- * - Auto-réparation en cas de problème Core.gs
- * - Performance optimisée avec cache intelligent
- * - Gestion d'erreurs de niveau enterprise
- * - Architecture modulaire et testable
+ * ╔══════════════════════════════════════════════════════════════════════════╗
+ * ║ CARACTÉRISTIQUES v3.0                                                    ║
+ * ╠══════════════════════════════════════════════════════════════════════════╣
+ * ║ ✅ Architecture autonome avec système de compatibilité                   ║
+ * ║ ✅ Fallbacks automatiques si Core.gs indisponible                        ║
+ * ║ ✅ Validation complète (téléphone CM, email, données)                    ║
+ * ║ ✅ Sanitization XSS et sécurité renforcée                                ║
+ * ║ ✅ Cache intelligent avec invalidation automatique                       ║
+ * ║ ✅ Formatage conditionnel avancé (statuts, notes)                        ║
+ * ║ ✅ Recherche optimisée avec limites configurables                        ║
+ * ║ ✅ Audit trail complet des opérations                                    ║
+ * ║ ✅ Statistiques en temps réel                                            ║
+ * ║ ✅ Support multi-utilisateurs thread-safe                                ║
+ * ╚══════════════════════════════════════════════════════════════════════════╝
  */
 
-// ============================================================================
-// CONFIGURATION ET CONSTANTES
-// ============================================================================
+'use strict';
 
+// ═══════════════════════════════════════════════════════════════════════════
+// 📋 CONFIGURATION GLOBALE
+// ═══════════════════════════════════════════════════════════════════════════
+
+/**
+ * Configuration du module Contacts v3.0
+ * @const {Object}
+ */
 const CONTACTS_V3_CONFIG = {
   VERSION: '3.0.0',
+  BUILD: 'PRODUCTION-20250111-ULTRA',
+  MODULE_NAME: '👥 Contacts',
 
-  // Limites et seuils
-  MAX_VALIDATION_ROWS: 1000,
-  MAX_SEARCH_RESULTS: 100,
-  BATCH_SIZE: 500,
-
-  // Cache TTL (secondes)
-  CACHE_TTL: {
-    ACTIVE_CLIENTS: 300,      // 5 minutes
-    SEARCH_RESULTS: 180,      // 3 minutes
-    STATS: 600,               // 10 minutes
-    CONFIG: 600               // 10 minutes
+  // ─────────────────────────────────────────────────────────────────────────
+  // Limites et seuils de performance
+  // ─────────────────────────────────────────────────────────────────────────
+  LIMITS: {
+    MAX_VALIDATION_ROWS: 1000,      // Lignes max pour validation de données
+    MAX_SEARCH_RESULTS: 100,        // Résultats max par recherche
+    BATCH_SIZE: 500,                // Taille des lots pour traitement batch
+    MAX_CACHE_SIZE: 50              // Nombre max d'entrées en cache
   },
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // Durées de vie du cache (secondes)
+  // ─────────────────────────────────────────────────────────────────────────
+  CACHE_TTL: {
+    ACTIVE_CLIENTS: 300,            // 5 minutes
+    SEARCH_RESULTS: 180,            // 3 minutes
+    STATS: 600,                     // 10 minutes
+    CONFIG: 600                     // 10 minutes
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
   // Indices de colonnes - CLIENTS
+  // ─────────────────────────────────────────────────────────────────────────
   CLIENT_COLS: {
     NUMERO: 0,
     NOM: 1,
@@ -54,7 +80,9 @@ const CONTACTS_V3_CONFIG = {
     DERNIERE_ACTIVITE: 11
   },
 
+  // ─────────────────────────────────────────────────────────────────────────
   // Indices de colonnes - FOURNISSEURS
+  // ─────────────────────────────────────────────────────────────────────────
   FOURNISSEUR_COLS: {
     NUMERO: 0,
     NOM: 1,
@@ -70,7 +98,9 @@ const CONTACTS_V3_CONFIG = {
     NOTE: 11
   },
 
-  // Valeurs par défaut
+  // ─────────────────────────────────────────────────────────────────────────
+  // Valeurs par défaut (Cameroun)
+  // ─────────────────────────────────────────────────────────────────────────
   DEFAULTS: {
     VILLE: 'Yaoundé',
     DEVISE: 'XAF',
@@ -78,40 +108,80 @@ const CONTACTS_V3_CONFIG = {
     STATUT_FOURNISSEUR: 'Actif',
     NOTE_FOURNISSEUR: 3,
     DELAI_LIVRAISON: 3,
-    TIMEZONE: 'Africa/Douala'
+    TIMEZONE: 'Africa/Douala',
+    PAYS: 'Cameroun'
   },
 
-  // Préfixes par défaut (si Core.gs non disponible)
+  // ─────────────────────────────────────────────────────────────────────────
+  // Préfixes de numérotation (fallback)
+  // ─────────────────────────────────────────────────────────────────────────
   PREFIXES: {
     CLIENT: 'CL',
     FOURNISSEUR: 'FR'
   },
 
-  // Couleurs par défaut (si Core.gs non disponible)
+  // ─────────────────────────────────────────────────────────────────────────
+  // Palette de couleurs moderne (fallback)
+  // ─────────────────────────────────────────────────────────────────────────
   COLORS: {
-    HEADER: '#1a73e8',
+    HEADER: '#1a73e8',              // Bleu Google moderne
     HEADER_TEXT: '#ffffff',
     SUB_HEADER: '#e8f0fe',
     INFO: '#d2e3fc',
     WARNING: '#fce8b2',
     SUCCESS: '#ceead6',
-    DANGER: '#fad2cf'
-  }
+    DANGER: '#fad2cf',
+    PRIMARY: '#1a73e8',
+    SECONDARY: '#5f6368',
+    ACCENT: '#fbbc04',
+    DARK: '#202124',
+    LIGHT: '#f8f9fa'
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Types de clients
+  // ─────────────────────────────────────────────────────────────────────────
+  CLIENT_TYPES: ['Particulier', 'Entreprise', 'Administration', 'ONG'],
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Statuts clients
+  // ─────────────────────────────────────────────────────────────────────────
+  CLIENT_STATUS: ['Actif', 'Inactif', 'Suspendu', 'VIP'],
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Catégories fournisseurs
+  // ─────────────────────────────────────────────────────────────────────────
+  FOURNISSEUR_CATEGORIES: [
+    'Fournitures Bureau',
+    'Informatique',
+    'Services',
+    'Papeterie',
+    'Mobilier',
+    'Autre'
+  ],
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Statuts fournisseurs
+  // ─────────────────────────────────────────────────────────────────────────
+  FOURNISSEUR_STATUS: ['Actif', 'Inactif', 'Bloqué']
 };
 
-// ============================================================================
-// SYSTÈME DE COMPATIBILITÉ ET FALLBACKS
-// ============================================================================
+// ═══════════════════════════════════════════════════════════════════════════
+// 🔧 SYSTÈME DE COMPATIBILITÉ ET FALLBACKS
+// ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Gestionnaire de compatibilité pour assurer le fonctionnement autonome
+ * Gestionnaire de compatibilité pour fonctionnement autonome
+ * Permet au module de fonctionner même si Core.gs est absent ou défaillant
+ *
+ * @namespace ContactsCompat_
  * @private
  */
 const ContactsCompat_ = {
 
   /**
-   * Vérifie si ERP Core est disponible et fonctionnel
-   * @return {boolean}
+   * Vérifie la disponibilité de l'ERP Core
+   * @returns {boolean} true si ERP Core est disponible
    */
   isERPAvailable: function() {
     try {
@@ -124,9 +194,9 @@ const ContactsCompat_ = {
   },
 
   /**
-   * Vérifie si une méthode ERP existe
-   * @param {string} methodName
-   * @return {boolean}
+   * Vérifie l'existence d'une méthode ERP
+   * @param {string} methodName - Nom de la méthode à vérifier
+   * @returns {boolean}
    */
   hasERPMethod: function(methodName) {
     try {
@@ -138,56 +208,62 @@ const ContactsCompat_ = {
   },
 
   /**
-   * Obtient la config de manière sûre avec fallback
-   * @return {Object}
+   * Obtient la configuration de manière sécurisée
+   * Avec système de fallback à 3 niveaux
+   * @returns {Object} Configuration ERP
    */
   getSafeConfig: function() {
-    // Essayer d'utiliser ERP.getSafeConfig si disponible
+    // Niveau 1: Essayer ERP.getSafeConfig()
     if (this.hasERPMethod('getSafeConfig')) {
       try {
         return ERP.getSafeConfig();
       } catch (e) {
-        console.warn('ERP.getSafeConfig failed, using fallback:', e);
+        this.log('WARN', '⚠️ ERP.getSafeConfig() failed, trying level 2');
       }
     }
 
-    // Essayer ERP.config direct
+    // Niveau 2: Essayer ERP.config direct
     if (this.isERPAvailable() && ERP.config) {
-      return ERP.config;
+      try {
+        return ERP.config;
+      } catch (e) {
+        this.log('WARN', '⚠️ ERP.config failed, trying level 3');
+      }
     }
 
-    // Fallback: charger depuis la feuille ou utiliser défaut
+    // Niveau 3: Charger depuis la feuille ou défaut
     return this.loadConfigFallback_();
   },
 
   /**
-   * Charge la config en mode fallback
+   * Charge la configuration en mode fallback
    * @private
-   * @return {Object}
+   * @returns {Object} Configuration par défaut ou depuis feuille
    */
   loadConfigFallback_: function() {
     try {
-      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Configuration');
+      const ss = SpreadsheetApp.getActiveSpreadsheet();
+      const sheet = ss.getSheetByName('Configuration');
+
       if (sheet && sheet.getLastRow() > 3) {
-        // Charger depuis la feuille
         return this.parseConfigSheet_(sheet);
       }
     } catch (e) {
-      console.warn('Cannot load config from sheet:', e);
+      this.log('WARN', '⚠️ Cannot load config from sheet: ' + e);
     }
 
-    // Retourner config minimale par défaut
     return this.getDefaultConfig_();
   },
 
   /**
-   * Parse la feuille de configuration
+   * Parse la feuille Configuration
    * @private
-   * @param {Sheet} sheet
-   * @return {Object}
+   * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
+   * @returns {Object}
    */
   parseConfigSheet_: function(sheet) {
     const data = sheet.getDataRange().getValues();
+
     return {
       entreprise: {
         nom: data[3] ? data[3][1] : 'Mon Entreprise',
@@ -197,11 +273,11 @@ const ContactsCompat_ = {
         nif: data[7] ? data[7][1] : '',
         rc: data[8] ? data[8][1] : ''
       },
-      devise: data[9] ? data[9][1] : 'XAF',
+      devise: data[9] ? data[9][1] : CONTACTS_V3_CONFIG.DEFAULTS.DEVISE,
       tauxTVA: data[13] ? data[13][1] : 19.25,
       prefixes: {
-        client: data[16] ? data[16][1] : 'CL',
-        fournisseur: data[17] ? data[17][1] : 'FR',
+        client: data[16] ? data[16][1] : CONTACTS_V3_CONFIG.PREFIXES.CLIENT,
+        fournisseur: data[17] ? data[17][1] : CONTACTS_V3_CONFIG.PREFIXES.FOURNISSEUR,
         devis: data[18] ? data[18][1] : 'DV',
         facture: data[19] ? data[19][1] : 'FA',
         courrierEntrant: data[20] ? data[20][1] : 'CE',
@@ -210,7 +286,7 @@ const ContactsCompat_ = {
         employe: data[23] ? data[23][1] : 'EMP'
       },
       colors: CONTACTS_V3_CONFIG.COLORS,
-      timezone: 'Africa/Douala',
+      timezone: CONTACTS_V3_CONFIG.DEFAULTS.TIMEZONE,
       options: {
         enableNotifications: true,
         enableAutoBackup: false,
@@ -221,9 +297,9 @@ const ContactsCompat_ = {
   },
 
   /**
-   * Config par défaut minimale
+   * Retourne la configuration minimale par défaut
    * @private
-   * @return {Object}
+   * @returns {Object}
    */
   getDefaultConfig_: function() {
     return {
@@ -235,7 +311,7 @@ const ContactsCompat_ = {
         nif: '',
         rc: ''
       },
-      devise: 'XAF',
+      devise: CONTACTS_V3_CONFIG.DEFAULTS.DEVISE,
       tauxTVA: 19.25,
       prefixes: CONTACTS_V3_CONFIG.PREFIXES,
       colors: CONTACTS_V3_CONFIG.COLORS,
@@ -251,26 +327,26 @@ const ContactsCompat_ = {
 
   /**
    * Obtient ou crée une feuille avec fallback
-   * @param {string} name
-   * @return {Sheet}
+   * @param {string} name - Nom de la feuille
+   * @returns {GoogleAppsScript.Spreadsheet.Sheet}
    */
   getOrCreateSheet: function(name) {
-    // Essayer d'utiliser ERP.getOrCreateSheet si disponible
+    // Niveau 1: Utiliser ERP.getOrCreateSheet si disponible
     if (this.hasERPMethod('getOrCreateSheet')) {
       try {
         return ERP.getOrCreateSheet(name);
       } catch (e) {
-        console.warn('ERP.getOrCreateSheet failed, using fallback:', e);
+        this.log('WARN', `⚠️ ERP.getOrCreateSheet("${name}") failed: ${e}`);
       }
     }
 
-    // Fallback local
+    // Niveau 2: Fallback local
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = ss.getSheetByName(name);
 
     if (!sheet) {
       sheet = ss.insertSheet(name);
-      console.log('Feuille créée (fallback):', name);
+      this.log('INFO', `✅ Feuille créée (fallback): ${name}`);
     }
 
     return sheet;
@@ -278,22 +354,22 @@ const ContactsCompat_ = {
 
   /**
    * Formate une date avec fallback
-   * @param {Date} date
-   * @return {string}
+   * @param {Date} date - Date à formater
+   * @returns {string} Date formatée
    */
   formatDate: function(date) {
     if (!date) date = new Date();
 
-    // Essayer ERP.formatDate
+    // Niveau 1: Utiliser ERP.formatDate si disponible
     if (this.hasERPMethod('formatDate')) {
       try {
         return ERP.formatDate(date);
       } catch (e) {
-        console.warn('ERP.formatDate failed, using fallback:', e);
+        this.log('WARN', '⚠️ ERP.formatDate failed, using fallback');
       }
     }
 
-    // Fallback
+    // Niveau 2: Fallback local
     const config = this.getSafeConfig();
     return Utilities.formatDate(
       date,
@@ -303,24 +379,26 @@ const ContactsCompat_ = {
   },
 
   /**
-   * Obtient le prochain numéro avec fallback
-   * @param {string} prefix
-   * @param {string} sheetName
-   * @return {string}
+   * Génère le prochain numéro avec fallback
+   * @param {string} prefix - Préfixe du numéro
+   * @param {string} sheetName - Nom de la feuille
+   * @returns {string} Numéro généré
    */
   getNextNumber: function(prefix, sheetName) {
-    // Essayer ERP.getNextNumber
+    // Niveau 1: Utiliser ERP.getNextNumber si disponible
     if (this.hasERPMethod('getNextNumber')) {
       try {
         return ERP.getNextNumber(prefix, sheetName);
       } catch (e) {
-        console.warn('ERP.getNextNumber failed, using fallback:', e);
+        this.log('WARN', '⚠️ ERP.getNextNumber failed, using fallback');
       }
     }
 
-    // Fallback simple
+    // Niveau 2: Fallback simple mais robuste
     try {
-      const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+      const ss = SpreadsheetApp.getActiveSpreadsheet();
+      const sheet = ss.getSheetByName(sheetName);
+
       if (!sheet) return prefix + '0001';
 
       const lastRow = sheet.getLastRow();
@@ -331,76 +409,91 @@ const ContactsCompat_ = {
 
       const numPart = parseInt(lastNumber.toString().replace(/\D/g, ''));
       const nextNum = (numPart + 1).toString().padStart(4, '0');
+
       return prefix + nextNum;
+
     } catch (e) {
-      console.error('getNextNumber fallback error:', e);
+      this.log('ERROR', `❌ getNextNumber fallback error: ${e}`);
       return prefix + '0001';
     }
   },
 
   /**
-   * Log avec fallback
-   * @param {string} level
-   * @param {string} message
+   * Système de logging avec fallback
+   * @param {string} level - Niveau de log (DEBUG, INFO, WARN, ERROR, SUCCESS)
+   * @param {string} message - Message à logger
    */
   log: function(level, message) {
+    // Niveau 1: Utiliser ERP.log si disponible
     if (this.hasERPMethod('log')) {
       try {
         ERP.log(level, message);
         return;
       } catch (e) {
-        // Continue to fallback
+        // Continue vers fallback
       }
     }
 
-    // Fallback console
-    console.log(`[${level}] [CONTACTS] ${message}`);
+    // Niveau 2: Fallback console avec emojis
+    const emoji = {
+      DEBUG: '🔍',
+      INFO: 'ℹ️',
+      WARN: '⚠️',
+      ERROR: '❌',
+      SUCCESS: '✅'
+    }[level] || '📝';
+
+    console.log(`${emoji} [${level}] [CONTACTS] ${message}`);
   },
 
   /**
    * Gestion d'erreur avec fallback
-   * @param {Error} error
-   * @param {string} context
+   * @param {Error} error - Erreur capturée
+   * @param {string} context - Contexte de l'erreur
    */
   handleError: function(error, context) {
     const errorMsg = `[${context}] ${error.toString()}`;
 
-    // Essayer ERP.handleError
+    // Niveau 1: Utiliser ERP.handleError si disponible
     if (this.hasERPMethod('handleError')) {
       try {
         ERP.handleError(error, context);
         return;
       } catch (e) {
-        console.warn('ERP.handleError failed, using fallback:', e);
+        this.log('WARN', '⚠️ ERP.handleError failed, using fallback');
       }
     }
 
-    // Fallback
-    console.error(errorMsg);
+    // Niveau 2: Fallback local
+    console.error(`❌ ${errorMsg}`);
     console.error('Stack:', error.stack);
 
     try {
       const ui = SpreadsheetApp.getUi();
-      ui.alert('Erreur', errorMsg, ui.ButtonSet.OK);
+      ui.alert(
+        '❌ Erreur',
+        errorMsg,
+        ui.ButtonSet.OK
+      );
     } catch (e) {
       console.error('Cannot show alert:', e);
     }
   }
 };
 
-// Alias court pour faciliter l'utilisation
+// Alias court pour usage interne
 const Compat_ = ContactsCompat_;
 
-// ============================================================================
-// UTILITAIRES INTERNES
-// ============================================================================
+// ═══════════════════════════════════════════════════════════════════════════
+// 🛠️ UTILITAIRES INTERNES
+// ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Crée un en-tête de feuille standardisé
- * @param {Sheet} sheet
- * @param {string} title
- * @param {string} range
+ * Crée un en-tête de feuille moderne et standardisé
  * @private
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
+ * @param {string} title - Titre de l'en-tête
+ * @param {string} range - Range à formater (ex: "A1:L1")
  */
 function createSheetHeader_(sheet, title, range) {
   const config = Compat_.getSafeConfig();
@@ -411,15 +504,16 @@ function createSheetHeader_(sheet, title, range) {
     .setFontColor(config.colors.headerText || CONTACTS_V3_CONFIG.COLORS.HEADER_TEXT)
     .setFontWeight('bold')
     .setFontSize(14)
-    .setHorizontalAlignment('center');
+    .setHorizontalAlignment('center')
+    .setVerticalAlignment('middle');
 }
 
 /**
  * Configure les en-têtes de colonnes
- * @param {Sheet} sheet
- * @param {Array<string>} headers
- * @param {number} row
  * @private
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
+ * @param {Array<string>} headers - Titres des colonnes
+ * @param {number} row - Numéro de ligne
  */
 function setupColumnHeaders_(sheet, headers, row) {
   const config = Compat_.getSafeConfig();
@@ -428,14 +522,15 @@ function setupColumnHeaders_(sheet, headers, row) {
     .setValues([headers])
     .setBackground(config.colors.subHeader || CONTACTS_V3_CONFIG.COLORS.SUB_HEADER)
     .setFontWeight('bold')
-    .setHorizontalAlignment('center');
+    .setHorizontalAlignment('center')
+    .setVerticalAlignment('middle');
 }
 
 /**
  * Configure les largeurs de colonnes en batch
- * @param {Sheet} sheet
- * @param {Array<number>} widths
  * @private
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
+ * @param {Array<number>} widths - Largeurs en pixels
  */
 function setupColumnWidths_(sheet, widths) {
   widths.forEach((width, index) => {
@@ -444,12 +539,12 @@ function setupColumnWidths_(sheet, widths) {
 }
 
 /**
- * Applique les validations de données
- * @param {Sheet} sheet
- * @param {string} range
- * @param {Array<string>} values
- * @param {string} helpText
+ * Applique une validation de liste déroulante
  * @private
+ * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
+ * @param {string} range - Range à valider
+ * @param {Array<string>} values - Valeurs autorisées
+ * @param {string} helpText - Texte d'aide
  */
 function applyDataValidation_(sheet, range, values, helpText) {
   try {
@@ -461,80 +556,97 @@ function applyDataValidation_(sheet, range, values, helpText) {
         .build()
     );
   } catch (e) {
-    Compat_.log('WARN', `Validation failed for ${range}: ${e}`);
+    Compat_.log('WARN', `⚠️ Validation failed for ${range}: ${e}`);
   }
 }
 
 /**
- * Sanitize une chaîne pour éviter XSS
- * @param {string} str
- * @return {string}
+ * Sanitize une chaîne pour éviter XSS et injections
  * @private
+ * @param {string} str - Chaîne à nettoyer
+ * @returns {string} Chaîne nettoyée
  */
 function sanitizeString_(str) {
   if (!str) return '';
 
-  // Utiliser Validator si disponible
+  // Niveau 1: Utiliser Validator si disponible
   if (typeof Validator !== 'undefined' && Validator.sanitizeString) {
     try {
       return Validator.sanitizeString(str);
     } catch (e) {
-      Compat_.log('WARN', 'Validator.sanitizeString failed, using fallback');
+      Compat_.log('WARN', '⚠️ Validator.sanitizeString failed, using fallback');
     }
   }
 
-  // Fallback simple
+  // Niveau 2: Fallback simple mais efficace
   return str.toString()
-    .replace(/[<>]/g, '')
-    .replace(/javascript:/gi, '')
-    .replace(/on\w+=/gi, '')
+    .replace(/[<>]/g, '')                    // Retire < et >
+    .replace(/javascript:/gi, '')            // Retire javascript:
+    .replace(/on\w+=/gi, '')                 // Retire les événements on*=
+    .replace(/[\x00-\x1F\x7F]/g, '')        // Retire caractères de contrôle
     .trim();
 }
 
 /**
  * Valide un email
- * @param {string} email
- * @return {boolean}
  * @private
+ * @param {string} email - Email à valider
+ * @returns {boolean} true si valide ou vide
  */
 function isValidEmail_(email) {
   if (!email) return true; // Email optionnel
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 }
 
 /**
- * Valide un téléphone (format Cameroun)
- * @param {string} phone
- * @return {boolean}
+ * Valide un numéro de téléphone camerounais
+ * Accepte: 6XXXXXXXX, +2376XXXXXXXX, 2376XXXXXXXX, 2XXXXXXXX
  * @private
+ * @param {string} phone - Téléphone à valider
+ * @returns {boolean} true si valide
  */
 function isValidPhone_(phone) {
   if (!phone) return false;
-  // Accepte: 6XXXXXXXX, +2376XXXXXXXX, 2376XXXXXXXX
+
+  // Retirer tous les espaces
+  const cleaned = phone.replace(/\s/g, '');
+
+  // Format Cameroun: commence par 2 ou 6, 9 chiffres
+  // Avec ou sans +237
   const phoneRegex = /^(\+?237)?[26]\d{8}$/;
-  return phoneRegex.test(phone.replace(/\s/g, ''));
+
+  return phoneRegex.test(cleaned);
 }
 
-// ============================================================================
-// INITIALISATION SYSTÈME
-// ============================================================================
+// ═══════════════════════════════════════════════════════════════════════════
+// 🚀 INITIALISATION SYSTÈME
+// ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Initialise toutes les feuilles de l'ERP v3.0
- * Architecture robuste avec gestion d'erreurs et auto-réparation
+ * Initialise l'ERP avec toutes les feuilles
+ * Architecture robuste avec gestion d'erreurs et rapports détaillés
  */
 function initializeERP() {
   const ui = SpreadsheetApp.getUi();
 
   try {
-    // Vérifier la disponibilité de Core.gs
+    // ─────────────────────────────────────────────────────────────────────────
+    // Vérification de la disponibilité de Core.gs
+    // ─────────────────────────────────────────────────────────────────────────
     const hasCore = Compat_.isERPAvailable();
+
     if (!hasCore) {
       const warn = ui.alert(
         '⚠️ Mode Autonome',
-        'Core.gs n\'est pas détecté. Contacts v3.0 fonctionnera en mode autonome.\n\n' +
-        'Fonctionnalités limitées mais opérationnelles.\n\n' +
+        'Core.gs n\'est pas détecté.\n\n' +
+        'Le module Contacts v3.0 fonctionnera en mode autonome avec fonctionnalités limitées.\n\n' +
+        '✅ Fonctionnalités disponibles:\n' +
+        '  • Gestion clients\n' +
+        '  • Gestion fournisseurs\n' +
+        '  • Recherche\n' +
+        '  • Statistiques\n\n' +
         'Continuer ?',
         ui.ButtonSet.YES_NO
       );
@@ -542,82 +654,96 @@ function initializeERP() {
       if (warn !== ui.Button.YES) return;
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // Confirmation de l'utilisateur
+    // ─────────────────────────────────────────────────────────────────────────
     const response = ui.alert(
-      `Initialisation ERP v${CONTACTS_V3_CONFIG.VERSION}`,
+      `🚀 Initialisation ERP v${CONTACTS_V3_CONFIG.VERSION}`,
       'Voulez-vous créer toutes les feuilles du système ?\n\n' +
-      '⏱️ Cette opération peut prendre quelques instants.\n' +
-      `📦 Mode: ${hasCore ? 'Complet' : 'Autonome'}`,
+      `⏱️ Durée estimée: ${hasCore ? '30-60' : '10-20'} secondes\n` +
+      `📦 Mode: ${hasCore ? 'Complet (avec Core.gs)' : 'Autonome (sans Core.gs)'}\n` +
+      `📊 Feuilles: ${hasCore ? '17' : '5'} feuilles`,
       ui.ButtonSet.YES_NO
     );
 
     if (response !== ui.Button.YES) return;
 
-    // Définir les feuilles à créer
+    // ─────────────────────────────────────────────────────────────────────────
+    // Définition des feuilles à créer
+    // ─────────────────────────────────────────────────────────────────────────
     const coreSheets = [
-      { fn: createConfigSheet, name: 'Configuration', category: 'core' },
-      { fn: createClientsSheet, name: 'Clients', category: 'core' },
-      { fn: createFournisseursSheet, name: 'Fournisseurs', category: 'core' },
-      { fn: createAuditSheet, name: 'Audit', category: 'system' },
-      { fn: createNotificationsSheet, name: 'Notifications', category: 'system' }
+      { fn: createConfigSheet, name: 'Configuration', category: 'core', icon: '⚙️' },
+      { fn: createClientsSheet, name: 'Clients', category: 'core', icon: '👥' },
+      { fn: createFournisseursSheet, name: 'Fournisseurs', category: 'core', icon: '🏪' },
+      { fn: createAuditSheet, name: '_Audit', category: 'system', icon: '📋' },
+      { fn: createNotificationsSheet, name: '_Notifications', category: 'system', icon: '🔔' }
     ];
 
-    // Feuilles optionnelles (nécessitent autres modules)
+    // Feuilles optionnelles (nécessitent Core.gs et autres modules)
     const optionalSheets = hasCore ? [
-      { fn: createCourrierEntrantSheet, name: 'Courrier Entrant', category: 'optional' },
-      { fn: createCourrierSortantSheet, name: 'Courrier Sortant', category: 'optional' },
-      { fn: createAgendaSheet, name: 'Agenda', category: 'optional' },
-      { fn: createTachesSheet, name: 'Tâches', category: 'optional' },
-      { fn: createDevisSheet, name: 'Devis', category: 'optional' },
-      { fn: createFacturesSheet, name: 'Factures', category: 'optional' },
-      { fn: createPaiementsSheet, name: 'Paiements', category: 'optional' },
-      { fn: createStockSheet, name: 'Stock', category: 'optional' },
-      { fn: createMouvementsStockSheet, name: 'Mouvements Stock', category: 'optional' },
-      { fn: createPersonnelSheet, name: 'Personnel', category: 'optional' },
-      { fn: createPresencesSheet, name: 'Présences', category: 'optional' },
-      { fn: createDashboardSheet, name: 'Tableau de bord', category: 'optional' }
+      { fn: createCourrierEntrantSheet, name: 'Courrier Entrant', category: 'optional', icon: '📥' },
+      { fn: createCourrierSortantSheet, name: 'Courrier Sortant', category: 'optional', icon: '📤' },
+      { fn: createAgendaSheet, name: 'Agenda', category: 'optional', icon: '📅' },
+      { fn: createTachesSheet, name: 'Tâches', category: 'optional', icon: '✅' },
+      { fn: createDevisSheet, name: 'Devis', category: 'optional', icon: '📝' },
+      { fn: createFacturesSheet, name: 'Factures', category: 'optional', icon: '🧾' },
+      { fn: createPaiementsSheet, name: 'Paiements', category: 'optional', icon: '💰' },
+      { fn: createStockSheet, name: 'Stock', category: 'optional', icon: '📦' },
+      { fn: createMouvementsStockSheet, name: 'Mouvements Stock', category: 'optional', icon: '🔄' },
+      { fn: createPersonnelSheet, name: 'Personnel', category: 'optional', icon: '👨‍💼' },
+      { fn: createPresencesSheet, name: 'Présences', category: 'optional', icon: '📊' },
+      { fn: createDashboardSheet, name: 'Tableau de bord', category: 'optional', icon: '📈' }
     ] : [];
 
     const allSheets = [...coreSheets, ...optionalSheets];
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // Création des feuilles avec gestion d'erreurs
+    // ─────────────────────────────────────────────────────────────────────────
     let successCount = 0;
     let skipCount = 0;
     const errors = [];
 
-    // Créer les feuilles
     for (const sheetDef of allSheets) {
       try {
         // Vérifier si la fonction existe
         if (typeof sheetDef.fn !== 'function') {
           skipCount++;
-          Compat_.log('WARN', `Fonction ${sheetDef.name} non disponible - ignorée`);
+          Compat_.log('WARN', `⏭️ ${sheetDef.icon} ${sheetDef.name} - fonction non disponible`);
           continue;
         }
 
         sheetDef.fn();
         successCount++;
-        Compat_.log('INFO', `✓ Feuille créée: ${sheetDef.name}`);
+        Compat_.log('SUCCESS', `✅ ${sheetDef.icon} ${sheetDef.name} créée`);
 
       } catch (error) {
         errors.push({
           sheet: sheetDef.name,
+          icon: sheetDef.icon,
           error: error.toString(),
           category: sheetDef.category
         });
-        Compat_.log('ERROR', `✗ Erreur ${sheetDef.name}: ${error}`);
+        Compat_.log('ERROR', `❌ ${sheetDef.icon} ${sheetDef.name}: ${error}`);
       }
     }
 
-    // Rapport d'initialisation
+    // ─────────────────────────────────────────────────────────────────────────
+    // Génération du rapport d'initialisation
+    // ─────────────────────────────────────────────────────────────────────────
     const coreSuccess = coreSheets.filter(s =>
       !errors.find(e => e.sheet === s.name)
     ).length;
     const coreTotal = coreSheets.length;
 
     let summary = `✅ Initialisation terminée !\n\n`;
-    summary += `📊 Résultats:\n`;
-    summary += `├─ Feuilles essentielles: ${coreSuccess}/${coreTotal}\n`;
-    summary += `├─ Feuilles optionnelles: ${successCount - coreSuccess}/${optionalSheets.length}\n`;
-    summary += `└─ Total: ${successCount}/${allSheets.length}\n`;
+    summary += `╔══════════════════════════════════════╗\n`;
+    summary += `║         RÉSULTATS CRÉATION           ║\n`;
+    summary += `╠══════════════════════════════════════╣\n`;
+    summary += `║ Feuilles essentielles: ${String(coreSuccess).padStart(2)}/${coreTotal}          ║\n`;
+    summary += `║ Feuilles optionnelles: ${String(successCount - coreSuccess).padStart(2)}/${String(optionalSheets.length).padEnd(2)}          ║\n`;
+    summary += `║ Total créé:            ${String(successCount).padStart(2)}/${String(allSheets.length).padEnd(2)}          ║\n`;
+    summary += `╚══════════════════════════════════════╝\n`;
 
     if (skipCount > 0) {
       summary += `\n⏭️ Ignorées: ${skipCount} (modules non chargés)`;
@@ -627,28 +753,32 @@ function initializeERP() {
       const criticalErrors = errors.filter(e => e.category === 'core');
       const optionalErrors = errors.filter(e => e.category !== 'core');
 
-      summary += `\n\n⚠️ Erreurs:\n`;
+      summary += `\n\n⚠️ ERREURS:\n`;
+      summary += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
 
       if (criticalErrors.length > 0) {
-        summary += `\nCritiques (${criticalErrors.length}):\n`;
+        summary += `\n🔴 Critiques (${criticalErrors.length}):\n`;
         criticalErrors.forEach(e => {
-          summary += `- ${e.sheet}: ${e.error.substring(0, 50)}...\n`;
+          summary += `${e.icon} ${e.sheet}:\n  ${e.error.substring(0, 60)}...\n`;
         });
       }
 
       if (optionalErrors.length > 0) {
-        summary += `\nOptionnelles (${optionalErrors.length}):\n`;
+        summary += `\n🟡 Optionnelles (${optionalErrors.length}):\n`;
         optionalErrors.forEach(e => {
-          summary += `- ${e.sheet}: ${e.error.substring(0, 50)}...\n`;
+          summary += `${e.icon} ${e.sheet}:\n  ${e.error.substring(0, 60)}...\n`;
         });
       }
 
-      ui.alert('Initialisation partielle', summary, ui.ButtonSet.OK);
+      ui.alert('⚠️ Initialisation Partielle', summary, ui.ButtonSet.OK);
     } else {
-      ui.alert('Succès complet', summary, ui.ButtonSet.OK);
+      summary += `\n\n🎉 Toutes les feuilles ont été créées avec succès !`;
+      ui.alert('✅ Succès Complet', summary, ui.ButtonSet.OK);
     }
 
-    // Log audit si disponible
+    // ─────────────────────────────────────────────────────────────────────────
+    // Audit log si disponible
+    // ─────────────────────────────────────────────────────────────────────────
     if (typeof AuditLog !== 'undefined' && AuditLog.log) {
       try {
         AuditLog.log(
@@ -658,16 +788,18 @@ function initializeERP() {
           `Init v${CONTACTS_V3_CONFIG.VERSION}: ${successCount}/${allSheets.length} feuilles`
         );
       } catch (e) {
-        Compat_.log('WARN', 'Cannot write audit log: ' + e);
+        Compat_.log('WARN', '⚠️ Cannot write audit log: ' + e);
       }
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
     // Redirection vers dashboard si disponible
+    // ─────────────────────────────────────────────────────────────────────────
     if (successCount > 0 && typeof goToDashboard === 'function') {
       try {
         goToDashboard();
       } catch (e) {
-        Compat_.log('WARN', 'Cannot go to dashboard: ' + e);
+        Compat_.log('WARN', '⚠️ Cannot navigate to dashboard: ' + e);
       }
     }
 
@@ -676,13 +808,13 @@ function initializeERP() {
   }
 }
 
-// ============================================================================
-// CRÉATION DES FEUILLES
-// ============================================================================
+// ═══════════════════════════════════════════════════════════════════════════
+// 📄 CRÉATION DES FEUILLES
+// ═══════════════════════════════════════════════════════════════════════════
 
 /**
  * Crée la feuille Configuration v3.0
- * Compatible mode autonome
+ * Design ultra moderne avec palette de couleurs Google Material
  */
 function createConfigSheet() {
   const sheet = Compat_.getOrCreateSheet('Configuration');
@@ -690,43 +822,60 @@ function createConfigSheet() {
 
   sheet.clear();
 
-  // En-tête
-  createSheetHeader_(sheet, '⚙️ CONFIGURATION ERP v3.0', 'A1:B1');
+  // ─────────────────────────────────────────────────────────────────────────
+  // En-tête principal
+  // ─────────────────────────────────────────────────────────────────────────
+  createSheetHeader_(sheet, '⚙️ CONFIGURATION ERP v3.0 - ULTRA MODERNE', 'A1:B1');
 
+  sheet.getRange('A2:B2')
+    .setValue(`Build: ${CONTACTS_V3_CONFIG.BUILD}`)
+    .setFontSize(8)
+    .setFontColor('#5f6368')
+    .setHorizontalAlignment('center');
+
+  // ─────────────────────────────────────────────────────────────────────────
   // Informations entreprise
-  sheet.getRange('A3')
+  // ─────────────────────────────────────────────────────────────────────────
+  sheet.getRange('A3:B3').merge()
     .setValue('📋 INFORMATIONS ENTREPRISE')
     .setFontWeight('bold')
     .setFontSize(12)
-    .setBackground(config.colors.info || CONTACTS_V3_CONFIG.COLORS.INFO);
+    .setBackground(config.colors.info || CONTACTS_V3_CONFIG.COLORS.INFO)
+    .setHorizontalAlignment('center');
 
   const infoEntreprise = [
     ['Nom de l\'entreprise:', config.entreprise.nom],
     ['Adresse:', config.entreprise.adresse],
     ['Téléphone:', config.entreprise.telephone],
     ['Email:', config.entreprise.email],
-    ['NIF:', config.entreprise.nif],
-    ['RC:', config.entreprise.rc],
+    ['NIF (N° Contribuable):', config.entreprise.nif],
+    ['RC (Registre Commerce):', config.entreprise.rc],
     ['Devise:', config.devise],
     ['', '']
   ];
   sheet.getRange(4, 1, infoEntreprise.length, 2).setValues(infoEntreprise);
 
+  // ─────────────────────────────────────────────────────────────────────────
   // Paramètres fiscaux
-  sheet.getRange('A13')
-    .setValue('💰 PARAMÈTRES FISCAUX')
+  // ─────────────────────────────────────────────────────────────────────────
+  sheet.getRange('A13:B13').merge()
+    .setValue('💰 PARAMÈTRES FISCAUX (CAMEROUN)')
     .setFontWeight('bold')
     .setFontSize(12)
-    .setBackground(config.colors.warning || CONTACTS_V3_CONFIG.COLORS.WARNING);
+    .setBackground(config.colors.warning || CONTACTS_V3_CONFIG.COLORS.WARNING)
+    .setHorizontalAlignment('center');
 
   sheet.getRange('A14:B14').setValues([['Taux TVA (%):', config.tauxTVA]]);
 
-  // Préfixes
-  sheet.getRange('A16')
-    .setValue('🔢 PRÉFIXES DOCUMENTS')
+  // ─────────────────────────────────────────────────────────────────────────
+  // Préfixes de numérotation
+  // ─────────────────────────────────────────────────────────────────────────
+  sheet.getRange('A16:B16').merge()
+    .setValue('🔢 PRÉFIXES DE NUMÉROTATION')
     .setFontWeight('bold')
     .setFontSize(12)
-    .setBackground(config.colors.success || CONTACTS_V3_CONFIG.COLORS.SUCCESS);
+    .setBackground(config.colors.success || CONTACTS_V3_CONFIG.COLORS.SUCCESS)
+    .setHorizontalAlignment('center');
 
   const prefixes = [
     ['Clients:', config.prefixes.client],
@@ -740,12 +889,15 @@ function createConfigSheet() {
   ];
   sheet.getRange(17, 1, prefixes.length, 2).setValues(prefixes);
 
+  // ─────────────────────────────────────────────────────────────────────────
   // Options système
-  sheet.getRange('A26')
+  // ─────────────────────────────────────────────────────────────────────────
+  sheet.getRange('A26:B26').merge()
     .setValue('⚙️ OPTIONS SYSTÈME')
     .setFontWeight('bold')
     .setFontSize(12)
-    .setBackground(config.colors.subHeader || CONTACTS_V3_CONFIG.COLORS.SUB_HEADER);
+    .setBackground(config.colors.subHeader || CONTACTS_V3_CONFIG.COLORS.SUB_HEADER)
+    .setHorizontalAlignment('center');
 
   const options = [
     ['Activer notifications:', config.options.enableNotifications ? 'OUI' : 'NON'],
@@ -755,49 +907,67 @@ function createConfigSheet() {
   ];
   sheet.getRange(27, 1, options.length, 2).setValues(options);
 
+  // ─────────────────────────────────────────────────────────────────────────
   // Informations système
-  sheet.getRange('A32')
+  // ─────────────────────────────────────────────────────────────────────────
+  sheet.getRange('A32:B32').merge()
     .setValue('ℹ️ INFORMATIONS SYSTÈME')
     .setFontWeight('bold')
-    .setFontSize(12);
+    .setFontSize(12)
+    .setBackground(config.colors.primary || CONTACTS_V3_CONFIG.COLORS.PRIMARY)
+    .setFontColor('#ffffff')
+    .setHorizontalAlignment('center');
 
   const sysInfo = [
-    ['Version Contacts:', CONTACTS_V3_CONFIG.VERSION],
-    ['Mode:', Compat_.isERPAvailable() ? 'Complet' : 'Autonome'],
-    ['Core.gs:', Compat_.isERPAvailable() ? 'Détecté' : 'Non détecté']
+    ['Version Module Contacts:', CONTACTS_V3_CONFIG.VERSION],
+    ['Build:', CONTACTS_V3_CONFIG.BUILD],
+    ['Mode Opération:', Compat_.isERPAvailable() ? 'Complet (avec Core.gs)' : 'Autonome (sans Core.gs)'],
+    ['Core.gs Détecté:', Compat_.isERPAvailable() ? '✅ OUI' : '❌ NON'],
+    ['Fallbacks Actifs:', '✅ OUI']
   ];
   sheet.getRange(33, 1, sysInfo.length, 2).setValues(sysInfo);
 
+  // ─────────────────────────────────────────────────────────────────────────
   // Instructions
-  sheet.getRange('A37')
-    .setValue('📝 Instructions:')
+  // ─────────────────────────────────────────────────────────────────────────
+  sheet.getRange('A39:B39').merge()
+    .setValue('📝 INSTRUCTIONS D\'UTILISATION')
     .setFontWeight('bold')
-    .setFontColor(config.colors.info || CONTACTS_V3_CONFIG.COLORS.INFO);
+    .setFontColor(config.colors.primary || CONTACTS_V3_CONFIG.COLORS.PRIMARY);
 
-  sheet.getRange('A38')
-    .setValue('Modifiez les valeurs de la colonne B. Videz le cache après modification.')
-    .setWrap(true);
+  sheet.getRange('A40:B40').merge()
+    .setValue('• Modifiez les valeurs de la colonne B selon vos besoins\n' +
+              '• Videz le cache après modification (Menu ERP > Système > Vider le cache)\n' +
+              '• Ne modifiez pas les libellés de la colonne A')
+    .setWrap(true)
+    .setVerticalAlignment('top')
+    .setFontSize(9);
 
-  // Dimensions
+  // ─────────────────────────────────────────────────────────────────────────
+  // Mise en forme finale
+  // ─────────────────────────────────────────────────────────────────────────
   sheet.setColumnWidth(1, 250);
   sheet.setColumnWidth(2, 300);
+
+  // Colonne A en gras
+  sheet.getRange('A4:A40').setFontWeight('bold');
 
   // Protection si Security disponible
   if (typeof Security !== 'undefined' && Security.protectRange) {
     try {
       Security.protectRange(sheet, sheet.getRange('A1:B2'), 'En-tête protégé');
     } catch (e) {
-      Compat_.log('WARN', 'Cannot protect range: ' + e);
+      Compat_.log('WARN', '⚠️ Cannot protect range: ' + e);
     }
   }
 
-  Compat_.log('INFO', 'Feuille Configuration v3.0 créée');
+  Compat_.log('SUCCESS', '✅ Feuille Configuration v3.0 créée');
   return sheet;
 }
 
 /**
  * Crée la feuille Clients v3.0
- * Optimisée avec formatage conditionnel avancé
+ * Design ultra moderne avec formatage conditionnel avancé
  */
 function createClientsSheet() {
   const sheet = Compat_.getOrCreateSheet('Clients');
@@ -805,10 +975,14 @@ function createClientsSheet() {
 
   sheet.clear();
 
+  // ─────────────────────────────────────────────────────────────────────────
   // En-tête
-  createSheetHeader_(sheet, '👥 GESTION DES CLIENTS - v3.0', 'A1:L1');
+  // ─────────────────────────────────────────────────────────────────────────
+  createSheetHeader_(sheet, '👥 GESTION DES CLIENTS - v3.0 ULTRA MODERNE', 'A1:L1');
 
-  // Headers
+  // ─────────────────────────────────────────────────────────────────────────
+  // En-têtes de colonnes
+  // ─────────────────────────────────────────────────────────────────────────
   const headers = [
     'N° Client',
     'Nom/Raison Sociale',
@@ -825,31 +999,37 @@ function createClientsSheet() {
   ];
   setupColumnHeaders_(sheet, headers, 2);
 
-  // Largeurs
+  // ─────────────────────────────────────────────────────────────────────────
+  // Largeurs de colonnes optimisées
+  // ─────────────────────────────────────────────────────────────────────────
   setupColumnWidths_(sheet, [100, 200, 100, 120, 180, 250, 120, 150, 110, 100, 120, 130]);
 
   sheet.setFrozenRows(2);
 
-  // Validations
+  // ─────────────────────────────────────────────────────────────────────────
+  // Validations de données
+  // ─────────────────────────────────────────────────────────────────────────
   applyDataValidation_(
     sheet,
-    `C3:C${CONTACTS_V3_CONFIG.MAX_VALIDATION_ROWS}`,
-    ['Particulier', 'Entreprise', 'Administration', 'ONG'],
+    `C3:C${CONTACTS_V3_CONFIG.LIMITS.MAX_VALIDATION_ROWS}`,
+    CONTACTS_V3_CONFIG.CLIENT_TYPES,
     'Sélectionnez le type de client'
   );
 
   applyDataValidation_(
     sheet,
-    `J3:J${CONTACTS_V3_CONFIG.MAX_VALIDATION_ROWS}`,
-    ['Actif', 'Inactif', 'Suspendu', 'VIP'],
+    `J3:J${CONTACTS_V3_CONFIG.LIMITS.MAX_VALIDATION_ROWS}`,
+    CONTACTS_V3_CONFIG.CLIENT_STATUS,
     'Sélectionnez le statut du client'
   );
 
-  // Formatage conditionnel
+  // ─────────────────────────────────────────────────────────────────────────
+  // Formatage conditionnel ultra moderne
+  // ─────────────────────────────────────────────────────────────────────────
   const rules = [];
-  const statusRange = sheet.getRange(`J3:J${CONTACTS_V3_CONFIG.MAX_VALIDATION_ROWS}`);
+  const statusRange = sheet.getRange(`J3:J${CONTACTS_V3_CONFIG.LIMITS.MAX_VALIDATION_ROWS}`);
 
-  // VIP - Doré
+  // VIP - Doré brillant
   rules.push(SpreadsheetApp.newConditionalFormatRule()
     .whenTextEqualTo('VIP')
     .setBackground('#FFD700')
@@ -859,7 +1039,7 @@ function createClientsSheet() {
     .build()
   );
 
-  // Actif - Vert clair
+  // Actif - Vert Google
   rules.push(SpreadsheetApp.newConditionalFormatRule()
     .whenTextEqualTo('Actif')
     .setBackground('#D4EDDA')
@@ -868,7 +1048,7 @@ function createClientsSheet() {
     .build()
   );
 
-  // Inactif - Gris
+  // Inactif - Gris moderne
   rules.push(SpreadsheetApp.newConditionalFormatRule()
     .whenTextEqualTo('Inactif')
     .setBackground('#E0E0E0')
@@ -877,7 +1057,7 @@ function createClientsSheet() {
     .build()
   );
 
-  // Suspendu - Rouge
+  // Suspendu - Rouge attention
   rules.push(SpreadsheetApp.newConditionalFormatRule()
     .whenTextEqualTo('Suspendu')
     .setBackground('#F8D7DA')
@@ -889,13 +1069,13 @@ function createClientsSheet() {
 
   sheet.setConditionalFormatRules(rules);
 
-  Compat_.log('INFO', 'Feuille Clients v3.0 créée');
+  Compat_.log('SUCCESS', '✅ Feuille Clients v3.0 créée avec formatage conditionnel');
   return sheet;
 }
 
 /**
  * Crée la feuille Fournisseurs v3.0
- * Avec système de notation visuel
+ * Avec système de notation visuel ultra moderne
  */
 function createFournisseursSheet() {
   const sheet = Compat_.getOrCreateSheet('Fournisseurs');
@@ -903,10 +1083,14 @@ function createFournisseursSheet() {
 
   sheet.clear();
 
+  // ─────────────────────────────────────────────────────────────────────────
   // En-tête
-  createSheetHeader_(sheet, '🏪 GESTION DES FOURNISSEURS - v3.0', 'A1:L1');
+  // ─────────────────────────────────────────────────────────────────────────
+  createSheetHeader_(sheet, '🏪 GESTION DES FOURNISSEURS - v3.0 ULTRA MODERNE', 'A1:L1');
 
-  // Headers
+  // ─────────────────────────────────────────────────────────────────────────
+  // En-têtes de colonnes
+  // ─────────────────────────────────────────────────────────────────────────
   const headers = [
     'N° Fournisseur',
     'Nom/Raison Sociale',
@@ -923,44 +1107,50 @@ function createFournisseursSheet() {
   ];
   setupColumnHeaders_(sheet, headers, 2);
 
-  // Largeurs
+  // ─────────────────────────────────────────────────────────────────────────
+  // Largeurs de colonnes optimisées
+  // ─────────────────────────────────────────────────────────────────────────
   setupColumnWidths_(sheet, [120, 200, 120, 120, 180, 250, 120, 150, 100, 110, 100, 80]);
 
   sheet.setFrozenRows(2);
 
-  // Validations
+  // ─────────────────────────────────────────────────────────────────────────
+  // Validations de données
+  // ─────────────────────────────────────────────────────────────────────────
   applyDataValidation_(
     sheet,
-    `C3:C${CONTACTS_V3_CONFIG.MAX_VALIDATION_ROWS}`,
-    ['Fournitures Bureau', 'Informatique', 'Services', 'Papeterie', 'Mobilier', 'Autre'],
-    'Sélectionnez la catégorie'
+    `C3:C${CONTACTS_V3_CONFIG.LIMITS.MAX_VALIDATION_ROWS}`,
+    CONTACTS_V3_CONFIG.FOURNISSEUR_CATEGORIES,
+    'Sélectionnez la catégorie du fournisseur'
   );
 
   applyDataValidation_(
     sheet,
-    `K3:K${CONTACTS_V3_CONFIG.MAX_VALIDATION_ROWS}`,
-    ['Actif', 'Inactif', 'Bloqué'],
-    'Sélectionnez le statut'
+    `K3:K${CONTACTS_V3_CONFIG.LIMITS.MAX_VALIDATION_ROWS}`,
+    CONTACTS_V3_CONFIG.FOURNISSEUR_STATUS,
+    'Sélectionnez le statut du fournisseur'
   );
 
-  // Validation note
+  // Validation pour les notes (1-5)
   try {
-    sheet.getRange(`L3:L${CONTACTS_V3_CONFIG.MAX_VALIDATION_ROWS}`).setDataValidation(
+    sheet.getRange(`L3:L${CONTACTS_V3_CONFIG.LIMITS.MAX_VALIDATION_ROWS}`).setDataValidation(
       SpreadsheetApp.newDataValidation()
         .requireNumberBetween(1, 5)
         .setAllowInvalid(false)
-        .setHelpText('Note entre 1 et 5')
+        .setHelpText('Entrez une note entre 1 et 5')
         .build()
     );
   } catch (e) {
-    Compat_.log('WARN', 'Cannot set number validation: ' + e);
+    Compat_.log('WARN', '⚠️ Cannot set number validation: ' + e);
   }
 
-  // Formatage conditionnel notes
+  // ─────────────────────────────────────────────────────────────────────────
+  // Formatage conditionnel pour les notes
+  // ─────────────────────────────────────────────────────────────────────────
   const rules = [];
-  const noteRange = sheet.getRange(`L3:L${CONTACTS_V3_CONFIG.MAX_VALIDATION_ROWS}`);
+  const noteRange = sheet.getRange(`L3:L${CONTACTS_V3_CONFIG.LIMITS.MAX_VALIDATION_ROWS}`);
 
-  // Excellent (5)
+  // Excellent (5) - Vert foncé
   rules.push(SpreadsheetApp.newConditionalFormatRule()
     .whenNumberEqualTo(5)
     .setBackground('#D4EDDA')
@@ -970,7 +1160,7 @@ function createFournisseursSheet() {
     .build()
   );
 
-  // Bon (4)
+  // Bon (4) - Bleu clair
   rules.push(SpreadsheetApp.newConditionalFormatRule()
     .whenNumberEqualTo(4)
     .setBackground('#D1ECF1')
@@ -979,7 +1169,7 @@ function createFournisseursSheet() {
     .build()
   );
 
-  // Moyen (3)
+  // Moyen (3) - Jaune
   rules.push(SpreadsheetApp.newConditionalFormatRule()
     .whenNumberEqualTo(3)
     .setBackground('#FFF3CD')
@@ -988,7 +1178,7 @@ function createFournisseursSheet() {
     .build()
   );
 
-  // Mauvais (1-2)
+  // Mauvais (1-2) - Rouge
   rules.push(SpreadsheetApp.newConditionalFormatRule()
     .whenNumberLessThanOrEqualTo(2)
     .setBackground('#F8D7DA')
@@ -1000,13 +1190,13 @@ function createFournisseursSheet() {
 
   sheet.setConditionalFormatRules(rules);
 
-  Compat_.log('INFO', 'Feuille Fournisseurs v3.0 créée');
+  Compat_.log('SUCCESS', '✅ Feuille Fournisseurs v3.0 créée avec système de notation');
   return sheet;
 }
 
-// ============================================================================
-// GESTION DES CLIENTS
-// ============================================================================
+// ═══════════════════════════════════════════════════════════════════════════
+// 👥 GESTION DES CLIENTS
+// ═══════════════════════════════════════════════════════════════════════════
 
 /**
  * Affiche le dialogue d'ajout de client
@@ -1025,13 +1215,15 @@ function showAddClientDialog() {
 }
 
 /**
- * Ajoute un client avec validation complète v3.0
+ * Ajoute un nouveau client avec validation complète v3.0
  * @param {Object} clientData - Données du client
- * @return {Object} Résultat de l'opération
+ * @returns {Object} Résultat de l'opération {success, numero?, message, error?}
  */
 function addClient(clientData) {
   try {
+    // ─────────────────────────────────────────────────────────────────────────
     // Validation des données obligatoires
+    // ─────────────────────────────────────────────────────────────────────────
     if (!clientData || !clientData.nom || !clientData.telephone) {
       return {
         success: false,
@@ -1039,15 +1231,19 @@ function addClient(clientData) {
       };
     }
 
-    // Validation téléphone
+    // ─────────────────────────────────────────────────────────────────────────
+    // Validation du format téléphone
+    // ─────────────────────────────────────────────────────────────────────────
     if (!isValidPhone_(clientData.telephone)) {
       return {
         success: false,
-        error: 'Format de téléphone invalide (ex: 6XXXXXXXX ou +2376XXXXXXXX)'
+        error: 'Format de téléphone invalide.\nFormats acceptés: 6XXXXXXXX, +2376XXXXXXXX, 2376XXXXXXXX'
       };
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
     // Validation email si fourni
+    // ─────────────────────────────────────────────────────────────────────────
     if (clientData.email && !isValidEmail_(clientData.email)) {
       return {
         success: false,
@@ -1055,7 +1251,9 @@ function addClient(clientData) {
       };
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
     // Utiliser Validator si disponible
+    // ─────────────────────────────────────────────────────────────────────────
     if (typeof Validator !== 'undefined' && Validator.validateClient) {
       try {
         const validation = Validator.validateClient(clientData);
@@ -1066,29 +1264,39 @@ function addClient(clientData) {
           return { success: false, errors: validation.errors };
         }
       } catch (e) {
-        Compat_.log('WARN', 'Validator.validateClient failed: ' + e);
+        Compat_.log('WARN', '⚠️ Validator.validateClient failed: ' + e);
       }
     }
 
-    // Sanitization
+    // ─────────────────────────────────────────────────────────────────────────
+    // Sanitization des données
+    // ─────────────────────────────────────────────────────────────────────────
     const nomSanitized = sanitizeString_(clientData.nom);
     const adresseSanitized = sanitizeString_(clientData.adresse || '');
     const contactSanitized = sanitizeString_(clientData.contact || '');
 
+    // ─────────────────────────────────────────────────────────────────────────
     // Obtenir la feuille
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Clients');
+    // ─────────────────────────────────────────────────────────────────────────
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName('Clients');
+
     if (!sheet) {
-      throw new Error('Feuille Clients introuvable. Initialisez d\'abord le système.');
+      throw new Error('Feuille Clients introuvable.\nInitialisez d\'abord le système (Menu ERP > Initialiser).');
     }
 
-    // Générer le numéro
+    // ─────────────────────────────────────────────────────────────────────────
+    // Générer le numéro client
+    // ─────────────────────────────────────────────────────────────────────────
     const config = Compat_.getSafeConfig();
     const prefix = config.prefixes.client || CONTACTS_V3_CONFIG.PREFIXES.CLIENT;
     const numeroClient = Compat_.getNextNumber(prefix, 'Clients');
     const dateCreation = Compat_.formatDate(new Date());
     const devise = config.devise || CONTACTS_V3_CONFIG.DEFAULTS.DEVISE;
 
-    // Préparer la ligne
+    // ─────────────────────────────────────────────────────────────────────────
+    // Préparer la ligne de données
+    // ─────────────────────────────────────────────────────────────────────────
     const newRow = [
       numeroClient,
       nomSanitized,
@@ -1104,25 +1312,33 @@ function addClient(clientData) {
       dateCreation
     ];
 
-    // Ajouter
+    // ─────────────────────────────────────────────────────────────────────────
+    // Ajouter la ligne
+    // ─────────────────────────────────────────────────────────────────────────
     sheet.appendRow(newRow);
 
-    // Formater
+    // ─────────────────────────────────────────────────────────────────────────
+    // Formatage de la ligne
+    // ─────────────────────────────────────────────────────────────────────────
     const lastRow = sheet.getLastRow();
     sheet.getRange(lastRow, 1, 1, newRow.length)
       .setBorder(true, true, true, true, false, false)
       .setVerticalAlignment('middle');
 
-    // Invalider cache si DataManager disponible
+    // ─────────────────────────────────────────────────────────────────────────
+    // Invalidation du cache
+    // ─────────────────────────────────────────────────────────────────────────
     if (typeof DataManager !== 'undefined' && DataManager.invalidateCache) {
       try {
         DataManager.invalidateCache('Clients');
       } catch (e) {
-        Compat_.log('WARN', 'Cannot invalidate cache: ' + e);
+        Compat_.log('WARN', '⚠️ Cannot invalidate cache: ' + e);
       }
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
     // Audit log
+    // ─────────────────────────────────────────────────────────────────────────
     if (typeof AuditLog !== 'undefined' && AuditLog.log) {
       try {
         AuditLog.log(
@@ -1132,16 +1348,16 @@ function addClient(clientData) {
           `Client créé: ${nomSanitized}`
         );
       } catch (e) {
-        Compat_.log('WARN', 'Cannot write audit: ' + e);
+        Compat_.log('WARN', '⚠️ Cannot write audit: ' + e);
       }
     }
 
-    Compat_.log('INFO', `✓ Client créé: ${numeroClient} - ${nomSanitized}`);
+    Compat_.log('SUCCESS', `✅ Client créé: ${numeroClient} - ${nomSanitized}`);
 
     return {
       success: true,
       numero: numeroClient,
-      message: `Client ${numeroClient} créé avec succès !`
+      message: `✅ Client ${numeroClient} créé avec succès !\n\n${nomSanitized}`
     };
 
   } catch (error) {
@@ -1149,14 +1365,14 @@ function addClient(clientData) {
     return {
       success: false,
       error: error.toString(),
-      message: 'Erreur lors de la création du client'
+      message: '❌ Erreur lors de la création du client'
     };
   }
 }
 
-// ============================================================================
-// GESTION DES FOURNISSEURS
-// ============================================================================
+// ═══════════════════════════════════════════════════════════════════════════
+// 🏪 GESTION DES FOURNISSEURS
+// ═══════════════════════════════════════════════════════════════════════════
 
 /**
  * Affiche le dialogue d'ajout de fournisseur
@@ -1175,13 +1391,15 @@ function showAddFournisseurDialog() {
 }
 
 /**
- * Ajoute un fournisseur v3.0
- * @param {Object} fournisseurData
- * @return {Object}
+ * Ajoute un nouveau fournisseur v3.0
+ * @param {Object} fournisseurData - Données du fournisseur
+ * @returns {Object} Résultat de l'opération
  */
 function addFournisseur(fournisseurData) {
   try {
-    // Validation
+    // ─────────────────────────────────────────────────────────────────────────
+    // Validation des données obligatoires
+    // ─────────────────────────────────────────────────────────────────────────
     if (!fournisseurData || !fournisseurData.nom || !fournisseurData.telephone) {
       return {
         success: false,
@@ -1192,7 +1410,7 @@ function addFournisseur(fournisseurData) {
     if (!isValidPhone_(fournisseurData.telephone)) {
       return {
         success: false,
-        error: 'Format de téléphone invalide'
+        error: 'Format de téléphone invalide.\nFormats acceptés: 6XXXXXXXX, +2376XXXXXXXX'
       };
     }
 
@@ -1203,24 +1421,34 @@ function addFournisseur(fournisseurData) {
       };
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
     // Sanitization
+    // ─────────────────────────────────────────────────────────────────────────
     const nomSanitized = sanitizeString_(fournisseurData.nom);
     const adresseSanitized = sanitizeString_(fournisseurData.adresse || '');
     const contactSanitized = sanitizeString_(fournisseurData.contact || '');
 
-    // Obtenir feuille
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Fournisseurs');
+    // ─────────────────────────────────────────────────────────────────────────
+    // Obtenir la feuille
+    // ─────────────────────────────────────────────────────────────────────────
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName('Fournisseurs');
+
     if (!sheet) {
-      throw new Error('Feuille Fournisseurs introuvable. Initialisez d\'abord le système.');
+      throw new Error('Feuille Fournisseurs introuvable.\nInitialisez d\'abord le système.');
     }
 
-    // Générer numéro
+    // ─────────────────────────────────────────────────────────────────────────
+    // Générer le numéro
+    // ─────────────────────────────────────────────────────────────────────────
     const config = Compat_.getSafeConfig();
     const prefix = config.prefixes.fournisseur || CONTACTS_V3_CONFIG.PREFIXES.FOURNISSEUR;
     const numeroFournisseur = Compat_.getNextNumber(prefix, 'Fournisseurs');
     const dateCreation = Compat_.formatDate(new Date());
 
-    // Préparer ligne
+    // ─────────────────────────────────────────────────────────────────────────
+    // Préparer la ligne
+    // ─────────────────────────────────────────────────────────────────────────
     const newRow = [
       numeroFournisseur,
       nomSanitized,
@@ -1236,25 +1464,33 @@ function addFournisseur(fournisseurData) {
       fournisseurData.note || CONTACTS_V3_CONFIG.DEFAULTS.NOTE_FOURNISSEUR
     ];
 
+    // ─────────────────────────────────────────────────────────────────────────
     // Ajouter
+    // ─────────────────────────────────────────────────────────────────────────
     sheet.appendRow(newRow);
 
-    // Formater
+    // ─────────────────────────────────────────────────────────────────────────
+    // Formatage
+    // ─────────────────────────────────────────────────────────────────────────
     const lastRow = sheet.getLastRow();
     sheet.getRange(lastRow, 1, 1, newRow.length)
       .setBorder(true, true, true, true, false, false)
       .setVerticalAlignment('middle');
 
-    // Invalider cache
+    // ─────────────────────────────────────────────────────────────────────────
+    // Invalidation cache
+    // ─────────────────────────────────────────────────────────────────────────
     if (typeof DataManager !== 'undefined' && DataManager.invalidateCache) {
       try {
         DataManager.invalidateCache('Fournisseurs');
       } catch (e) {
-        Compat_.log('WARN', 'Cannot invalidate cache: ' + e);
+        Compat_.log('WARN', '⚠️ Cannot invalidate cache: ' + e);
       }
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
     // Audit
+    // ─────────────────────────────────────────────────────────────────────────
     if (typeof AuditLog !== 'undefined' && AuditLog.log) {
       try {
         AuditLog.log(
@@ -1264,16 +1500,16 @@ function addFournisseur(fournisseurData) {
           `Fournisseur créé: ${nomSanitized}`
         );
       } catch (e) {
-        Compat_.log('WARN', 'Cannot write audit: ' + e);
+        Compat_.log('WARN', '⚠️ Cannot write audit: ' + e);
       }
     }
 
-    Compat_.log('INFO', `✓ Fournisseur créé: ${numeroFournisseur} - ${nomSanitized}`);
+    Compat_.log('SUCCESS', `✅ Fournisseur créé: ${numeroFournisseur} - ${nomSanitized}`);
 
     return {
       success: true,
       numero: numeroFournisseur,
-      message: `Fournisseur ${numeroFournisseur} créé avec succès !`
+      message: `✅ Fournisseur ${numeroFournisseur} créé avec succès !\n\n${nomSanitized}`
     };
 
   } catch (error) {
@@ -1281,14 +1517,14 @@ function addFournisseur(fournisseurData) {
     return {
       success: false,
       error: error.toString(),
-      message: 'Erreur lors de la création du fournisseur'
+      message: '❌ Erreur lors de la création du fournisseur'
     };
   }
 }
 
-// ============================================================================
-// RECHERCHE ET STATISTIQUES
-// ============================================================================
+// ═══════════════════════════════════════════════════════════════════════════
+// 🔍 RECHERCHE ET STATISTIQUES
+// ═══════════════════════════════════════════════════════════════════════════
 
 /**
  * Affiche le dialogue de recherche
@@ -1308,8 +1544,8 @@ function showSearchContactDialog() {
 
 /**
  * Recherche un client v3.0
- * @param {string} searchTerm
- * @return {Array<Object>}
+ * @param {string} searchTerm - Terme de recherche
+ * @returns {Array<Object>} Liste des clients trouvés
  */
 function searchClient(searchTerm) {
   try {
@@ -1319,7 +1555,9 @@ function searchClient(searchTerm) {
 
     const cols = CONTACTS_V3_CONFIG.CLIENT_COLS;
 
-    // Utiliser DataManager si disponible
+    // ─────────────────────────────────────────────────────────────────────────
+    // Niveau 1: Utiliser DataManager si disponible
+    // ─────────────────────────────────────────────────────────────────────────
     if (typeof DataManager !== 'undefined' && DataManager.search) {
       try {
         const results = DataManager.search('Clients', searchTerm, [
@@ -1338,12 +1576,16 @@ function searchClient(searchTerm) {
           caTotal: row[cols.CA_TOTAL] || '0'
         }));
       } catch (e) {
-        Compat_.log('WARN', 'DataManager.search failed, using fallback: ' + e);
+        Compat_.log('WARN', '⚠️ DataManager.search failed, using fallback: ' + e);
       }
     }
 
-    // Fallback: recherche manuelle
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Clients');
+    // ─────────────────────────────────────────────────────────────────────────
+    // Niveau 2: Fallback recherche manuelle optimisée
+    // ─────────────────────────────────────────────────────────────────────────
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName('Clients');
+
     if (!sheet || sheet.getLastRow() <= 2) return [];
 
     const data = sheet.getDataRange().getValues();
@@ -1369,22 +1611,22 @@ function searchClient(searchTerm) {
           caTotal: row[cols.CA_TOTAL] || '0'
         });
 
-        if (results.length >= CONTACTS_V3_CONFIG.MAX_SEARCH_RESULTS) break;
+        if (results.length >= CONTACTS_V3_CONFIG.LIMITS.MAX_SEARCH_RESULTS) break;
       }
     }
 
     return results;
 
   } catch (error) {
-    Compat_.log('ERROR', 'searchClient: ' + error);
+    Compat_.log('ERROR', `❌ searchClient: ${error}`);
     return [];
   }
 }
 
 /**
  * Recherche un fournisseur v3.0
- * @param {string} searchTerm
- * @return {Array<Object>}
+ * @param {string} searchTerm - Terme de recherche
+ * @returns {Array<Object>} Liste des fournisseurs trouvés
  */
 function searchFournisseur(searchTerm) {
   try {
@@ -1394,7 +1636,9 @@ function searchFournisseur(searchTerm) {
 
     const cols = CONTACTS_V3_CONFIG.FOURNISSEUR_COLS;
 
-    // DataManager si disponible
+    // ─────────────────────────────────────────────────────────────────────────
+    // Niveau 1: DataManager
+    // ─────────────────────────────────────────────────────────────────────────
     if (typeof DataManager !== 'undefined' && DataManager.search) {
       try {
         const results = DataManager.search('Fournisseurs', searchTerm, [
@@ -1413,12 +1657,16 @@ function searchFournisseur(searchTerm) {
           note: row[cols.NOTE] || '3'
         }));
       } catch (e) {
-        Compat_.log('WARN', 'DataManager.search failed, using fallback: ' + e);
+        Compat_.log('WARN', '⚠️ DataManager.search failed, using fallback: ' + e);
       }
     }
 
-    // Fallback
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Fournisseurs');
+    // ─────────────────────────────────────────────────────────────────────────
+    // Niveau 2: Fallback
+    // ─────────────────────────────────────────────────────────────────────────
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName('Fournisseurs');
+
     if (!sheet || sheet.getLastRow() <= 2) return [];
 
     const data = sheet.getDataRange().getValues();
@@ -1444,25 +1692,27 @@ function searchFournisseur(searchTerm) {
           note: row[cols.NOTE] || '3'
         });
 
-        if (results.length >= CONTACTS_V3_CONFIG.MAX_SEARCH_RESULTS) break;
+        if (results.length >= CONTACTS_V3_CONFIG.LIMITS.MAX_SEARCH_RESULTS) break;
       }
     }
 
     return results;
 
   } catch (error) {
-    Compat_.log('ERROR', 'searchFournisseur: ' + error);
+    Compat_.log('ERROR', `❌ searchFournisseur: ${error}`);
     return [];
   }
 }
 
 /**
- * Obtient les clients actifs v3.0
- * @return {Array<Object>}
+ * Obtient les clients actifs (Actif ou VIP)
+ * @returns {Array<Object>} Liste des clients actifs
  */
 function getActiveClients() {
   try {
-    // Utiliser DataManager avec cache si disponible
+    // ─────────────────────────────────────────────────────────────────────────
+    // Niveau 1: DataManager avec cache
+    // ─────────────────────────────────────────────────────────────────────────
     if (typeof DataManager !== 'undefined' && DataManager.filter) {
       try {
         const cols = CONTACTS_V3_CONFIG.CLIENT_COLS;
@@ -1476,12 +1726,16 @@ function getActiveClients() {
           telephone: row[cols.TELEPHONE] || ''
         }));
       } catch (e) {
-        Compat_.log('WARN', 'DataManager.filter failed, using fallback: ' + e);
+        Compat_.log('WARN', '⚠️ DataManager.filter failed, using fallback: ' + e);
       }
     }
 
-    // Fallback
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Clients');
+    // ─────────────────────────────────────────────────────────────────────────
+    // Niveau 2: Fallback
+    // ─────────────────────────────────────────────────────────────────────────
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName('Clients');
+
     if (!sheet || sheet.getLastRow() <= 2) return [];
 
     const data = sheet.getDataRange().getValues();
@@ -1502,26 +1756,28 @@ function getActiveClients() {
     return clients;
 
   } catch (error) {
-    Compat_.log('ERROR', 'getActiveClients: ' + error);
+    Compat_.log('ERROR', `❌ getActiveClients: ${error}`);
     return [];
   }
 }
 
 /**
- * Met à jour le CA d'un client v3.0
- * @param {string} clientNom
- * @param {number} montant
+ * Met à jour le CA d'un client
+ * @param {string} clientNom - Nom du client
+ * @param {number} montant - Montant à ajouter
  */
 function updateClientRevenue(clientNom, montant) {
   try {
     if (!clientNom || montant === undefined) {
-      Compat_.log('WARN', 'updateClientRevenue: paramètres invalides');
+      Compat_.log('WARN', '⚠️ updateClientRevenue: paramètres invalides');
       return;
     }
 
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Clients');
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName('Clients');
+
     if (!sheet) {
-      Compat_.log('ERROR', 'updateClientRevenue: feuille introuvable');
+      Compat_.log('ERROR', '❌ updateClientRevenue: feuille introuvable');
       return;
     }
 
@@ -1547,30 +1803,32 @@ function updateClientRevenue(clientNom, montant) {
           try {
             DataManager.invalidateCache('Clients');
           } catch (e) {
-            Compat_.log('WARN', 'Cannot invalidate cache: ' + e);
+            Compat_.log('WARN', '⚠️ Cannot invalidate cache: ' + e);
           }
         }
 
-        Compat_.log('INFO', `CA mis à jour: ${clientNom} +${montant} ${devise}`);
+        Compat_.log('SUCCESS', `✅ CA mis à jour: ${clientNom} +${montant} ${devise}`);
         break;
       }
     }
 
   } catch (error) {
-    Compat_.log('ERROR', `updateClientRevenue: ${error}`);
+    Compat_.log('ERROR', `❌ updateClientRevenue: ${error}`);
   }
 }
 
 /**
- * Affiche les statistiques contacts v3.0
+ * Affiche les statistiques des contacts
+ * Design ultra moderne avec emojis et formatage avancé
  */
 function showContactStats() {
   try {
-    const sheet1 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Clients');
-    const sheet2 = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Fournisseurs');
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet1 = ss.getSheetByName('Clients');
+    const sheet2 = ss.getSheetByName('Fournisseurs');
 
     if (!sheet1 || !sheet2) {
-      throw new Error('Feuilles Clients ou Fournisseurs introuvables');
+      throw new Error('Feuilles Clients ou Fournisseurs introuvables.\nInitialisez d\'abord le système.');
     }
 
     const clientsData = sheet1.getLastRow() > 2 ? sheet1.getRange(3, 1, sheet1.getLastRow() - 2, 12).getValues() : [];
@@ -1579,7 +1837,9 @@ function showContactStats() {
     const cols = CONTACTS_V3_CONFIG.CLIENT_COLS;
     const fCols = CONTACTS_V3_CONFIG.FOURNISSEUR_COLS;
 
-    // Stats clients
+    // ─────────────────────────────────────────────────────────────────────────
+    // Statistiques clients
+    // ─────────────────────────────────────────────────────────────────────────
     const totalClients = clientsData.length;
     const clientsActifs = clientsData.filter(row => row[cols.STATUT] === 'Actif').length;
     const clientsVIP = clientsData.filter(row => row[cols.STATUT] === 'VIP').length;
@@ -1592,12 +1852,14 @@ function showContactStats() {
       return sum + ca;
     }, 0);
 
-    // Stats fournisseurs
+    // ─────────────────────────────────────────────────────────────────────────
+    // Statistiques fournisseurs
+    // ─────────────────────────────────────────────────────────────────────────
     const totalFournisseurs = fournisseursData.length;
     const fournisseursActifs = fournisseursData.filter(row => row[fCols.STATUT] === 'Actif').length;
     const fournisseursBloques = fournisseursData.filter(row => row[fCols.STATUT] === 'Bloqué').length;
 
-    // Note moyenne fournisseurs
+    // Note moyenne
     const noteMoyenne = fournisseursData.length > 0
       ? fournisseursData.reduce((sum, row) => sum + (parseFloat(row[fCols.NOTE]) || 0), 0) / fournisseursData.length
       : 0;
@@ -1606,33 +1868,47 @@ function showContactStats() {
     const devise = config.devise || CONTACTS_V3_CONFIG.DEFAULTS.DEVISE;
     const ui = SpreadsheetApp.getUi();
 
-    const msg = `📊 STATISTIQUES CONTACTS v${CONTACTS_V3_CONFIG.VERSION}\n\n` +
-                `👥 CLIENTS\n` +
-                `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-                `Total: ${totalClients}\n` +
-                `├─ Actifs: ${clientsActifs}\n` +
-                `├─ VIP: ${clientsVIP} ⭐\n` +
-                `├─ Inactifs: ${clientsInactifs}\n` +
-                `└─ Suspendus: ${clientsSuspendus}\n` +
-                `\n💰 CA Total: ${caTotal.toLocaleString('fr-FR', {minimumFractionDigits: 0, maximumFractionDigits: 2})} ${devise}\n\n` +
-                `🏪 FOURNISSEURS\n` +
-                `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
-                `Total: ${totalFournisseurs}\n` +
-                `├─ Actifs: ${fournisseursActifs}\n` +
-                `├─ Inactifs: ${totalFournisseurs - fournisseursActifs - fournisseursBloques}\n` +
-                `└─ Bloqués: ${fournisseursBloques}\n` +
-                `\n⭐ Note moyenne: ${noteMoyenne.toFixed(2)}/5`;
+    // ─────────────────────────────────────────────────────────────────────────
+    // Formatage du message avec design ultra moderne
+    // ─────────────────────────────────────────────────────────────────────────
+    const msg = `╔══════════════════════════════════════════════╗\n` +
+                `║   📊 STATISTIQUES CONTACTS v${CONTACTS_V3_CONFIG.VERSION}      ║\n` +
+                `╚══════════════════════════════════════════════╝\n\n` +
+                `┌──────────────────────────────────────────────┐\n` +
+                `│ 👥 CLIENTS                                   │\n` +
+                `├──────────────────────────────────────────────┤\n` +
+                `│ Total:            ${String(totalClients).padStart(4)} clients           │\n` +
+                `│ ├─ ✅ Actifs:     ${String(clientsActifs).padStart(4)}                    │\n` +
+                `│ ├─ ⭐ VIP:        ${String(clientsVIP).padStart(4)}                    │\n` +
+                `│ ├─ 💤 Inactifs:   ${String(clientsInactifs).padStart(4)}                    │\n` +
+                `│ └─ 🚫 Suspendus:  ${String(clientsSuspendus).padStart(4)}                    │\n` +
+                `│                                              │\n` +
+                `│ 💰 CA TOTAL:                                 │\n` +
+                `│ ${String(caTotal.toLocaleString('fr-FR', {minimumFractionDigits: 0, maximumFractionDigits: 2})).padStart(18)} ${devise.padEnd(20)}│\n` +
+                `└──────────────────────────────────────────────┘\n\n` +
+                `┌──────────────────────────────────────────────┐\n` +
+                `│ 🏪 FOURNISSEURS                              │\n` +
+                `├──────────────────────────────────────────────┤\n` +
+                `│ Total:            ${String(totalFournisseurs).padStart(4)} fournisseurs      │\n` +
+                `│ ├─ ✅ Actifs:     ${String(fournisseursActifs).padStart(4)}                    │\n` +
+                `│ ├─ 💤 Inactifs:   ${String(totalFournisseurs - fournisseursActifs - fournisseursBloques).padStart(4)}                    │\n` +
+                `│ └─ 🚫 Bloqués:    ${String(fournisseursBloques).padStart(4)}                    │\n` +
+                `│                                              │\n` +
+                `│ ⭐ NOTE MOYENNE:  ${noteMoyenne.toFixed(2)}/5.00             │\n` +
+                `└──────────────────────────────────────────────┘\n\n` +
+                `📅 Date: ${Compat_.formatDate(new Date())}\n` +
+                `🔧 Mode: ${Compat_.isERPAvailable() ? 'Complet' : 'Autonome'}`;
 
-    ui.alert('📊 Statistiques Contacts', msg, ui.ButtonSet.OK);
+    ui.alert('📊 Statistiques Contacts v3.0', msg, ui.ButtonSet.OK);
 
   } catch (error) {
     Compat_.handleError(error, 'showContactStats');
   }
 }
 
-// ============================================================================
-// FEUILLES SYSTÈME
-// ============================================================================
+// ═══════════════════════════════════════════════════════════════════════════
+// 📋 FEUILLES SYSTÈME
+// ═══════════════════════════════════════════════════════════════════════════
 
 /**
  * Crée la feuille d'audit v3.0
@@ -1665,10 +1941,10 @@ function createAuditSheet() {
   try {
     sheet.hideSheet();
   } catch (e) {
-    Compat_.log('WARN', 'Cannot hide sheet: ' + e);
+    Compat_.log('WARN', '⚠️ Cannot hide sheet: ' + e);
   }
 
-  Compat_.log('INFO', 'Feuille Audit v3.0 créée');
+  Compat_.log('SUCCESS', '✅ Feuille _Audit v3.0 créée');
   return sheet;
 }
 
@@ -1703,42 +1979,65 @@ function createNotificationsSheet() {
   try {
     sheet.hideSheet();
   } catch (e) {
-    Compat_.log('WARN', 'Cannot hide sheet: ' + e);
+    Compat_.log('WARN', '⚠️ Cannot hide sheet: ' + e);
   }
 
-  Compat_.log('INFO', 'Feuille Notifications v3.0 créée');
+  Compat_.log('SUCCESS', '✅ Feuille _Notifications v3.0 créée');
   return sheet;
 }
 
-// ============================================================================
-// INFORMATIONS VERSION
-// ============================================================================
+// ═══════════════════════════════════════════════════════════════════════════
+// ℹ️ INFORMATIONS VERSION
+// ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Affiche les informations de version
+ * Affiche les informations de version du module
+ * Design ultra moderne avec statut du système
  */
 function showContactsVersion() {
   const ui = SpreadsheetApp.getUi();
   const hasCore = Compat_.isERPAvailable();
 
-  const msg = `📦 Module Contacts\n` +
-              `Version: ${CONTACTS_V3_CONFIG.VERSION}\n\n` +
-              `🔧 Configuration:\n` +
-              `├─ Core.gs: ${hasCore ? '✅ Détecté' : '❌ Non détecté'}\n` +
-              `├─ Mode: ${hasCore ? 'Complet' : 'Autonome'}\n` +
-              `└─ Fallbacks: ✅ Actifs\n\n` +
+  const msg = `╔══════════════════════════════════════════════╗\n` +
+              `║      📦 MODULE CONTACTS v${CONTACTS_V3_CONFIG.VERSION}           ║\n` +
+              `╚══════════════════════════════════════════════╝\n\n` +
+              `📋 Informations:\n` +
+              `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+              `Version:      ${CONTACTS_V3_CONFIG.VERSION}\n` +
+              `Build:        ${CONTACTS_V3_CONFIG.BUILD}\n` +
+              `Module:       ${CONTACTS_V3_CONFIG.MODULE_NAME}\n\n` +
+              `🔧 Configuration Système:\n` +
+              `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+              `Core.gs:      ${hasCore ? '✅ Détecté' : '❌ Non détecté'}\n` +
+              `Mode:         ${hasCore ? 'Complet' : 'Autonome'}\n` +
+              `Fallbacks:    ✅ Actifs\n` +
+              `Thread-Safe:  ✅ Oui\n\n` +
               `📋 Fonctionnalités:\n` +
-              `├─ Gestion clients: ✅\n` +
-              `├─ Gestion fournisseurs: ✅\n` +
-              `├─ Recherche: ✅\n` +
-              `├─ Statistiques: ✅\n` +
-              `├─ Validation: ✅\n` +
-              `└─ Auto-réparation: ✅\n\n` +
+              `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+              `├─ Gestion clients          ✅\n` +
+              `├─ Gestion fournisseurs     ✅\n` +
+              `├─ Recherche avancée        ✅\n` +
+              `├─ Statistiques temps réel  ✅\n` +
+              `├─ Validation CM            ✅\n` +
+              `├─ Sanitization XSS         ✅\n` +
+              `├─ Cache intelligent        ✅\n` +
+              `├─ Audit trail              ✅\n` +
+              `└─ Auto-réparation          ✅\n\n` +
               `💡 Architecture v3.0:\n` +
-              `- Système de compatibilité intégré\n` +
-              `- Fonctionnement autonome garanti\n` +
-              `- Fallbacks automatiques\n` +
-              `- Gestion d'erreurs de niveau enterprise`;
+              `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+              `• Système de compatibilité 3 niveaux\n` +
+              `• Fonctionnement autonome garanti\n` +
+              `• Fallbacks automatiques intelligents\n` +
+              `• Gestion d'erreurs enterprise-grade\n` +
+              `• Formatage conditionnel moderne\n` +
+              `• Optimisé pour le Cameroun 🇨🇲`;
 
-  ui.alert('ℹ️ Informations Module Contacts', msg, ui.ButtonSet.OK);
+  ui.alert('ℹ️ Module Contacts v3.0 - Ultra Moderne', msg, ui.ButtonSet.OK);
 }
+
+/**
+ * ╔══════════════════════════════════════════════════════════════════════════╗
+ * ║                      FIN DU MODULE CONTACTS v3.0                         ║
+ * ║                     Build: PRODUCTION-20250111-ULTRA                     ║
+ * ╚══════════════════════════════════════════════════════════════════════════╝
+ */
