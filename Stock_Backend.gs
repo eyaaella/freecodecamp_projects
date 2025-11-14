@@ -1,13 +1,17 @@
 /**
- * @file Stock_Backend.gs (V12.6.5 - PRODUCTION READY)
- * @description Module Stock V12.6.5 - Corrigé pour Contexte UI
+ * @file Stock_Backend.gs (V12.6.6 - PRODUCTION READY)
+ * @description Module Stock V12.6.6 - Null Safety
+ *
+ * CORRECTIONS V12.6.6:
+ * ✅ Fix: The parameters (number,null,number) don't match getRange signature
+ * ✅ Vérifications de nullité pour toutes les colonnes optionnelles
+ * ✅ Protection des appels getRange() avec colonnes null/undefined
+ * ✅ Gestion robuste des configurations partielles
  *
  * CORRECTIONS V12.6.5:
  * ✅ Fix: Cannot call SpreadsheetApp.getUi() from this context
  * ✅ Ajout fonction _isUiAvailable() pour détecter contexte UI
  * ✅ Gestion gracieuse des contextes sans UI (triggers, API)
- * ✅ Backup automatique sans confirmation si pas d'UI
- * ✅ Toutes les fonctionnalités V12.6.1 préservées
  */
 
 // ============================================================================
@@ -58,12 +62,12 @@ const _stock_FormulaService = {
 };
 
 // ============================================================================
-// 3. INITIALISATION V12.6.5 (CORRIGÉE)
+// 3. INITIALISATION V12.6.6 (NULL SAFETY)
 // ============================================================================
 
 function setupStockSheet() {
   return ErrorHandler.wrap(function() {
-    Logger4.info('🚀 Lancement Initialisation V12.6.5 - Module Stock...');
+    Logger4.info('🚀 Lancement Initialisation V12.6.6 - Module Stock...');
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = ss.getSheetByName(S_SHEET_NAME);
@@ -76,7 +80,7 @@ function setupStockSheet() {
         // Demander confirmation si UI disponible
         const ui = SpreadsheetApp.getUi();
         const response = ui.alert(
-          '⚠️ Réinitialisation V12.6.5',
+          '⚠️ Réinitialisation V12.6.6',
           `La feuille "${S_SHEET_NAME}" existe déjà.\n\nRéinitialiser?\n💾 Un backup sera créé.`,
           ui.ButtonSet.YES_NO
         );
@@ -145,21 +149,21 @@ function setupStockSheet() {
 
     EventManager.trigger('stock:sheet_initialized', {
       sheetName: S_SHEET_NAME,
-      version: '12.6.5'
+      version: '12.6.6'
     });
 
-    Logger4.info('✅ Module Stock V12.6.5 initialisé!');
+    Logger4.info('✅ Module Stock V12.6.6 initialisé!');
 
     // Notification uniquement si UI disponible
     if (_isUiAvailable()) {
       notify(
-        '✅ Module Stock V12.6.5 initialisé!\n\n' +
+        '✅ Module Stock V12.6.6 initialisé!\n\n' +
         '🎨 Design Material 3.0\n' +
         '⚡ Stock calculé (Mouvements)\n' +
         '🚚 Gestion Fournisseurs & PO\n' +
         '📊 Dashboard généré\n' +
         '🛡️ Audit activé',
-        'Succès V12.6.5',
+        'Succès V12.6.6',
         'success'
       );
     }
@@ -236,32 +240,44 @@ function _stock_setupValidation(sheet) {
   const lastRow = C_LIMITS.MAX_ROWS;
 
   try {
-    sheet.getRange(2, S_COLS.CATEGORIE, lastRow).setDataValidation(
-      SpreadsheetApp.newDataValidation()
-        .requireValueInList(S_LISTS.categorie, true)
-        .setAllowInvalid(false).setHelpText('📦 Catégorie d\'article').build()
-    );
-
-    sheet.getRange(2, S_COLS.UNITE, lastRow).setDataValidation(
-      SpreadsheetApp.newDataValidation()
-        .requireValueInList(S_LISTS.unite, true)
-        .setAllowInvalid(false).setHelpText('📏 Unité de mesure').build()
-    );
-
-    sheet.getRange(2, S_COLS.STOCK_MIN, lastRow).setDataValidation(
-      SpreadsheetApp.newDataValidation()
-        .requireNumberGreaterThanOrEqualTo(0)
-        .setAllowInvalid(true).setHelpText('Stock minimum >= 0').build()
-    );
-
-    const supplierSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(S_SUPPLIERS_SHEET_NAME);
-    if (supplierSheet && supplierSheet.getLastRow() > 1) {
-      const supplierRange = supplierSheet.getRange(2, 2, supplierSheet.getLastRow() - 1);
-      sheet.getRange(2, S_COLS.FOURNISSEUR, lastRow).setDataValidation(
+    // Validation CATEGORIE
+    if (S_COLS.CATEGORIE) {
+      sheet.getRange(2, S_COLS.CATEGORIE, lastRow).setDataValidation(
         SpreadsheetApp.newDataValidation()
-          .requireValueInRange(supplierRange, true)
-          .setAllowInvalid(true).setHelpText('Fournisseur depuis BD_FOURNISSEURS').build()
+          .requireValueInList(S_LISTS.categorie, true)
+          .setAllowInvalid(false).setHelpText('📦 Catégorie d\'article').build()
       );
+    }
+
+    // Validation UNITE
+    if (S_COLS.UNITE) {
+      sheet.getRange(2, S_COLS.UNITE, lastRow).setDataValidation(
+        SpreadsheetApp.newDataValidation()
+          .requireValueInList(S_LISTS.unite, true)
+          .setAllowInvalid(false).setHelpText('📏 Unité de mesure').build()
+      );
+    }
+
+    // Validation STOCK_MIN
+    if (S_COLS.STOCK_MIN) {
+      sheet.getRange(2, S_COLS.STOCK_MIN, lastRow).setDataValidation(
+        SpreadsheetApp.newDataValidation()
+          .requireNumberGreaterThanOrEqualTo(0)
+          .setAllowInvalid(true).setHelpText('Stock minimum >= 0').build()
+      );
+    }
+
+    // Validation FOURNISSEUR
+    if (S_COLS.FOURNISSEUR) {
+      const supplierSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(S_SUPPLIERS_SHEET_NAME);
+      if (supplierSheet && supplierSheet.getLastRow() > 1) {
+        const supplierRange = supplierSheet.getRange(2, 2, supplierSheet.getLastRow() - 1);
+        sheet.getRange(2, S_COLS.FOURNISSEUR, lastRow).setDataValidation(
+          SpreadsheetApp.newDataValidation()
+            .requireValueInRange(supplierRange, true)
+            .setAllowInvalid(true).setHelpText('Fournisseur depuis BD_FOURNISSEURS').build()
+        );
+      }
     }
 
   } catch (e) {
@@ -289,35 +305,43 @@ function _stock_setupFormatting(sheet) {
     });
   });
 
-  sheet.getRange(2, S_COLS.ID, lastRow).setHorizontalAlignment('center');
-  sheet.getRange(2, S_COLS.CATEGORIE, lastRow).setHorizontalAlignment('center');
-  sheet.getRange(2, S_COLS.UNITE, lastRow).setHorizontalAlignment('center');
+  // Alignement horizontal (avec vérification de nullité)
+  if (S_COLS.ID) sheet.getRange(2, S_COLS.ID, lastRow).setHorizontalAlignment('center');
+  if (S_COLS.CATEGORIE) sheet.getRange(2, S_COLS.CATEGORIE, lastRow).setHorizontalAlignment('center');
+  if (S_COLS.UNITE) sheet.getRange(2, S_COLS.UNITE, lastRow).setHorizontalAlignment('center');
 }
 
 function _stock_setupConditionalFormatting(sheet) {
   const lastRow = C_LIMITS.MAX_ROWS;
   const rules = [];
 
-  const alerteColors = {
-    'Rupture': { bg: C_COLORS.error, fg: '#FFFFFF', bold: true },
-    'À Commander': { bg: C_COLORS.warning, fg: '#000000', bold: true },
-    'OK': { bg: C_COLORS.successLight, fg: C_COLORS.success, bold: false }
-  };
+  // Vérification: Colonne STATUT_STOCK existe
+  if (S_COLS.STATUT_STOCK) {
+    const alerteColors = {
+      'Rupture': { bg: C_COLORS.error, fg: '#FFFFFF', bold: true },
+      'À Commander': { bg: C_COLORS.warning, fg: '#000000', bold: true },
+      'OK': { bg: C_COLORS.successLight, fg: C_COLORS.success, bold: false }
+    };
 
-  Object.entries(alerteColors).forEach(([alerte, style]) => {
+    Object.entries(alerteColors).forEach(([alerte, style]) => {
+      rules.push(SpreadsheetApp.newConditionalFormatRule()
+        .whenTextEqualTo(alerte)
+        .setBackground(style.bg).setFontColor(style.fg).setBold(style.bold)
+        .setRanges([sheet.getRange(2, S_COLS.STATUT_STOCK, lastRow)]).build()
+      );
+    });
+  }
+
+  // Vérification: Colonne STOCK_ACTUEL existe
+  if (S_COLS.STOCK_ACTUEL) {
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo(alerte)
-      .setBackground(style.bg).setFontColor(style.fg).setBold(style.bold)
-      .setRanges([sheet.getRange(2, S_COLS.STATUT_STOCK, lastRow)]).build()
+      .whenNumberLessThanOrEqualTo(0)
+      .setBackground(C_COLORS.errorLight).setFontColor(C_COLORS.error).setBold(true)
+      .setRanges([sheet.getRange(2, S_COLS.STOCK_ACTUEL, lastRow)]).build()
     );
-  });
+  }
 
-  rules.push(SpreadsheetApp.newConditionalFormatRule()
-    .whenNumberLessThanOrEqualTo(0)
-    .setBackground(C_COLORS.errorLight).setFontColor(C_COLORS.error).setBold(true)
-    .setRanges([sheet.getRange(2, S_COLS.STOCK_ACTUEL, lastRow)]).build()
-  );
-
+  // Vérification: Colonne MARGE existe
   if (S_COLS.MARGE) {
     rules.push(SpreadsheetApp.newConditionalFormatRule()
       .setGradientMinpointWithValue(C_COLORS.error, SpreadsheetApp.InterpolationType.NUMBER, '0')
@@ -327,13 +351,19 @@ function _stock_setupConditionalFormatting(sheet) {
     );
   }
 
-  sheet.setConditionalFormatRules(rules);
+  // Appliquer les règles seulement si au moins une règle existe
+  if (rules.length > 0) {
+    sheet.setConditionalFormatRules(rules);
+  }
 }
 
 function _stock_setupBorders(sheet) {
   const lastRow = C_LIMITS.MAX_ROWS;
 
-  const importantCols = [S_COLS.ARTICLE, S_COLS.STOCK_ACTUEL, S_COLS.STATUT_STOCK, S_COLS.VALEUR_STOCK];
+  // Filtrer les colonnes qui existent réellement
+  const importantCols = [S_COLS.ARTICLE, S_COLS.STOCK_ACTUEL, S_COLS.STATUT_STOCK, S_COLS.VALEUR_STOCK]
+    .filter(col => col !== null && col !== undefined);
+
   importantCols.forEach(colNum => {
     sheet.getRange(2, colNum, lastRow).setBorder(null, true, null, true, null, null,
       C_COLORS.outline, SpreadsheetApp.BorderStyle.SOLID);
@@ -355,7 +385,7 @@ function _stock_setupProtection(sheet) {
   const lastRow = C_LIMITS.MAX_ROWS;
 
   try {
-    const protection = sheet.protect().setDescription('🔒 Protection V12.6.5');
+    const protection = sheet.protect().setDescription('🔒 Protection V12.6.6');
 
     const editableRanges = [
       S_COLS.ARTICLE, S_COLS.CATEGORIE, S_COLS.STOCK_MIN, S_COLS.UNITE,
@@ -572,7 +602,7 @@ function setupStockPurchaseOrderDetailsSheet() {
 }
 
 // ============================================================================
-// 5. CRUD ARTICLES V12.6.5
+// 5. CRUD ARTICLES V12.6.6
 // ============================================================================
 
 function stock_add(formData) {
@@ -991,7 +1021,7 @@ function supplier_getListForDropdown() {
 }
 
 // ============================================================================
-// 9. ANALYTICS & GETTERS V12.6.5
+// 9. ANALYTICS & GETTERS V12.6.6
 // ============================================================================
 
 function stock_search(filters = {}) {
@@ -1288,7 +1318,7 @@ function stock_getCategoryAnalysis() {
 }
 
 // ============================================================================
-// 10. UI FUNCTIONS V12.6.5
+// 10. UI FUNCTIONS V12.6.6
 // ============================================================================
 
 function _stock_getHtmlConfig(moduleKey) {
@@ -1357,7 +1387,7 @@ function showStockModal(mode = 'add', rowNum = null) {
 }
 
 // ============================================================================
-// 11. DASHBOARD V12.6.5
+// 11. DASHBOARD V12.6.6
 // ============================================================================
 
 function setupStockDashboard() {
@@ -1382,7 +1412,7 @@ function setupStockDashboard() {
     sheet.setColumnWidths(1, 11, 150);
 
     sheet.getRange('A1:K1').merge()
-      .setValue(`📦 Tableau de Bord Stock V12.6.5 (${CONFIG_APP.app.name})`)
+      .setValue(`📦 Tableau de Bord Stock V12.6.6 (${CONFIG_APP.app.name})`)
       .setFontSize(24).setFontWeight('bold').setFontFamily('Product Sans')
       .setBackground(C_COLORS.primary).setFontColor('#FFFFFF')
       .setHorizontalAlignment('center').setVerticalAlignment('middle');
@@ -1969,5 +1999,5 @@ function stock_exportToJSON() {
 }
 
 // ============================================================================
-// FIN DU MODULE STOCK V12.6.5 - BUG UI CORRIGÉ
+// FIN DU MODULE STOCK V12.6.6 - NULL SAFETY CORRIGÉE
 // ============================================================================
