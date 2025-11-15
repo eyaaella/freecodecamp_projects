@@ -3,241 +3,1783 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestionnaire Projets v2.0 - TopoGest Pro</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
-    .header { background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%); color: white; padding: 20px; }
-    .header h1 { font-size: 22px; margin-bottom: 5px; }
-    .container { padding: 20px; }
-    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #dee2e6; }
-    .tab { padding: 12px 20px; background: #f8f9fa; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; }
-    .tab.active { background: #1a73e8; color: white; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
-    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
-    .btn-primary { background: #1a73e8; color: white; }
-    .btn-success { background: #34a853; color: white; }
-    .btn-danger { background: #ea4335; color: white; }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-    .data-table { width: 100%; background: white; border-radius: 8px; overflow: hidden; }
-    .data-table table { width: 100%; border-collapse: collapse; }
-    .data-table th { background: #1a73e8; color: white; padding: 12px; text-align: left; font-size: 12px; }
-    .data-table td { padding: 12px; border-bottom: 1px solid #dee2e6; font-size: 13px; }
-    .action-btn { padding: 5px 10px; margin: 0 2px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #1a73e8;
+      --primary-dark: #174ea6;
+      --success: #34a853;
+      --warning: #fbbc04;
+      --danger: #ea4335;
+      --gray-50: #f8f9fa;
+      --gray-100: #f1f3f4;
+      --gray-200: #e8eaed;
+      --gray-300: #dadce0;
+      --gray-700: #5f6368;
+      --gray-900: #202124;
+      --shadow: 0 2px 8px rgba(0,0,0,0.1);
+      --shadow-lg: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      color: var(--gray-900);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 24px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge {
+      background: rgba(255,255,255,0.2);
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: bold;
+    }
+
+    .tabs {
+      display: flex;
+      background: var(--gray-50);
+      border-bottom: 2px solid var(--gray-200);
+      overflow-x: auto;
+    }
+
+    .tab {
+      padding: 16px 24px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--gray-700);
+      transition: all 0.3s;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab:hover {
+      background: var(--gray-100);
+      color: var(--primary);
+    }
+
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background: white;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 30px;
+      animation: fadeIn 0.3s;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4);
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: var(--gray-100);
+      color: var(--gray-900);
+    }
+
+    .btn-secondary:hover {
+      background: var(--gray-200);
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 250px;
+      position: relative;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 10px 40px 10px 16px;
+      border: 2px solid var(--gray-200);
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray-700);
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--gray-200);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead {
+      background: var(--gray-50);
+      border-bottom: 2px solid var(--gray-200);
+    }
+
+    th {
+      padding: 14px 16px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--gray-700);
+      text-transform: uppercase;
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    tbody tr:hover {
+      background: var(--gray-50);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .status-planifie {
+      background: #e3f2fd;
+      color: #1565c0;
+    }
+
+    .status-en-cours {
+      background: #fff3e0;
+      color: #e65100;
+    }
+
+    .status-termine {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .status-suspendu {
+      background: #ffebee;
+      color: #c62828;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--gray-700);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 10px 14px;
+      border: 2px solid var(--gray-200);
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .gantt-container {
+      background: var(--gray-50);
+      border-radius: 8px;
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    .gantt-header {
+      display: grid;
+      grid-template-columns: 200px repeat(12, 100px);
+      gap: 1px;
+      background: var(--gray-200);
+      margin-bottom: 1px;
+    }
+
+    .gantt-header-cell {
+      background: var(--primary);
+      color: white;
+      padding: 12px;
+      font-weight: 600;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .gantt-row {
+      display: grid;
+      grid-template-columns: 200px repeat(12, 100px);
+      gap: 1px;
+      background: var(--gray-200);
+      margin-bottom: 1px;
+    }
+
+    .gantt-task-name {
+      background: white;
+      padding: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+    }
+
+    .gantt-cell {
+      background: white;
+      min-height: 50px;
+      position: relative;
+    }
+
+    .gantt-bar {
+      position: absolute;
+      top: 10px;
+      height: 30px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-radius: 4px;
+      cursor: move;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .gantt-bar:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4);
+    }
+
+    .gantt-bar.critical {
+      background: linear-gradient(135deg, var(--danger) 0%, #d33426 100%);
+    }
+
+    .evm-dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .evm-card {
+      background: var(--gray-50);
+      border-radius: 8px;
+      padding: 20px;
+      border-left: 4px solid var(--primary);
+    }
+
+    .evm-card.good {
+      border-left-color: var(--success);
+    }
+
+    .evm-card.bad {
+      border-left-color: var(--danger);
+    }
+
+    .evm-label {
+      font-size: 12px;
+      color: var(--gray-700);
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .evm-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .evm-value.good {
+      color: var(--success);
+    }
+
+    .evm-value.bad {
+      color: var(--danger);
+    }
+
+    .evm-subtitle {
+      font-size: 11px;
+      color: var(--gray-700);
+      margin-top: 4px;
+    }
+
+    .chart-container {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      border: 1px solid var(--gray-200);
+      margin-bottom: 24px;
+    }
+
+    .chart-container h3 {
+      margin-bottom: 16px;
+      color: var(--gray-900);
+    }
+
+    .risk-matrix {
+      display: grid;
+      grid-template-columns: 80px repeat(5, 1fr);
+      grid-template-rows: repeat(6, 60px);
+      gap: 2px;
+      margin-top: 20px;
+    }
+
+    .risk-matrix-cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 4px;
+    }
+
+    .risk-matrix-label {
+      background: var(--gray-100);
+      color: var(--gray-700);
+    }
+
+    .risk-matrix-low {
+      background: #c8e6c9;
+      color: #2e7d32;
+      cursor: pointer;
+    }
+
+    .risk-matrix-medium {
+      background: #fff9c4;
+      color: #f57f17;
+      cursor: pointer;
+    }
+
+    .risk-matrix-high {
+      background: #ffccbc;
+      color: #d84315;
+      cursor: pointer;
+    }
+
+    .risk-matrix-critical {
+      background: #ffcdd2;
+      color: #c62828;
+      cursor: pointer;
+    }
+
+    .risk-item {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border-left: 4px solid var(--warning);
+      box-shadow: var(--shadow);
+    }
+
+    .risk-item.critical {
+      border-left-color: var(--danger);
+    }
+
+    .risk-item.low {
+      border-left-color: var(--success);
+    }
+
+    .risk-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .risk-title {
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+
+    .risk-score {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .risk-score.critical {
+      background: var(--danger);
+      color: white;
+    }
+
+    .risk-score.high {
+      background: var(--warning);
+      color: var(--gray-900);
+    }
+
+    .risk-score.low {
+      background: var(--success);
+      color: white;
+    }
+
+    .template-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      border: 2px solid var(--gray-200);
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .template-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .template-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .template-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
+    }
+
+    .template-title {
+      font-weight: 600;
+      font-size: 16px;
+      color: var(--gray-900);
+      margin-bottom: 8px;
+    }
+
+    .template-meta {
+      font-size: 12px;
+      color: var(--gray-700);
+    }
+
+    .prediction-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .prediction-card h3 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .prediction-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .prediction-item {
+      background: rgba(255,255,255,0.1);
+      padding: 16px;
+      border-radius: 8px;
+      backdrop-filter: blur(10px);
+    }
+
+    .prediction-label {
+      font-size: 12px;
+      opacity: 0.9;
+      margin-bottom: 8px;
+    }
+
+    .prediction-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: var(--gray-200);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--success) 0%, #2d8e47 100%);
+      transition: width 0.3s;
+    }
+
+    .action-icons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      border-radius: 6px;
+      background: var(--gray-100);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: var(--primary);
+      color: white;
+      transform: scale(1.1);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      max-width: 800px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .modal-header h2 {
+      color: var(--gray-900);
+      font-size: 20px;
+    }
+
+    .close-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      background: var(--gray-100);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      transition: all 0.2s;
+    }
+
+    .close-btn:hover {
+      background: var(--danger);
+      color: white;
+      transform: rotate(90deg);
+    }
+
+    .alert {
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .alert-success {
+      background: #e8f5e9;
+      border: 1px solid var(--success);
+      color: #2e7d32;
+    }
+
+    .alert-danger {
+      background: #ffebee;
+      border: 1px solid var(--danger);
+      color: #c62828;
+    }
+
+    .alert-warning {
+      background: #fff3e0;
+      border: 1px solid var(--warning);
+      color: #e65100;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--gray-200);
+      border-left-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+      }
+
+      .toolbar {
+        flex-direction: column;
+      }
+
+      .search-box {
+        width: 100%;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .gantt-header,
+      .gantt-row {
+        grid-template-columns: 150px repeat(12, 80px);
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>📁 Gestionnaire de Projets</h1>
-    <p>CRUD Complet des Projets d'Aménagement</p>
-  </div>
-
   <div class="container">
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('liste')">📋 Liste</button>
-      <button class="tab" onclick="switchTab('nouveau')">➕ Nouveau</button>
-      <button class="tab" onclick="switchTab('recherche')">🔍 Recherche</button>
-      <button class="tab" onclick="switchTab('stats')">📊 Statistiques</button>
+    <div class="header">
+      <h1>
+        📁 Gestionnaire de Projets v2.0
+        <span class="badge">EVM</span>
+        <span class="badge">IA</span>
+        <span class="badge">GANTT</span>
+      </h1>
+      <div>
+        <button class="btn btn-secondary" onclick="google.script.host.close()">✕ Fermer</button>
+      </div>
     </div>
 
-    <!-- Onglet Liste -->
-    <div id="liste" class="tab-content active">
-      <div class="data-table">
-        <table>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('projets')">📋 Projets</button>
+      <button class="tab" onclick="switchTab('gantt')">📅 Gantt</button>
+      <button class="tab" onclick="switchTab('evm')">📊 EVM</button>
+      <button class="tab" onclick="switchTab('risques')">⚠️ Risques</button>
+      <button class="tab" onclick="switchTab('templates')">🎯 Templates</button>
+      <button class="tab" onclick="switchTab('predictions')">🤖 IA Prévisions</button>
+    </div>
+
+    <!-- TAB 1: LISTE PROJETS -->
+    <div id="tab-projets" class="tab-content active">
+      <div class="toolbar">
+        <button class="btn btn-success" onclick="ouvrirModalNouveauProjet()">
+          ➕ Nouveau Projet
+        </button>
+        <button class="btn btn-primary" onclick="importerTemplate()">
+          📥 Importer Template
+        </button>
+        <button class="btn btn-secondary" onclick="exporterProjets()">
+          📤 Exporter
+        </button>
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="🔍 Rechercher un projet..." onkeyup="rechercherProjet()">
+          <span class="search-icon">🔍</span>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table id="tableProjets">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Nom</th>
-              <th>Localisation</th>
+              <th>Code</th>
+              <th>Nom du Projet</th>
+              <th>Client</th>
               <th>Statut</th>
-              <th>Budget</th>
               <th>Progression</th>
+              <th>Budget</th>
+              <th>CPI</th>
+              <th>SPI</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody id="listeProjets">
-            <tr><td colspan="7" style="text-align:center;">Chargement...</td></tr>
+            <tr>
+              <td colspan="9" class="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 16px;">Chargement des projets...</p>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Onglet Nouveau -->
-    <div id="nouveau" class="tab-content">
-      <form id="formProjet">
-        <div class="form-row">
-          <div class="form-group">
-            <label>Nom du Projet *</label>
-            <input type="text" id="nom" required>
+    <!-- TAB 2: GANTT -->
+    <div id="tab-gantt" class="tab-content">
+      <div class="toolbar">
+        <div class="form-group" style="width: 300px;">
+          <label>Sélectionner un projet</label>
+          <select id="ganttProjetSelect" onchange="chargerGantt()">
+            <option value="">-- Choisir un projet --</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="afficherCheminCritique()">
+          🔴 Afficher Chemin Critique
+        </button>
+        <button class="btn btn-secondary" onclick="exporterGanttPDF()">
+          📄 Export PDF
+        </button>
+      </div>
+
+      <div class="gantt-container" id="ganttContainer">
+        <div class="alert alert-warning">
+          ℹ️ Sélectionnez un projet pour afficher le diagramme de Gantt
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: EVM -->
+    <div id="tab-evm" class="tab-content">
+      <div class="toolbar">
+        <div class="form-group" style="width: 300px;">
+          <label>Sélectionner un projet</label>
+          <select id="evmProjetSelect" onchange="chargerEVM()">
+            <option value="">-- Choisir un projet --</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="rafraichirEVM()">
+          🔄 Rafraîchir
+        </button>
+        <button class="btn btn-secondary" onclick="exporterRapportEVM()">
+          📊 Rapport EVM
+        </button>
+      </div>
+
+      <div class="evm-dashboard" id="evmDashboard">
+        <div class="evm-card">
+          <div class="evm-label">BAC - Budget Initial</div>
+          <div class="evm-value" id="evm-bac">-</div>
+          <div class="evm-subtitle">Budget At Completion</div>
+        </div>
+        <div class="evm-card">
+          <div class="evm-label">PV - Valeur Planifiée</div>
+          <div class="evm-value" id="evm-pv">-</div>
+          <div class="evm-subtitle">Planned Value</div>
+        </div>
+        <div class="evm-card">
+          <div class="evm-label">EV - Valeur Acquise</div>
+          <div class="evm-value" id="evm-ev">-</div>
+          <div class="evm-subtitle">Earned Value</div>
+        </div>
+        <div class="evm-card">
+          <div class="evm-label">AC - Coût Réel</div>
+          <div class="evm-value" id="evm-ac">-</div>
+          <div class="evm-subtitle">Actual Cost</div>
+        </div>
+        <div class="evm-card good">
+          <div class="evm-label">CPI - Indice Coût</div>
+          <div class="evm-value good" id="evm-cpi">-</div>
+          <div class="evm-subtitle">Cost Performance Index</div>
+        </div>
+        <div class="evm-card bad">
+          <div class="evm-label">SPI - Indice Délai</div>
+          <div class="evm-value bad" id="evm-spi">-</div>
+          <div class="evm-subtitle">Schedule Performance Index</div>
+        </div>
+        <div class="evm-card">
+          <div class="evm-label">EAC - Estimation Finale</div>
+          <div class="evm-value" id="evm-eac">-</div>
+          <div class="evm-subtitle">Estimate At Completion</div>
+        </div>
+        <div class="evm-card">
+          <div class="evm-label">VAC - Variance Budget</div>
+          <div class="evm-value" id="evm-vac">-</div>
+          <div class="evm-subtitle">Variance At Completion</div>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <h3>📈 Courbe en S - Évolution EVM</h3>
+        <canvas id="chartEVM" height="80"></canvas>
+      </div>
+
+      <div class="chart-container">
+        <h3>📊 Analyse de Performance</h3>
+        <canvas id="chartPerformance" height="60"></canvas>
+      </div>
+    </div>
+
+    <!-- TAB 4: RISQUES -->
+    <div id="tab-risques" class="tab-content">
+      <div class="toolbar">
+        <div class="form-group" style="width: 300px;">
+          <label>Sélectionner un projet</label>
+          <select id="risqueProjetSelect" onchange="chargerRisques()">
+            <option value="">-- Choisir un projet --</option>
+          </select>
+        </div>
+        <button class="btn btn-success" onclick="ouvrirModalNouveauRisque()">
+          ➕ Nouveau Risque
+        </button>
+        <button class="btn btn-primary" onclick="analyserRisques()">
+          🔍 Analyser Risques
+        </button>
+      </div>
+
+      <h3 style="margin-bottom: 16px;">📊 Matrice des Risques</h3>
+      <div class="risk-matrix">
+        <div class="risk-matrix-cell risk-matrix-label"></div>
+        <div class="risk-matrix-cell risk-matrix-label">Très Faible</div>
+        <div class="risk-matrix-cell risk-matrix-label">Faible</div>
+        <div class="risk-matrix-cell risk-matrix-label">Moyen</div>
+        <div class="risk-matrix-cell risk-matrix-label">Élevé</div>
+        <div class="risk-matrix-cell risk-matrix-label">Très Élevé</div>
+
+        <div class="risk-matrix-cell risk-matrix-label">Critique</div>
+        <div class="risk-matrix-cell risk-matrix-medium" onclick="filtrerRisqueMatrice(5,5)">5×5</div>
+        <div class="risk-matrix-cell risk-matrix-high" onclick="filtrerRisqueMatrice(5,4)">5×4</div>
+        <div class="risk-matrix-cell risk-matrix-critical" onclick="filtrerRisqueMatrice(5,3)">5×3</div>
+        <div class="risk-matrix-cell risk-matrix-critical" onclick="filtrerRisqueMatrice(5,2)">5×2</div>
+        <div class="risk-matrix-cell risk-matrix-critical" onclick="filtrerRisqueMatrice(5,1)">5×1</div>
+
+        <div class="risk-matrix-cell risk-matrix-label">Élevé</div>
+        <div class="risk-matrix-cell risk-matrix-low" onclick="filtrerRisqueMatrice(4,5)">4×5</div>
+        <div class="risk-matrix-cell risk-matrix-medium" onclick="filtrerRisqueMatrice(4,4)">4×4</div>
+        <div class="risk-matrix-cell risk-matrix-high" onclick="filtrerRisqueMatrice(4,3)">4×3</div>
+        <div class="risk-matrix-cell risk-matrix-critical" onclick="filtrerRisqueMatrice(4,2)">4×2</div>
+        <div class="risk-matrix-cell risk-matrix-critical" onclick="filtrerRisqueMatrice(4,1)">4×1</div>
+
+        <div class="risk-matrix-cell risk-matrix-label">Moyen</div>
+        <div class="risk-matrix-cell risk-matrix-low" onclick="filtrerRisqueMatrice(3,5)">3×5</div>
+        <div class="risk-matrix-cell risk-matrix-medium" onclick="filtrerRisqueMatrice(3,4)">3×4</div>
+        <div class="risk-matrix-cell risk-matrix-medium" onclick="filtrerRisqueMatrice(3,3)">3×3</div>
+        <div class="risk-matrix-cell risk-matrix-high" onclick="filtrerRisqueMatrice(3,2)">3×2</div>
+        <div class="risk-matrix-cell risk-matrix-critical" onclick="filtrerRisqueMatrice(3,1)">3×1</div>
+
+        <div class="risk-matrix-cell risk-matrix-label">Faible</div>
+        <div class="risk-matrix-cell risk-matrix-low" onclick="filtrerRisqueMatrice(2,5)">2×5</div>
+        <div class="risk-matrix-cell risk-matrix-low" onclick="filtrerRisqueMatrice(2,4)">2×4</div>
+        <div class="risk-matrix-cell risk-matrix-medium" onclick="filtrerRisqueMatrice(2,3)">2×3</div>
+        <div class="risk-matrix-cell risk-matrix-medium" onclick="filtrerRisqueMatrice(2,2)">2×2</div>
+        <div class="risk-matrix-cell risk-matrix-high" onclick="filtrerRisqueMatrice(2,1)">2×1</div>
+
+        <div class="risk-matrix-cell risk-matrix-label">Très Faible</div>
+        <div class="risk-matrix-cell risk-matrix-low" onclick="filtrerRisqueMatrice(1,5)">1×5</div>
+        <div class="risk-matrix-cell risk-matrix-low" onclick="filtrerRisqueMatrice(1,4)">1×4</div>
+        <div class="risk-matrix-cell risk-matrix-low" onclick="filtrerRisqueMatrice(1,3)">1×3</div>
+        <div class="risk-matrix-cell risk-matrix-medium" onclick="filtrerRisqueMatrice(1,2)">1×2</div>
+        <div class="risk-matrix-cell risk-matrix-medium" onclick="filtrerRisqueMatrice(1,1)">1×1</div>
+      </div>
+
+      <h3 style="margin: 32px 0 16px;">📋 Liste des Risques</h3>
+      <div id="listeRisques">
+        <div class="alert alert-warning">
+          ℹ️ Sélectionnez un projet pour voir les risques
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: TEMPLATES -->
+    <div id="tab-templates" class="tab-content">
+      <div class="toolbar">
+        <button class="btn btn-success" onclick="ouvrirModalNouveauTemplate()">
+          ➕ Créer Template
+        </button>
+        <button class="btn btn-primary" onclick="importerTemplateExterne()">
+          📥 Importer
+        </button>
+      </div>
+
+      <div class="template-grid" id="listeTemplates">
+        <div class="template-card" onclick="utiliserTemplate('TPL001')">
+          <div class="template-header">
+            <div class="template-icon">🌾</div>
           </div>
-          <div class="form-group">
-            <label>Localisation *</label>
-            <input type="text" id="localisation" required>
+          <div class="template-title">Périmètre Irrigué Type</div>
+          <div class="template-meta">
+            📏 Surface: 100-500 ha<br>
+            💧 Gravitaire classique<br>
+            ⏱️ Durée: 18-24 mois<br>
+            💰 Budget: 500M-2Mrd FCFA
           </div>
         </div>
-        <div class="form-row">
+
+        <div class="template-card" onclick="utiliserTemplate('TPL002')">
+          <div class="template-header">
+            <div class="template-icon">🏗️</div>
+          </div>
+          <div class="template-title">Ouvrage Hydraulique</div>
+          <div class="template-meta">
+            🔧 Barrage + Canal principal<br>
+            💧 Débit: 5-15 m³/s<br>
+            ⏱️ Durée: 12-18 mois<br>
+            💰 Budget: 300M-1Mrd FCFA
+          </div>
+        </div>
+
+        <div class="template-card" onclick="utiliserTemplate('TPL003')">
+          <div class="template-header">
+            <div class="template-icon">📐</div>
+          </div>
+          <div class="template-title">Levé Topographique</div>
+          <div class="template-meta">
+            📏 Surface: 50-200 ha<br>
+            🎯 Précision: ±5 cm<br>
+            ⏱️ Durée: 2-4 mois<br>
+            💰 Budget: 50M-150M FCFA
+          </div>
+        </div>
+
+        <div class="template-card" onclick="utiliserTemplate('TPL004')">
+          <div class="template-header">
+            <div class="template-icon">🌊</div>
+          </div>
+          <div class="template-title">Réseau de Drainage</div>
+          <div class="template-meta">
+            💧 Drainage secondaire<br>
+            📏 Linéaire: 5-20 km<br>
+            ⏱️ Durée: 6-12 mois<br>
+            💰 Budget: 200M-600M FCFA
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: PREDICTIONS IA -->
+    <div id="tab-predictions" class="tab-content">
+      <div class="toolbar">
+        <div class="form-group" style="width: 300px;">
+          <label>Sélectionner un projet</label>
+          <select id="predictionProjetSelect" onchange="chargerPredictions()">
+            <option value="">-- Choisir un projet --</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="genererPredictions()">
+          🤖 Générer Prévisions
+        </button>
+        <button class="btn btn-secondary" onclick="exporterPredictions()">
+          📊 Exporter Rapport
+        </button>
+      </div>
+
+      <div class="prediction-card">
+        <h3>🤖 Prévisions Basées sur l'IA</h3>
+        <div class="prediction-grid" id="predictionsGrid">
+          <div class="prediction-item">
+            <div class="prediction-label">Date Fin Prévue</div>
+            <div class="prediction-value" id="pred-date-fin">-</div>
+          </div>
+          <div class="prediction-item">
+            <div class="prediction-label">Budget Final Estimé</div>
+            <div class="prediction-value" id="pred-budget">-</div>
+          </div>
+          <div class="prediction-item">
+            <div class="prediction-label">Probabilité Succès</div>
+            <div class="prediction-value" id="pred-proba">-</div>
+          </div>
+          <div class="prediction-item">
+            <div class="prediction-label">Risque Global</div>
+            <div class="prediction-value" id="pred-risque">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <h3>📈 Évolution Prévue vs Réelle</h3>
+        <canvas id="chartPredictions" height="80"></canvas>
+      </div>
+
+      <div class="chart-container">
+        <h3>🎯 Recommandations IA</h3>
+        <div id="recommandationsIA">
+          <div class="alert alert-warning">
+            ℹ️ Sélectionnez un projet et générez les prévisions pour voir les recommandations
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL NOUVEAU PROJET -->
+  <div id="modalNouveauProjet" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>➕ Nouveau Projet</h2>
+        <button class="close-btn" onclick="fermerModalNouveauProjet()">✕</button>
+      </div>
+
+      <form id="formNouveauProjet" onsubmit="creerProjet(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Code Projet *</label>
+            <input type="text" name="code" required placeholder="PROJ001">
+          </div>
+          <div class="form-group">
+            <label>Nom du Projet *</label>
+            <input type="text" name="nom" required placeholder="Périmètre irrigué...">
+          </div>
+          <div class="form-group">
+            <label>Client *</label>
+            <input type="text" name="client" required placeholder="Nom du client">
+          </div>
+          <div class="form-group">
+            <label>Statut</label>
+            <select name="statut">
+              <option value="Planifié">Planifié</option>
+              <option value="En cours">En cours</option>
+              <option value="Terminé">Terminé</option>
+              <option value="Suspendu">Suspendu</option>
+            </select>
+          </div>
           <div class="form-group">
             <label>Date Début *</label>
-            <input type="date" id="dateDebut" required>
+            <input type="date" name="dateDebut" required>
           </div>
           <div class="form-group">
             <label>Date Fin Prévue *</label>
-            <input type="date" id="dateFin" required>
+            <input type="date" name="dateFinPrevue" required>
+          </div>
+          <div class="form-group">
+            <label>Budget (FCFA) *</label>
+            <input type="number" name="budget" required placeholder="500000000" step="1000">
+          </div>
+          <div class="form-group">
+            <label>Responsable *</label>
+            <input type="text" name="responsable" required placeholder="Nom du responsable">
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Superficie (ha) *</label>
-            <input type="number" id="superficie" min="0" step="0.01" required>
-          </div>
-          <div class="form-group">
-            <label>Budget Total (FCFA) *</label>
-            <input type="number" id="budget" min="0" required>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Chef de Projet *</label>
-            <input type="text" id="chefProjet" required>
-          </div>
-          <div class="form-group">
-            <label>Priorité *</label>
-            <select id="priorite" required>
-              <option value="">Sélectionner...</option>
-              <option value="Haute">Haute</option>
-              <option value="Moyenne">Moyenne</option>
-              <option value="Basse">Basse</option>
-            </select>
-          </div>
-        </div>
+
         <div class="form-group">
           <label>Description</label>
-          <textarea id="description" rows="3"></textarea>
+          <textarea name="description" rows="3" placeholder="Description détaillée du projet..."></textarea>
         </div>
-        <button type="submit" class="btn btn-success">💾 Enregistrer</button>
+
+        <div class="form-group">
+          <label>Localisation GPS (UTM Zone 33N)</label>
+          <input type="text" name="localisation" placeholder="X: 450000, Y: 850000, Alt: 350">
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+          <button type="submit" class="btn btn-success" style="flex: 1;">✅ Créer Projet</button>
+          <button type="button" class="btn btn-secondary" onclick="fermerModalNouveauProjet()">✕ Annuler</button>
+        </div>
       </form>
-    </div>
-
-    <!-- Onglet Recherche -->
-    <div id="recherche" class="tab-content">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Critère de recherche</label>
-          <select id="critere">
-            <option value="nom">Nom</option>
-            <option value="localisation">Localisation</option>
-            <option value="statut">Statut</option>
-            <option value="chefProjet">Chef de Projet</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Valeur</label>
-          <input type="text" id="valeurRecherche">
-        </div>
-      </div>
-      <button class="btn btn-primary" onclick="rechercher()">🔍 Rechercher</button>
-      <div id="resultatsRecherche" style="margin-top: 20px;"></div>
-    </div>
-
-    <!-- Onglet Stats -->
-    <div id="stats" class="tab-content">
-      <h3>📊 Statistiques des Projets</h3>
-      <div id="statsContent">Chargement...</div>
     </div>
   </div>
 
   <script>
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    let projetsData = [];
+    let evmChart = null;
+    let performanceChart = null;
+    let predictionsChart = null;
+
+    // Switch entre les tabs
+    function switchTab(tabName) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+
       event.target.classList.add('active');
-      if (tabId === 'liste') chargerProjets();
+      document.getElementById('tab-' + tabName).classList.add('active');
     }
 
-    function chargerProjets() {
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success) {
-          let html = '';
-          result.projets.forEach(p => {
-            html += `<tr>
-              <td>${p.id}</td>
-              <td>${p.nom}</td>
-              <td>${p.localisation}</td>
-              <td>${p.statut}</td>
-              <td>${p.budget.toLocaleString()} FCFA</td>
-              <td>${(p.progression * 100).toFixed(1)}%</td>
-              <td>
-                <button class="action-btn btn-primary" onclick="editer('${p.id}')">✏️</button>
-                <button class="action-btn btn-danger" onclick="supprimer('${p.id}')">🗑️</button>
-              </td>
-            </tr>`;
-          });
-          document.getElementById('listeProjets').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">Aucun projet</td></tr>';
-        }
-      }).obtenirTousProjets();
-    }
-
-    document.getElementById('formProjet').onsubmit = function(e) {
-      e.preventDefault();
-      const data = {
-        nom: document.getElementById('nom').value,
-        dateDebut: document.getElementById('dateDebut').value,
-        dateFin: document.getElementById('dateFin').value,
-        description: document.getElementById('description').value,
-        localisation: document.getElementById('localisation').value,
-        superficie: document.getElementById('superficie').value,
-        budget: document.getElementById('budget').value,
-        chefProjet: document.getElementById('chefProjet').value,
-        priorite: document.getElementById('priorite').value
-      };
-
-      google.script.run.withSuccessHandler(function(result) {
-        alert(result.message);
-        if (result.success) {
-          document.getElementById('formProjet').reset();
-          switchTab('liste');
-        }
-      }).ajouterProjet(data.nom, data.dateDebut, data.dateFin, data.description, data.localisation, data.superficie, data.budget, data.chefProjet, data.priorite);
+    // Chargement initial
+    window.onload = function() {
+      chargerProjets();
+      chargerSelectsProjets();
     };
 
-    function rechercher() {
-      const critere = document.getElementById('critere').value;
-      const valeur = document.getElementById('valeurRecherche').value;
-      google.script.run.withSuccessHandler(function(result) {
-        let html = '<div class="data-table"><table><thead><tr><th>ID</th><th>Nom</th><th>Localisation</th><th>Statut</th></tr></thead><tbody>';
-        if (result.success && result.resultats.length > 0) {
-          result.resultats.forEach(r => {
-            html += `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[5]}</td><td>${r[7]}</td></tr>`;
-          });
-        } else {
-          html += '<tr><td colspan="4">Aucun résultat</td></tr>';
+    // Charger tous les projets
+    function chargerProjets() {
+      google.script.run
+        .withSuccessHandler(afficherProjets)
+        .withFailureHandler(onError)
+        .obtenirTousProjets();
+    }
+
+    function afficherProjets(data) {
+      if (!data || !data.success) {
+        onError(data.message || 'Erreur de chargement');
+        return;
+      }
+
+      projetsData = data.projets || [];
+      const tbody = document.getElementById('listeProjets');
+      tbody.innerHTML = '';
+
+      if (projetsData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 40px;">Aucun projet trouvé</td></tr>';
+        return;
+      }
+
+      projetsData.forEach(projet => {
+        const tr = document.createElement('tr');
+        const statusClass = 'status-' + projet.statut.toLowerCase().replace(/ /g, '-');
+
+        tr.innerHTML = `
+          <td><strong>${projet.code}</strong></td>
+          <td>${projet.nom}</td>
+          <td>${projet.client}</td>
+          <td><span class="status-badge ${statusClass}">${projet.statut}</span></td>
+          <td>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${(projet.progression * 100).toFixed(0)}%"></div>
+            </div>
+            ${(projet.progression * 100).toFixed(0)}%
+          </td>
+          <td>${formatMontant(projet.budget)}</td>
+          <td><strong style="color: ${projet.cpi >= 1 ? 'var(--success)' : 'var(--danger)'}">${(projet.cpi || 0).toFixed(2)}</strong></td>
+          <td><strong style="color: ${projet.spi >= 1 ? 'var(--success)' : 'var(--danger)'}">${(projet.spi || 0).toFixed(2)}</strong></td>
+          <td>
+            <div class="action-icons">
+              <button class="icon-btn" onclick="editerProjet('${projet.code}')" title="Éditer">✏️</button>
+              <button class="icon-btn" onclick="voirDetailsProjet('${projet.code}')" title="Détails">👁️</button>
+              <button class="icon-btn" onclick="supprimerProjet('${projet.code}')" title="Supprimer">🗑️</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Charger les selects de projets
+    function chargerSelectsProjets() {
+      google.script.run
+        .withSuccessHandler(function(data) {
+          if (data && data.success && data.projets) {
+            const selects = [
+              document.getElementById('ganttProjetSelect'),
+              document.getElementById('evmProjetSelect'),
+              document.getElementById('risqueProjetSelect'),
+              document.getElementById('predictionProjetSelect')
+            ];
+
+            selects.forEach(select => {
+              select.innerHTML = '<option value="">-- Choisir un projet --</option>';
+              data.projets.forEach(projet => {
+                const option = document.createElement('option');
+                option.value = projet.code;
+                option.textContent = `${projet.code} - ${projet.nom}`;
+                select.appendChild(option);
+              });
+            });
+          }
+        })
+        .obtenirTousProjets();
+    }
+
+    // Rechercher projet
+    function rechercherProjet() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const rows = document.querySelectorAll('#listeProjets tr');
+
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(search) ? '' : 'none';
+      });
+    }
+
+    // Modal nouveau projet
+    function ouvrirModalNouveauProjet() {
+      document.getElementById('modalNouveauProjet').classList.add('active');
+    }
+
+    function fermerModalNouveauProjet() {
+      document.getElementById('modalNouveauProjet').classList.remove('active');
+      document.getElementById('formNouveauProjet').reset();
+    }
+
+    function creerProjet(event) {
+      event.preventDefault();
+      const form = event.target;
+      const formData = new FormData(form);
+      const projet = Object.fromEntries(formData.entries());
+
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            alert('✅ Projet créé avec succès !');
+            fermerModalNouveauProjet();
+            chargerProjets();
+            chargerSelectsProjets();
+          } else {
+            alert('❌ Erreur : ' + result.message);
+          }
+        })
+        .withFailureHandler(onError)
+        .creerProjet(projet);
+    }
+
+    // Charger Gantt
+    function chargerGantt() {
+      const projetCode = document.getElementById('ganttProjetSelect').value;
+      if (!projetCode) {
+        document.getElementById('ganttContainer').innerHTML = '<div class="alert alert-warning">ℹ️ Sélectionnez un projet</div>';
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(afficherGantt)
+        .withFailureHandler(onError)
+        .obtenirTachesProjet(projetCode);
+    }
+
+    function afficherGantt(data) {
+      if (!data || !data.success) {
+        onError(data.message || 'Erreur de chargement');
+        return;
+      }
+
+      const taches = data.taches || [];
+      const container = document.getElementById('ganttContainer');
+
+      let html = '<div class="gantt-header">';
+      html += '<div class="gantt-header-cell">Tâche</div>';
+      for (let i = 1; i <= 12; i++) {
+        html += `<div class="gantt-header-cell">Mois ${i}</div>`;
+      }
+      html += '</div>';
+
+      taches.forEach(tache => {
+        html += '<div class="gantt-row">';
+        html += `<div class="gantt-task-name">${tache.nom}</div>`;
+
+        for (let i = 1; i <= 12; i++) {
+          html += '<div class="gantt-cell">';
+          if (i >= tache.moisDebut && i <= tache.moisFin) {
+            const width = ((tache.moisFin - tache.moisDebut + 1) * 100);
+            const left = 0;
+            const criticalClass = tache.cheminCritique ? 'critical' : '';
+            html += `<div class="gantt-bar ${criticalClass}" style="width: ${width}%; left: ${left}%">${tache.progression}%</div>`;
+          }
+          html += '</div>';
         }
-        html += '</tbody></table></div>';
-        document.getElementById('resultatsRecherche').innerHTML = html;
-      }).rechercherProjets(critere, valeur);
+        html += '</div>';
+      });
+
+      container.innerHTML = html;
     }
 
-    function editer(id) {
-      alert('Édition du projet: ' + id);
+    function afficherCheminCritique() {
+      const projetCode = document.getElementById('ganttProjetSelect').value;
+      if (!projetCode) {
+        alert('⚠️ Veuillez sélectionner un projet');
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            alert('🔴 Chemin critique affiché en rouge sur le Gantt');
+            chargerGantt();
+          }
+        })
+        .withFailureHandler(onError)
+        .calculerCheminCritique(projetCode);
     }
 
-    function supprimer(id) {
-      if (confirm('Supprimer le projet ' + id + ' ?')) {
-        google.script.run.withSuccessHandler(function(result) {
-          alert(result.message);
-          if (result.success) chargerProjets();
-        }).supprimerProjet(id);
+    // Charger EVM
+    function chargerEVM() {
+      const projetCode = document.getElementById('evmProjetSelect').value;
+      if (!projetCode) return;
+
+      google.script.run
+        .withSuccessHandler(afficherEVM)
+        .withFailureHandler(onError)
+        .calculerEVM(projetCode);
+    }
+
+    function afficherEVM(data) {
+      if (!data || !data.success) {
+        onError(data.message || 'Erreur de chargement');
+        return;
+      }
+
+      const evm = data.evm;
+
+      document.getElementById('evm-bac').textContent = formatMontant(evm.BAC);
+      document.getElementById('evm-pv').textContent = formatMontant(evm.PV);
+      document.getElementById('evm-ev').textContent = formatMontant(evm.EV);
+      document.getElementById('evm-ac').textContent = formatMontant(evm.AC);
+      document.getElementById('evm-cpi').textContent = evm.CPI.toFixed(2);
+      document.getElementById('evm-spi').textContent = evm.SPI.toFixed(2);
+      document.getElementById('evm-eac').textContent = formatMontant(evm.EAC);
+      document.getElementById('evm-vac').textContent = formatMontant(evm.VAC);
+
+      // Couleurs conditionnelles
+      document.getElementById('evm-cpi').className = evm.CPI >= 1 ? 'evm-value good' : 'evm-value bad';
+      document.getElementById('evm-spi').className = evm.SPI >= 1 ? 'evm-value good' : 'evm-value bad';
+      document.getElementById('evm-vac').className = evm.VAC >= 0 ? 'evm-value good' : 'evm-value bad';
+
+      // Graphiques
+      creerGraphiqueEVM(evm);
+      creerGraphiquePerformance(evm);
+    }
+
+    function creerGraphiqueEVM(evm) {
+      const ctx = document.getElementById('chartEVM').getContext('2d');
+
+      if (evmChart) evmChart.destroy();
+
+      evmChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Mois 1', 'Mois 2', 'Mois 3', 'Mois 4', 'Mois 5', 'Mois 6'],
+          datasets: [
+            {
+              label: 'Valeur Planifiée (PV)',
+              data: [evm.PV * 0.1, evm.PV * 0.25, evm.PV * 0.4, evm.PV * 0.6, evm.PV * 0.8, evm.PV],
+              borderColor: '#1a73e8',
+              backgroundColor: 'rgba(26, 115, 232, 0.1)',
+              tension: 0.4
+            },
+            {
+              label: 'Valeur Acquise (EV)',
+              data: [evm.EV * 0.12, evm.EV * 0.28, evm.EV * 0.45, evm.EV * 0.65, evm.EV * 0.85, evm.EV],
+              borderColor: '#34a853',
+              backgroundColor: 'rgba(52, 168, 83, 0.1)',
+              tension: 0.4
+            },
+            {
+              label: 'Coût Réel (AC)',
+              data: [evm.AC * 0.15, evm.AC * 0.3, evm.AC * 0.5, evm.AC * 0.7, evm.AC * 0.9, evm.AC],
+              borderColor: '#ea4335',
+              backgroundColor: 'rgba(234, 67, 53, 0.1)',
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { position: 'top' },
+            title: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return formatMontant(value);
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function creerGraphiquePerformance(evm) {
+      const ctx = document.getElementById('chartPerformance').getContext('2d');
+
+      if (performanceChart) performanceChart.destroy();
+
+      performanceChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['CPI', 'SPI'],
+          datasets: [{
+            label: 'Indices de Performance',
+            data: [evm.CPI, evm.SPI],
+            backgroundColor: [
+              evm.CPI >= 1 ? '#34a853' : '#ea4335',
+              evm.SPI >= 1 ? '#34a853' : '#ea4335'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 2
+            }
+          }
+        }
+      });
+    }
+
+    // Charger risques
+    function chargerRisques() {
+      const projetCode = document.getElementById('risqueProjetSelect').value;
+      if (!projetCode) {
+        document.getElementById('listeRisques').innerHTML = '<div class="alert alert-warning">ℹ️ Sélectionnez un projet</div>';
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(afficherRisques)
+        .withFailureHandler(onError)
+        .analyserRisquesProjet(projetCode);
+    }
+
+    function afficherRisques(data) {
+      if (!data || !data.success) {
+        onError(data.message || 'Erreur de chargement');
+        return;
+      }
+
+      const risques = data.risques || [];
+      const container = document.getElementById('listeRisques');
+
+      if (risques.length === 0) {
+        container.innerHTML = '<div class="alert alert-success">✅ Aucun risque identifié</div>';
+        return;
+      }
+
+      let html = '';
+      risques.forEach(risque => {
+        const scoreClass = risque.score >= 15 ? 'critical' : risque.score >= 9 ? 'high' : 'low';
+        const itemClass = risque.score >= 15 ? 'critical' : risque.score >= 9 ? '' : 'low';
+
+        html += `
+          <div class="risk-item ${itemClass}">
+            <div class="risk-header">
+              <div class="risk-title">${risque.nom}</div>
+              <span class="risk-score ${scoreClass}">Score: ${risque.score}</span>
+            </div>
+            <div style="font-size: 13px; color: var(--gray-700); margin-top: 8px;">
+              ${risque.description}
+            </div>
+            <div style="margin-top: 8px; font-size: 12px;">
+              <strong>Probabilité:</strong> ${risque.probabilite}/5 •
+              <strong>Impact:</strong> ${risque.impact}/5 •
+              <strong>Mitigation:</strong> ${risque.mitigation}
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Charger prédictions
+    function chargerPredictions() {
+      const projetCode = document.getElementById('predictionProjetSelect').value;
+      if (!projetCode) return;
+
+      google.script.run
+        .withSuccessHandler(afficherPredictions)
+        .withFailureHandler(onError)
+        .previsionsIA(projetCode);
+    }
+
+    function afficherPredictions(data) {
+      if (!data || !data.success) {
+        onError(data.message || 'Erreur de chargement');
+        return;
+      }
+
+      const pred = data.previsions;
+
+      document.getElementById('pred-date-fin').textContent = pred.dateFin;
+      document.getElementById('pred-budget').textContent = formatMontant(pred.budgetFinal);
+      document.getElementById('pred-proba').textContent = (pred.probaSucces * 100).toFixed(0) + '%';
+      document.getElementById('pred-risque').textContent = pred.risqueGlobal;
+
+      // Recommandations
+      let recoHTML = '<ul style="list-style: none; padding: 0;">';
+      pred.recommandations.forEach(reco => {
+        recoHTML += `<li style="padding: 12px; background: var(--gray-50); border-radius: 6px; margin-bottom: 8px;">💡 ${reco}</li>`;
+      });
+      recoHTML += '</ul>';
+      document.getElementById('recommandationsIA').innerHTML = recoHTML;
+
+      // Graphique
+      creerGraphiquePredictions(pred);
+    }
+
+    function creerGraphiquePredictions(pred) {
+      const ctx = document.getElementById('chartPredictions').getContext('2d');
+
+      if (predictionsChart) predictionsChart.destroy();
+
+      predictionsChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Mois 1', 'Mois 2', 'Mois 3', 'Mois 4', 'Mois 5', 'Mois 6'],
+          datasets: [
+            {
+              label: 'Progression Réelle',
+              data: [10, 25, 40, 60, 75, 85],
+              borderColor: '#1a73e8',
+              backgroundColor: 'rgba(26, 115, 232, 0.1)',
+              tension: 0.4
+            },
+            {
+              label: 'Prévision IA',
+              data: [12, 28, 45, 65, 80, 95],
+              borderColor: '#34a853',
+              borderDash: [5, 5],
+              backgroundColor: 'rgba(52, 168, 83, 0.1)',
+              tension: 0.4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          plugins: {
+            legend: { position: 'top' }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              ticks: {
+                callback: function(value) {
+                  return value + '%';
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Utiliser template
+    function utiliserTemplate(templateId) {
+      if (confirm('Créer un nouveau projet à partir de ce template ?')) {
+        google.script.run
+          .withSuccessHandler(function(result) {
+            if (result.success) {
+              alert('✅ Projet créé à partir du template !');
+              chargerProjets();
+              chargerSelectsProjets();
+              switchTab('projets');
+            }
+          })
+          .withFailureHandler(onError)
+          .creerProjetDepuisTemplate(templateId);
       }
     }
 
-    window.onload = function() {
-      chargerProjets();
-    };
+    // Fonctions utilitaires
+    function formatMontant(montant) {
+      if (!montant) return '0 FCFA';
+      return new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
+    }
+
+    function onError(error) {
+      console.error('Erreur:', error);
+      alert('❌ Erreur : ' + (error.message || error));
+    }
+
+    function rafraichirEVM() {
+      chargerEVM();
+    }
+
+    function genererPredictions() {
+      chargerPredictions();
+    }
+
+    function analyserRisques() {
+      chargerRisques();
+    }
+
+    function editerProjet(code) {
+      alert('Édition du projet ' + code + ' (à implémenter)');
+    }
+
+    function voirDetailsProjet(code) {
+      alert('Détails du projet ' + code + ' (à implémenter)');
+    }
+
+    function supprimerProjet(code) {
+      if (confirm('Supprimer définitivement le projet ' + code + ' ?')) {
+        google.script.run
+          .withSuccessHandler(function(result) {
+            if (result.success) {
+              alert('✅ Projet supprimé');
+              chargerProjets();
+            }
+          })
+          .withFailureHandler(onError)
+          .supprimerProjet(code);
+      }
+    }
+
+    function exporterProjets() {
+      alert('Export des projets (à implémenter)');
+    }
+
+    function importerTemplate() {
+      switchTab('templates');
+    }
+
+    function exporterGanttPDF() {
+      alert('Export Gantt PDF (à implémenter)');
+    }
+
+    function exporterRapportEVM() {
+      alert('Export Rapport EVM (à implémenter)');
+    }
+
+    function exporterPredictions() {
+      alert('Export Prédictions (à implémenter)');
+    }
+
+    function ouvrirModalNouveauRisque() {
+      alert('Nouveau risque (à implémenter)');
+    }
+
+    function ouvrirModalNouveauTemplate() {
+      alert('Nouveau template (à implémenter)');
+    }
+
+    function importerTemplateExterne() {
+      alert('Import template externe (à implémenter)');
+    }
+
+    function filtrerRisqueMatrice(prob, impact) {
+      alert(`Filtrer risques: Probabilité=${prob}, Impact=${impact}`);
+    }
   </script>
 </body>
 </html>

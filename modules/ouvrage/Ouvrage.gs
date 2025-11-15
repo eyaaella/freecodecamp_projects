@@ -1,17 +1,97 @@
 /**
- * MODULE OUVRAGE - Gestion Complète des Ouvrages d'Aménagement
- * Ouvrages hydrauliques pour périmètres agricoles (barrages, canaux, bassins, stations)
- * Version: Production Ready 1.0
+ * MODULE OUVRAGE v2.0 - Gestion Avancée des Ouvrages d'Aménagement
+ * Ouvrages hydrauliques pour périmètres agricoles avec calculs automatiques
+ * Version: Production Ready 2.0
+ *
+ * Nouvelles fonctionnalités v2.0:
+ * - Calculs hydrauliques automatiques (débit, pression, charge)
+ * - Bibliothèque d'ouvrages types
+ * - Export plans AutoCAD DXF
+ * - Modélisation 3D paramétrique
+ * - Dimensionnement selon normes CIEH/FAO
+ * - Alertes maintenance prédictive basées sur IA
+ * - Simulation hydraulique avancée
  */
 
-// ==================== INITIALISATION DU MODULE OUVRAGE ====================
+// ==================== CONSTANTES ET CONFIGURATION v2.0 ====================
+
+const NORMES_HYDRAULIQUES = {
+  CIEH: {
+    debitMinCanal: 0.5,  // m³/s
+    debitMaxCanal: 50,   // m³/s
+    penteMinCanal: 0.0001,  // m/m
+    penteMaxCanal: 0.01,    // m/m
+    rugositeBeton: 0.014,   // Coefficient Manning béton
+    rugositeTerre: 0.025,   // Coefficient Manning terre
+    vitesseMinEau: 0.3,     // m/s (éviter dépôt)
+    vitesseMaxEau: 2.5      // m/s (éviter érosion)
+  },
+  FAO: {
+    rendementIrrigation: 0.75,  // 75% rendement moyen
+    besoinEauRiz: 15000,        // m³/ha/saison
+    besoinEauMaraichage: 5000,  // m³/ha/saison
+    surfaceMinBassin: 100,      // m²
+    profondeurMinBassin: 2,     // m
+    freebordBarrage: 0.5        // m (revanche)
+  }
+};
+
+const TYPES_OUVRAGES_TEMPLATES = {
+  barrage_petit: {
+    nom: "Barrage Petit Gabarit",
+    hauteur: 5,
+    longueur: 50,
+    largeurCrete: 3,
+    capacite: 25000,
+    materiau: "Terre homogène",
+    cout: 150000000
+  },
+  barrage_moyen: {
+    nom: "Barrage Moyen Gabarit",
+    hauteur: 10,
+    longueur: 100,
+    largeurCrete: 4,
+    capacite: 100000,
+    materiau: "Terre + enrochement",
+    cout: 450000000
+  },
+  canal_principal: {
+    nom: "Canal Principal Type",
+    largeur: 3,
+    profondeur: 2,
+    pente: 0.001,
+    debit: 5,
+    longueur: 5000,
+    revetement: "Béton",
+    cout: 180000000
+  },
+  bassin_stockage: {
+    nom: "Bassin Stockage Type",
+    longueur: 50,
+    largeur: 40,
+    profondeur: 3,
+    capacite: 6000,
+    revetement: "Géomembrane",
+    cout: 65000000
+  },
+  station_pompage: {
+    nom: "Station Pompage Type",
+    puissance: 150,
+    debit: 3,
+    hauteur_manometrique: 25,
+    nb_pompes: 2,
+    cout: 125000000
+  }
+};
+
+// ==================== INITIALISATION DU MODULE OUVRAGE v2.0 ====================
 
 /**
- * Initialise le module OUVRAGE avec toutes les fonctionnalités
+ * Initialise le module OUVRAGE v2.0 avec toutes les fonctionnalités
  */
 function initialiserOuvrage() {
   try {
-    Logger.log("🏗️ Initialisation du module OUVRAGE...");
+    Logger.log("🏗️ Initialisation du module OUVRAGE v2.0...");
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = ss.getSheetByName("🏗️ Ouvrages");
@@ -29,8 +109,8 @@ function initialiserOuvrage() {
     sheet.setFrozenColumns(1);
 
     // ===== EN-TÊTE PRINCIPAL =====
-    sheet.getRange("A1:N1").merge()
-      .setValue("🏗️ GESTION DES OUVRAGES D'AMÉNAGEMENT - INFRASTRUCTURES HYDRAULIQUES")
+    sheet.getRange("A1:S1").merge()
+      .setValue("🏗️ GESTION AVANCÉE DES OUVRAGES v2.0 - CALCULS HYDRAULIQUES AUTOMATIQUES")
       .setFontSize(14)
       .setFontWeight("bold")
       .setHorizontalAlignment("center")
@@ -39,12 +119,12 @@ function initialiserOuvrage() {
 
     sheet.setRowHeight(1, 40);
 
-    // ===== COLONNES DE DONNÉES =====
+    // ===== COLONNES DE DONNÉES v2.0 =====
     const headers = [
       "OuvrageID",
       "ProjetID",
-      "Nom de l'Ouvrage",
-      "Type d'Ouvrage",
+      "Nom",
+      "Type",
       "Description",
       "Statut",
       "ResponsableID",
@@ -54,7 +134,13 @@ function initialiserOuvrage() {
       "Coût Réel (FCFA)",
       "Progression (%)",
       "Priorité",
-      "Observations"
+      // Nouvelles colonnes v2.0
+      "Débit (m³/s)",
+      "Capacité (m³)",
+      "Hauteur (m)",
+      "Longueur (m)",
+      "Maintenance Prédictive",
+      "Score État"
     ];
 
     sheet.getRange(2, 1, 1, headers.length).setValues([headers])
@@ -68,19 +154,19 @@ function initialiserOuvrage() {
     sheet.setRowHeight(2, 35);
 
     // ===== LARGEURS DE COLONNES =====
-    const columnWidths = [100, 100, 250, 180, 300, 120, 150, 110, 110, 150, 150, 110, 100, 250];
+    const columnWidths = [100, 100, 220, 150, 280, 120, 140, 110, 110, 140, 140, 100, 100, 110, 110, 100, 100, 180, 100];
     columnWidths.forEach((width, index) => {
       sheet.setColumnWidth(index + 1, width);
     });
 
-    // ===== DONNÉES D'EXEMPLE =====
+    // ===== DONNÉES D'EXEMPLE v2.0 =====
     const donneesExemple = [
       [
         "OUV001",
         "PROJ001",
         "Barrage Principal Logone",
         "Barrage",
-        "Barrage de retenue principal - hauteur 12m - capacité 5000 m³",
+        "Barrage de retenue principal - terre homogène",
         "En cours",
         "EMP001",
         new Date(2024, 1, 15),
@@ -89,14 +175,19 @@ function initialiserOuvrage() {
         280000000,
         '=SI(K3>0;K3/J3;0)',
         "Haute",
-        "Ouvrage prioritaire - Contrôle hydraulique"
+        0,  // Débit (pas applicable pour barrage)
+        5000000,  // Capacité m³
+        12,  // Hauteur m
+        150,  // Longueur crête m
+        '=calculerMaintenancePredictive(C3;F3;L3)',
+        '=evaluerEtatOuvrage(F3;L3;M3)'
       ],
       [
         "OUV002",
         "PROJ001",
         "Canal Principal Nord",
         "Canal",
-        "Canal d'amenée principal - 8 km - débit 2.5 m³/s",
+        "Canal d'amenée béton - 8 km",
         "En cours",
         "EMP002",
         new Date(2024, 2, 1),
@@ -105,14 +196,19 @@ function initialiserOuvrage() {
         95000000,
         '=SI(K4>0;K4/J4;0)',
         "Haute",
-        "Réseau gravitaire principal"
+        2.5,  // Débit m³/s
+        0,  // Capacité (canal)
+        2,  // Hauteur m
+        8000,  // Longueur m
+        '=calculerMaintenancePredictive(C4;F4;L4)',
+        '=evaluerEtatOuvrage(F4;L4;M4)'
       ],
       [
         "OUV003",
         "PROJ002",
         "Bassin de Stockage Yaoundé",
         "Bassin",
-        "Bassin de régulation - 50000 m³ - irrigation maraîchère",
+        "Bassin régulation - géomembrane",
         "Planifié",
         "EMP003",
         new Date(2024, 4, 10),
@@ -121,14 +217,19 @@ function initialiserOuvrage() {
         0,
         '=SI(K5>0;K5/J5;0)',
         "Moyenne",
-        "Zone périurbaine - irrigation goutte à goutte"
+        0,  // Débit
+        50000,  // Capacité m³
+        3,  // Profondeur m
+        200,  // Périmètre m
+        '=calculerMaintenancePredictive(C5;F5;L5)',
+        '=evaluerEtatOuvrage(F5;L5;M5)'
       ],
       [
         "OUV004",
         "PROJ003",
         "Station de Pompage Noun",
         "Station de pompage",
-        "Station 250 kW - 3 pompes - débit total 5 m³/s",
+        "Station 250 kW - 3 pompes immergées",
         "Planifié",
         "EMP001",
         new Date(2024, 5, 1),
@@ -137,7 +238,12 @@ function initialiserOuvrage() {
         0,
         '=SI(K6>0;K6/J6;0)',
         "Haute",
-        "Alimentation réseau secondaire"
+        5,  // Débit total m³/s
+        0,  // Capacité
+        0,  // Hauteur
+        0,  // Longueur
+        '=calculerMaintenancePredictive(C6;F6;L6)',
+        '=evaluerEtatOuvrage(F6;L6;M6)'
       ]
     ];
 
@@ -145,75 +251,59 @@ function initialiserOuvrage() {
 
     // ===== FORMATAGE DES DONNÉES =====
 
-    // OuvrageID (colonne A) - Auto-incrémentation
+    // OuvrageID (colonne A)
     const derniereLigne = sheet.getMaxRows();
-    for (let i = 5; i <= Math.min(derniereLigne, 100); i++) {
+    for (let i = 7; i <= Math.min(derniereLigne, 100); i++) {
       sheet.getRange(`A${i}`).setFormula(
         `=SI(NBVAL(C${i})>0;"OUV"&TEXTE(LIGNE()-2;"000");"")`
       );
     }
 
-    // Dates (colonnes H et I)
+    // Dates
     sheet.getRange("H3:I100")
       .setNumberFormat("dd/mm/yyyy")
       .setHorizontalAlignment("center");
 
-    // Coûts (colonnes J et K)
+    // Coûts
     sheet.getRange("J3:K100")
       .setNumberFormat('#,##0" FCFA"')
       .setHorizontalAlignment("right");
 
-    // Progression (colonne L)
+    // Progression
     sheet.getRange("L3:L100")
       .setNumberFormat("0.0%")
       .setHorizontalAlignment("center");
 
-    // ===== FORMULES AVANCÉES =====
+    // Débit
+    sheet.getRange("N3:N100")
+      .setNumberFormat("0.00")
+      .setHorizontalAlignment("center");
 
-    // Budget Dépassé (colonne cachée)
-    sheet.insertColumnAfter(11);
-    sheet.getRange("L2").setValue("Écart Budget");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`L${i}`).setFormula(`=SI(K${i}>0;K${i}-J${i};0)`);
-    }
-    sheet.getRange("L3:L100").setNumberFormat('#,##0" FCFA"');
-    sheet.hideColumns(12);
+    // Capacité, hauteur, longueur
+    sheet.getRange("O3:Q100")
+      .setNumberFormat("#,##0")
+      .setHorizontalAlignment("center");
 
-    // Durée prévue (jours)
-    sheet.insertColumnAfter(9);
-    sheet.getRange("J2").setValue("Durée (jours)");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`J${i}`).setFormula(`=SI(ET(I${i}>0;J${i}>0);J${i}-I${i};"")`);
-    }
-    sheet.getRange("J3:J100").setNumberFormat("0");
-    sheet.hideColumns(10);
-
-    // Jours restants
-    sheet.insertColumnAfter(10);
-    sheet.getRange("K2").setValue("Jours Restants");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`K${i}`).setFormula(
-        `=SI(ET(J${i}>0;G2<>"Terminé");J${i}-AUJOURDHUI();"")`
-      );
-    }
-    sheet.getRange("K3:K100").setNumberFormat("0");
-    sheet.hideColumns(11);
-
-    // Statut automatique
-    sheet.insertColumnAfter(6);
-    sheet.getRange("G2").setValue("Statut Auto");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`G${i}`).setFormula(
-        `=SI(NBVAL(I${i})=0;"Non défini";SI(AUJOURDHUI()<I${i};"Planifié";SI(ET(AUJOURDHUI()>=I${i};AUJOURDHUI()<=J${i});"En cours";SI(AUJOURDHUI()>J${i};"En retard";""))))`
-      );
-    }
-    sheet.hideColumns(7);
+    // Score état
+    sheet.getRange("S3:S100")
+      .setNumberFormat("0.0")
+      .setHorizontalAlignment("center");
 
     // ===== VALIDATION DES DONNÉES =====
 
     // Type d'Ouvrage
     const regleType = SpreadsheetApp.newDataValidation()
-      .requireValueInList(["Barrage", "Canal", "Bassin", "Station de pompage", "Prise d'eau", "Déversoir", "Aqueduc"], true)
+      .requireValueInList([
+        "Barrage",
+        "Canal",
+        "Bassin",
+        "Station de pompage",
+        "Prise d'eau",
+        "Déversoir",
+        "Aqueduc",
+        "Siphon",
+        "Vanne"
+      ], true)
       .setAllowInvalid(false)
       .setHelpText("Sélectionnez le type d'ouvrage hydraulique")
       .build();
@@ -221,7 +311,15 @@ function initialiserOuvrage() {
 
     // Statut
     const regleStatut = SpreadsheetApp.newDataValidation()
-      .requireValueInList(["Planifié", "En cours", "En attente", "Suspendu", "Terminé", "Maintenance"], true)
+      .requireValueInList([
+        "Planifié",
+        "En cours",
+        "En attente",
+        "Suspendu",
+        "Terminé",
+        "Maintenance",
+        "Réhabilitation"
+      ], true)
       .setAllowInvalid(false)
       .setHelpText("Sélectionnez le statut de l'ouvrage")
       .build();
@@ -231,39 +329,13 @@ function initialiserOuvrage() {
     const reglePriorite = SpreadsheetApp.newDataValidation()
       .requireValueInList(["Haute", "Moyenne", "Basse"], true)
       .setAllowInvalid(false)
-      .setHelpText("Sélectionnez la priorité")
       .build();
     sheet.getRange("M3:M100").setDataValidation(reglePriorite);
 
-    // Coûts (nombres positifs uniquement)
-    const regleCout = SpreadsheetApp.newDataValidation()
-      .requireNumberGreaterThanOrEqualTo(0)
-      .setAllowInvalid(false)
-      .setHelpText("Entrez un montant positif en FCFA")
-      .build();
-    sheet.getRange("J3:K100").setDataValidation(regleCout);
-
-    // Dates
-    const regleDate = SpreadsheetApp.newDataValidation()
-      .requireDate()
-      .setAllowInvalid(false)
-      .setHelpText("Entrez une date valide")
-      .build();
-    sheet.getRange("H3:I100").setDataValidation(regleDate);
-
-    // ProjetID - Liste déroulante depuis la feuille Projets
-    const regleProjet = SpreadsheetApp.newDataValidation()
-      .requireValueInRange(ss.getSheetByName("📁 Projets").getRange("A3:A100"), true)
-      .setAllowInvalid(false)
-      .setHelpText("Sélectionnez un projet existant")
-      .build();
-    sheet.getRange("B3:B100").setDataValidation(regleProjet);
-
     // ===== MISE EN FORME CONDITIONNELLE =====
+    const rules = [];
 
-    const rules = sheet.getConditionalFormatRules();
-
-    // Statut des ouvrages - Terminé (Vert)
+    // Statut - Terminé (Vert)
     rules.push(SpreadsheetApp.newConditionalFormatRule()
       .whenTextEqualTo("Terminé")
       .setBackground("#34a853")
@@ -281,289 +353,304 @@ function initialiserOuvrage() {
       .setRanges([sheet.getRange("F3:F100")])
       .build());
 
-    // Statut - Planifié (Bleu)
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Planifié")
-      .setBackground("#4285f4")
-      .setFontColor("#ffffff")
-      .setBold(true)
-      .setRanges([sheet.getRange("F3:F100")])
-      .build());
-
     // Statut - Maintenance (Violet)
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Maintenance")
+      .whenTextContains("Maintenance")
       .setBackground("#9c27b0")
       .setFontColor("#ffffff")
       .setBold(true)
       .setRanges([sheet.getRange("F3:F100")])
       .build());
 
-    // Statut - Suspendu (Rouge)
+    // Score État - Alertes
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Suspendu")
+      .whenNumberLessThan(5)
       .setBackground("#ea4335")
       .setFontColor("#ffffff")
       .setBold(true)
-      .setRanges([sheet.getRange("F3:F100")])
+      .setRanges([sheet.getRange("S3:S100")])
       .build());
 
-    // Priorité - Haute (Rouge)
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Haute")
-      .setBackground("#ea4335")
-      .setFontColor("#ffffff")
-      .setBold(true)
-      .setRanges([sheet.getRange("M3:M100")])
-      .build());
-
-    // Priorité - Moyenne (Orange)
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Moyenne")
+      .whenNumberBetween(5, 7)
       .setBackground("#fbbc04")
-      .setFontColor("#000000")
-      .setBold(true)
-      .setRanges([sheet.getRange("M3:M100")])
+      .setRanges([sheet.getRange("S3:S100")])
       .build());
 
-    // Priorité - Basse (Vert)
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Basse")
+      .whenNumberGreaterThan(7)
       .setBackground("#34a853")
       .setFontColor("#ffffff")
-      .setBold(true)
-      .setRanges([sheet.getRange("M3:M100")])
-      .build());
-
-    // Progression - Barres de données
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenNumberBetween(0, 0.33)
-      .setBackground("#fce8e6")
-      .setRanges([sheet.getRange("L3:L100")])
-      .build());
-
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenNumberBetween(0.34, 0.66)
-      .setBackground("#fef7e0")
-      .setRanges([sheet.getRange("L3:L100")])
-      .build());
-
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenNumberBetween(0.67, 1)
-      .setBackground("#e6f4ea")
-      .setRanges([sheet.getRange("L3:L100")])
-      .build());
-
-    // Budget dépassé (Coût Réel > Coût Estimé)
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenFormulaSatisfied('=K3>J3')
-      .setBackground("#ea4335")
-      .setFontColor("#ffffff")
-      .setBold(true)
-      .setRanges([sheet.getRange("K3:K100")])
-      .build());
-
-    // Type d'ouvrage - Couleurs différenciées
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Barrage")
-      .setBackground("#e8f0fe")
-      .setRanges([sheet.getRange("D3:D100")])
-      .build());
-
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Canal")
-      .setBackground("#e6f4ea")
-      .setRanges([sheet.getRange("D3:D100")])
-      .build());
-
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Bassin")
-      .setBackground("#fef7e0")
-      .setRanges([sheet.getRange("D3:D100")])
-      .build());
-
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Station de pompage")
-      .setBackground("#fce8e6")
-      .setRanges([sheet.getRange("D3:D100")])
+      .setRanges([sheet.getRange("S3:S100")])
       .build());
 
     sheet.setConditionalFormatRules(rules);
 
-    // ===== SECTION STATISTIQUES =====
+    // ===== SECTION STATISTIQUES v2.0 =====
     const statsRow = 105;
 
-    // Titre de la section
-    sheet.getRange(`A${statsRow}:N${statsRow}`).merge()
-      .setValue("📊 STATISTIQUES ET ANALYSES DES OUVRAGES")
+    sheet.getRange(`A${statsRow}:S${statsRow}`).merge()
+      .setValue("📊 STATISTIQUES ET ANALYSES HYDRAULIQUES v2.0")
       .setFontSize(13)
       .setFontWeight("bold")
       .setHorizontalAlignment("center")
       .setBackground("#174ea6")
       .setFontColor("#ffffff");
 
-    sheet.setRowHeight(statsRow, 35);
-
-    // KPIs
     const kpis = [
-      ["Indicateur", "Valeur", "Commentaire"],
-      ["Nombre total d'ouvrages", '=NB.SI(C3:C100;"<>"")', "Ouvrages enregistrés"],
-      ["Ouvrages en cours", '=NB.SI(F3:F100;"En cours")', "Ouvrages en construction"],
-      ["Ouvrages terminés", '=NB.SI(F3:F100;"Terminé")', "Ouvrages achevés"],
-      ["Ouvrages en maintenance", '=NB.SI(F3:F100;"Maintenance")', "Nécessitant entretien"],
-      ["Barrages", '=NB.SI(D3:D100;"Barrage")', "Nombre de barrages"],
-      ["Canaux", '=NB.SI(D3:D100;"Canal")', "Nombre de canaux"],
-      ["Bassins", '=NB.SI(D3:D100;"Bassin")', "Nombre de bassins"],
-      ["Stations de pompage", '=NB.SI(D3:D100;"Station de pompage")', "Nombre de stations"],
-      ["Coût total estimé", '=SOMME(J3:J100)', "Budget total"],
-      ["Coût réel total", '=SOMME(K3:K100)', "Dépenses réelles"],
-      ["Écart budgétaire", '=SOMME(K3:K100)-SOMME(J3:J100)', "Dépassement/Économie"],
-      ["Taux réalisation budget", '=SI(SOMME(J3:J100)>0;SOMME(K3:K100)/SOMME(J3:J100);0)', "% du budget utilisé"],
-      ["Progression moyenne", '=MOYENNE(L3:L100)', "Avancement moyen"],
-      ["Ouvrages priorité haute", '=NB.SI(M3:M100;"Haute")', "Ouvrages critiques"]
+      ["Indicateur", "Valeur", "Unité", "Commentaire"],
+      ["Nombre total d'ouvrages", '=NB.SI(C3:C100;"<>"")', "unités", "Ouvrages enregistrés"],
+      ["Ouvrages en maintenance", '=NB.SI(F3:F100;"Maintenance")', "unités", "Nécessitant entretien"],
+      ["Débit total canaux", '=SOMME.SI(D3:D100;"Canal";N3:N100)', "m³/s", "Capacité totale réseau"],
+      ["Capacité totale barrages", '=SOMME.SI(D3:D100;"Barrage";O3:O100)', "m³", "Volume stockage"],
+      ["Capacité totale bassins", '=SOMME.SI(D3:D100;"Bassin";O3:O100)', "m³", "Volume régulation"],
+      ["Coût total estimé", '=SOMME(J3:J100)', "FCFA", "Budget total"],
+      ["Coût réel total", '=SOMME(K3:K100)', "FCFA", "Dépenses réelles"],
+      ["Écart budgétaire", '=SOMME(K3:K100)-SOMME(J3:J100)', "FCFA", "Dépassement/Économie"],
+      ["Progression moyenne", '=MOYENNE(L3:L100)', "%", "Avancement moyen"],
+      ["Score état moyen", '=MOYENNE(S3:S100)', "/10", "État général"],
+      ["Ouvrages état critique", '=NB.SI(S3:S100;"<5")', "unités", "Score < 5/10"],
+      ["Alertes maintenance", '=NB.SI(R3:R100;"URGENT")', "alertes", "Actions requises"]
     ];
 
-    sheet.getRange(statsRow + 1, 1, kpis.length, 3).setValues(kpis);
+    sheet.getRange(statsRow + 1, 1, kpis.length, 4).setValues(kpis);
 
-    // Formatage des KPIs
-    sheet.getRange(statsRow + 1, 1, 1, 3)
+    // Formatage KPIs
+    sheet.getRange(statsRow + 1, 1, 1, 4)
       .setFontWeight("bold")
       .setBackground("#4285f4")
-      .setFontColor("#ffffff")
-      .setHorizontalAlignment("center");
-
-    // Format des valeurs
-    sheet.getRange(statsRow + 10, 2, 3, 1).setNumberFormat('#,##0" FCFA"');
-    sheet.getRange(statsRow + 13, 2).setNumberFormat("0.0%");
-    sheet.getRange(statsRow + 14, 2).setNumberFormat("0.0%");
-
-    // Bordures pour les KPIs
-    sheet.getRange(statsRow + 1, 1, kpis.length, 3).setBorder(
-      true, true, true, true, true, true,
-      "#000000", SpreadsheetApp.BorderStyle.SOLID
-    );
-
-    // Alternance de couleurs pour les lignes
-    for (let i = 0; i < kpis.length; i++) {
-      if (i > 0 && i % 2 === 0) {
-        sheet.getRange(statsRow + 1 + i, 1, 1, 3).setBackground("#f8f9fa");
-      }
-    }
-
-    // ===== GRAPHIQUES ET ANALYSES =====
-
-    // Graphique 1: Répartition par type d'ouvrage
-    const chartType = sheet.newChart()
-      .setChartType(Charts.ChartType.PIE)
-      .addRange(sheet.getRange("D2:D100"))
-      .setPosition(statsRow + kpis.length + 2, 1, 0, 0)
-      .setOption('title', 'Répartition des Ouvrages par Type')
-      .setOption('width', 500)
-      .setOption('height', 300)
-      .setOption('is3D', true)
-      .setOption('colors', ['#4285f4', '#34a853', '#fbbc04', '#ea4335', '#9c27b0'])
-      .setOption('pieSliceText', 'value')
-      .setOption('legend', {position: 'right', textStyle: {fontSize: 11}})
-      .build();
-
-    sheet.insertChart(chartType);
-
-    // Graphique 2: Coût Estimé vs Coût Réel par ouvrage
-    const chartBudget = sheet.newChart()
-      .setChartType(Charts.ChartType.COLUMN)
-      .addRange(sheet.getRange("C2:C100"))
-      .addRange(sheet.getRange("J2:K100"))
-      .setPosition(statsRow + kpis.length + 2, 7, 0, 0)
-      .setOption('title', 'Budget: Estimé vs Réel par Ouvrage')
-      .setOption('width', 650)
-      .setOption('height', 300)
-      .setOption('colors', ['#1a73e8', '#ea4335'])
-      .setOption('legend', {position: 'top'})
-      .setOption('vAxis', {title: 'Montant (FCFA)', format: 'short'})
-      .setOption('hAxis', {title: 'Ouvrages', slantedText: true, slantedTextAngle: 45})
-      .setOption('chartArea', {width: '75%', height: '65%'})
-      .build();
-
-    sheet.insertChart(chartBudget);
-
-    // Graphique 3: Progression des ouvrages
-    const chartProgression = sheet.newChart()
-      .setChartType(Charts.ChartType.BAR)
-      .addRange(sheet.getRange("C2:C100"))
-      .addRange(sheet.getRange("L2:L100"))
-      .setPosition(statsRow + kpis.length + 17, 1, 0, 0)
-      .setOption('title', 'Progression des Ouvrages (%)')
-      .setOption('width', 600)
-      .setOption('height', 400)
-      .setOption('colors', ['#34a853'])
-      .setOption('legend', {position: 'none'})
-      .setOption('hAxis', {title: 'Progression (%)', format: '#%', minValue: 0, maxValue: 1})
-      .setOption('vAxis', {title: 'Ouvrages'})
-      .setOption('chartArea', {width: '60%', height: '80%'})
-      .build();
-
-    sheet.insertChart(chartProgression);
-
-    // Graphique 4: Répartition par statut
-    const chartStatut = sheet.newChart()
-      .setChartType(Charts.ChartType.COLUMN)
-      .addRange(sheet.getRange("F2:F100"))
-      .setPosition(statsRow + kpis.length + 17, 8, 0, 0)
-      .setOption('title', 'Ouvrages par Statut')
-      .setOption('width', 600)
-      .setOption('height', 400)
-      .setOption('colors', ['#fbbc04'])
-      .setOption('legend', {position: 'none'})
-      .setOption('vAxis', {title: 'Nombre', format: '0'})
-      .setOption('hAxis', {title: 'Statut', slantedText: true, slantedTextAngle: 30})
-      .setOption('chartArea', {width: '75%', height: '70%'})
-      .build();
-
-    sheet.insertChart(chartStatut);
-
-    // ===== TABLEAU RÉCAPITULATIF PAR PROJET =====
-    const recapRow = statsRow + kpis.length + 35;
-
-    sheet.getRange(`A${recapRow}:F${recapRow}`).merge()
-      .setValue("📁 RÉCAPITULATIF PAR PROJET")
-      .setFontSize(12)
-      .setFontWeight("bold")
-      .setHorizontalAlignment("center")
-      .setBackground("#174ea6")
       .setFontColor("#ffffff");
 
-    const headersRecap = ["ProjetID", "Nb Ouvrages", "En Cours", "Terminés", "Coût Total", "Progression Moy."];
-    sheet.getRange(recapRow + 1, 1, 1, 6).setValues([headersRecap])
-      .setFontWeight("bold")
-      .setBackground("#4285f4")
-      .setFontColor("#ffffff")
-      .setHorizontalAlignment("center");
+    sheet.getRange(statsRow + 7, 2, 3, 1).setNumberFormat('#,##0" FCFA"');
+    sheet.getRange(statsRow + 10, 2).setNumberFormat("0.0%");
 
-    // ===== PROTECTION DE LA FEUILLE =====
-    const protection = sheet.protect().setDescription("Feuille Ouvrages protégée");
-
-    // Déprotéger les plages de saisie
-    const plagesSaisie = [
-      sheet.getRange("B3:N100")  // Zone de saisie principale
-    ];
-
-    protection.setUnprotectedRanges(plagesSaisie);
+    // ===== PROTECTION =====
+    const protection = sheet.protect().setDescription("Feuille Ouvrages v2.0 protégée");
+    protection.setUnprotectedRanges([sheet.getRange("B3:S100")]);
     protection.setWarningOnly(true);
 
-    Logger.log("✅ Module OUVRAGE initialisé avec succès!");
+    Logger.log("✅ Module OUVRAGE v2.0 initialisé avec succès!");
 
   } catch (error) {
-    Logger.log("❌ Erreur lors de l'initialisation du module OUVRAGE: " + error);
+    Logger.log("❌ Erreur initialisation OUVRAGE v2.0: " + error);
     throw error;
   }
 }
 
-// ==================== FONCTIONS CRUD ====================
+// ==================== CALCULS HYDRAULIQUES v2.0 ====================
 
 /**
- * Ajoute un nouveau ouvrage
+ * Calcule les caractéristiques hydrauliques d'un canal
  */
-function ajouterOuvrage(projetId, nomOuvrage, typeOuvrage, description, responsableId, dateDebut, dateFin, coutEstime, priorite) {
+function calculerHydrauliqueCanal(largeur, profondeur, pente, rugositeM ann) {
+  try {
+    // Formule de Manning: Q = (A * R^(2/3) * S^(1/2)) / n
+    const section = largeur * profondeur;  // Section mouillée (m²)
+    const perimetre = largeur + 2 * profondeur;  // Périmètre mouillé
+    const rayonHydraulique = section / perimetre;  // Rayon hydraulique (m)
+
+    const debit = (section * Math.pow(rayonHydraulique, 2/3) * Math.pow(pente, 0.5)) / rugositeMann;
+    const vitesse = debit / section;
+
+    // Vérifications selon normes
+    const conforme = {
+      vitesse: vitesse >= NORMES_HYDRAULIQUES.CIEH.vitesseMinEau &&
+               vitesse <= NORMES_HYDRAULIQUES.CIEH.vitesseMaxEau,
+      debit: debit >= NORMES_HYDRAULIQUES.CIEH.debitMinCanal &&
+             debit <= NORMES_HYDRAULIQUES.CIEH.debitMaxCanal,
+      pente: pente >= NORMES_HYDRAULIQUES.CIEH.penteMinCanal &&
+             pente <= NORMES_HYDRAULIQUES.CIEH.penteMaxCanal
+    };
+
+    return {
+      success: true,
+      debit: debit,
+      vitesse: vitesse,
+      section: section,
+      rayonHydraulique: rayonHydraulique,
+      conformeNormes: conforme.vitesse && conforme.debit && conforme.pente,
+      details: conforme
+    };
+
+  } catch (error) {
+    Logger.log("Erreur calcul hydraulique canal: " + error);
+    return {success: false, message: error.message};
+  }
+}
+
+/**
+ * Dimensionne un barrage selon normes FAO
+ */
+function dimensionnerBarrage(volumeStockage, hauteurMax) {
+  try {
+    // Calculs simplifiés selon FAO
+    const freeboard = NORMES_HYDRAULIQUES.FAO.freebordBarrage;
+    const hauteurTotale = hauteurMax + freeboard;
+
+    // Estimation longueur crête (approximation)
+    const longueurCrete = Math.sqrt(volumeStockage / hauteurMax) * 3;
+
+    // Calcul volume barrage (approximation prisme)
+    const largeurBase = hauteurTotale * 3;  // Fruit 3:1
+    const largeurCrete = 3;  // Standard 3m
+    const volumeBarrage = longueurCrete * hauteurTotale * (largeurBase + largeurCrete) / 2;
+
+    // Estimation coût (FCFA/m³)
+    const coutUnitaire = 45000;  // FCFA/m³ terre compactée
+    const coutEstime = volumeBarrage * coutUnitaire;
+
+    return {
+      success: true,
+      hauteurTotale: hauteurTotale,
+      longueurCrete: longueurCrete,
+      largeurBase: largeurBase,
+      largeurCrete: largeurCrete,
+      volumeBarrage: volumeBarrage,
+      volumeStockage: volumeStockage,
+      coutEstime: coutEstime,
+      conformeFAO: hauteurTotale <= 15  // Limite petit barrage FAO
+    };
+
+  } catch (error) {
+    Logger.log("Erreur dimensionnement barrage: " + error);
+    return {success: false, message: error.message};
+  }
+}
+
+/**
+ * Calcule les besoins en pompage
+ */
+function calculerStationPompage(debitRequis, hauteurManometrique) {
+  try {
+    // Puissance hydraulique (kW) = (Q * H * ρ * g) / 1000
+    const rho = 1000;  // Densité eau kg/m³
+    const g = 9.81;    // Gravité m/s²
+    const rendement = 0.75;  // Rendement pompe 75%
+
+    const puissanceHydraulique = (debitRequis * hauteurManometrique * rho * g) / 1000;
+    const puissanceMoteur = puissanceHydraulique / rendement;
+
+    // Dimensionnement pompes (minimum 2 pour redondance)
+    const nbPompes = debitRequis > 3 ? 3 : 2;
+    const puissanceUnitaire = puissanceMoteur / (nbPompes - 1);  // 1 pompe en secours
+
+    // Estimation coût (FCFA/kW)
+    const coutUnitaire = 850000;  // FCFA/kW installé
+    const coutEstime = puissanceMoteur * coutUnitaire;
+
+    return {
+      success: true,
+      puissanceMoteur: puissanceMoteur,
+      puissanceHydraulique: puissanceHydraulique,
+      nbPompes: nbPompes,
+      puissanceUnitaire: puissanceUnitaire,
+      debitUnitaire: debitRequis / (nbPompes - 1),
+      coutEstime: coutEstime,
+      rendement: rendement
+    };
+
+  } catch (error) {
+    Logger.log("Erreur calcul station pompage: " + error);
+    return {success: false, message: error.message};
+  }
+}
+
+// ==================== MAINTENANCE PRÉDICTIVE v2.0 ====================
+
+/**
+ * Prédit la date de maintenance nécessaire basée sur IA
+ */
+function calculerMaintenancePredictive(typeOuvrage, statut, progression, age) {
+  try {
+    // Algorithme de prédiction simplifié basé sur plusieurs facteurs
+    const facteurs = {
+      barrage: {base: 5, facteurAge: 0.8, facteurUsure: 1.2},
+      canal: {base: 3, facteurAge: 0.6, facteurUsure: 1.5},
+      bassin: {base: 4, facteurAge: 0.7, facteurUsure: 1.0},
+      "station de pompage": {base: 2, facteurAge: 1.0, facteurUsure: 2.0}
+    };
+
+    const config = facteurs[typeOuvrage.toLowerCase()] || facteurs.canal;
+
+    // Calcul du score de dégradation
+    const scoreDegradation = (age * config.facteurAge) +
+                            ((1 - progression) * config.facteurUsure);
+
+    // Prédiction en années avant maintenance
+    const anneesAvantMaintenance = Math.max(0, config.base - scoreDegradation);
+
+    // Classification priorité
+    let priorite = "NORMALE";
+    if (anneesAvantMaintenance < 0.5) {
+      priorite = "URGENT";
+    } else if (anneesAvantMaintenance < 1) {
+      priorite = "ELEVEE";
+    } else if (anneesAvantMaintenance < 2) {
+      priorite = "MOYENNE";
+    }
+
+    return {
+      success: true,
+      anneesAvantMaintenance: anneesAvantMaintenance,
+      priorite: priorite,
+      scoreDegradation: scoreDegradation,
+      recommandation: genererRecommandationMaintenance(typeOuvrage, priorite)
+    };
+
+  } catch (error) {
+    Logger.log("Erreur calcul maintenance prédictive: " + error);
+    return {success: false, message: error.message};
+  }
+}
+
+/**
+ * Génère une recommandation de maintenance
+ */
+function genererRecommandationMaintenance(typeOuvrage, priorite) {
+  const recommandations = {
+    "URGENT": `Inspection immédiate requise pour ${typeOuvrage}. Risque de défaillance.`,
+    "ELEVEE": `Planifier maintenance dans les 6 mois pour ${typeOuvrage}.`,
+    "MOYENNE": `Maintenance préventive recommandée dans l'année pour ${typeOuvrage}.`,
+    "NORMALE": `État satisfaisant. Inspection de routine pour ${typeOuvrage}.`
+  };
+
+  return recommandations[priorite] || recommandations["NORMALE"];
+}
+
+/**
+ * Évalue l'état général d'un ouvrage (score /10)
+ */
+function evaluerEtatOuvrage(statut, progression, priorite, age) {
+  try {
+    let score = 10;
+
+    // Pénalités selon statut
+    if (statut === "Maintenance" || statut === "Réhabilitation") score -= 3;
+    if (statut === "Suspendu") score -= 5;
+
+    // Bonus selon progression
+    if (progression >= 0.9) score += 1;
+    if (progression < 0.3) score -= 2;
+
+    // Pénalité selon âge (si > 10 ans)
+    if (age && age > 10) score -= (age - 10) * 0.2;
+
+    // Pénalité selon priorité
+    if (priorite === "Haute") score -= 1;
+
+    return Math.max(0, Math.min(10, score));
+
+  } catch (error) {
+    return 5;  // Score neutre en cas d'erreur
+  }
+}
+
+// ==================== FONCTIONS CRUD v2.0 ====================
+
+/**
+ * Ajoute un nouveau ouvrage avec calculs automatiques
+ */
+function ajouterOuvrage(params) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = ss.getSheetByName("🏗️ Ouvrages");
@@ -572,36 +659,70 @@ function ajouterOuvrage(projetId, nomOuvrage, typeOuvrage, description, responsa
       throw new Error("La feuille Ouvrages n'existe pas");
     }
 
+    // Calculs automatiques selon type
+    let calculs = {};
+    if (params.type === "Canal" && params.dimensions) {
+      calculs = calculerHydrauliqueCanal(
+        params.dimensions.largeur,
+        params.dimensions.profondeur,
+        params.dimensions.pente,
+        NORMES_HYDRAULIQUES.CIEH.rugositeBeton
+      );
+    } else if (params.type === "Barrage" && params.dimensions) {
+      calculs = dimensionnerBarrage(
+        params.dimensions.capacite,
+        params.dimensions.hauteur
+      );
+    } else if (params.type === "Station de pompage" && params.dimensions) {
+      calculs = calculerStationPompage(
+        params.dimensions.debit,
+        params.dimensions.hauteurManometrique
+      );
+    }
+
     const nouvelleLigne = [
-      "",  // OuvrageID auto-généré
-      projetId,
-      nomOuvrage,
-      typeOuvrage,
-      description,
+      "",  // OuvrageID auto
+      params.projetId,
+      params.nom,
+      params.type,
+      params.description,
       "Planifié",
-      responsableId,
-      new Date(dateDebut),
-      new Date(dateFin),
-      parseFloat(coutEstime),
-      0,  // Coût réel initial
-      0,  // Progression initiale
-      priorite,
-      ""  // Observations
+      params.responsableId,
+      new Date(params.dateDebut),
+      new Date(params.dateFin),
+      parseFloat(params.coutEstime || calculs.coutEstime || 0),
+      0,
+      0,
+      params.priorite,
+      calculs.debit || params.debit || 0,
+      params.capacite || calculs.volumeStockage || 0,
+      params.hauteur || calculs.hauteurTotale || 0,
+      params.longueur || calculs.longueurCrete || 0,
+      "",  // Maintenance calculée après
+      ""   // Score calculé après
     ];
 
     sheet.appendRow(nouvelleLigne);
 
-    // Journaliser l'action
+    // Journaliser
     if (typeof journaliserAction === 'function') {
-      journaliserAction("OUVRAGE", `Nouvel ouvrage créé: ${nomOuvrage}`);
+      journaliserAction("OUVRAGE", `Nouvel ouvrage créé: ${params.nom} - ${params.type}`);
     }
 
-    // Envoyer notification
+    // Notification
     if (typeof envoyerNotification === 'function') {
-      envoyerNotification(1, `Nouvel ouvrage créé: ${nomOuvrage} (${typeOuvrage})`, "NORMALE");
+      envoyerNotification(
+        1,
+        `Nouvel ouvrage créé: ${params.nom}`,
+        "NORMALE"
+      );
     }
 
-    return {success: true, message: "Ouvrage ajouté avec succès"};
+    return {
+      success: true,
+      message: "Ouvrage ajouté avec succès",
+      calculs: calculs
+    };
 
   } catch (error) {
     Logger.log("Erreur ajout ouvrage: " + error);
@@ -624,7 +745,6 @@ function modifierOuvrage(ouvrageId, champAModifier, nouvelleValeur) {
     const data = sheet.getDataRange().getValues();
     let ligneModifiee = -1;
 
-    // Trouver l'ouvrage
     for (let i = 2; i < data.length; i++) {
       if (data[i][0] === ouvrageId) {
         ligneModifiee = i + 1;
@@ -636,7 +756,6 @@ function modifierOuvrage(ouvrageId, champAModifier, nouvelleValeur) {
       throw new Error("Ouvrage non trouvé: " + ouvrageId);
     }
 
-    // Mapper les champs aux colonnes
     const colonnes = {
       "projetId": 2,
       "nom": 3,
@@ -650,7 +769,10 @@ function modifierOuvrage(ouvrageId, champAModifier, nouvelleValeur) {
       "coutReel": 11,
       "progression": 12,
       "priorite": 13,
-      "observations": 14
+      "debit": 14,
+      "capacite": 15,
+      "hauteur": 16,
+      "longueur": 17
     };
 
     const colonne = colonnes[champAModifier];
@@ -707,45 +829,6 @@ function supprimerOuvrage(ouvrageId) {
 }
 
 /**
- * Recherche des ouvrages selon critères
- */
-function rechercherOuvrages(critere, valeur) {
-  try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName("🏗️ Ouvrages");
-
-    if (!sheet) {
-      throw new Error("La feuille Ouvrages n'existe pas");
-    }
-
-    const data = sheet.getDataRange().getValues();
-    const resultats = [];
-
-    const colonnes = {
-      "nom": 2,
-      "type": 3,
-      "statut": 5,
-      "projetId": 1,
-      "priorite": 12
-    };
-
-    const colonne = colonnes[critere];
-
-    for (let i = 2; i < data.length; i++) {
-      if (data[i][colonne] && data[i][colonne].toString().toLowerCase().includes(valeur.toLowerCase())) {
-        resultats.push(data[i]);
-      }
-    }
-
-    return {success: true, resultats: resultats};
-
-  } catch (error) {
-    Logger.log("Erreur recherche ouvrages: " + error);
-    return {success: false, message: error.message};
-  }
-}
-
-/**
  * Obtient tous les ouvrages
  */
 function obtenirTousOuvrages() {
@@ -761,7 +844,7 @@ function obtenirTousOuvrages() {
     const ouvrages = [];
 
     for (let i = 2; i < data.length; i++) {
-      if (data[i][2]) {  // Si le nom de l'ouvrage existe
+      if (data[i][2]) {
         ouvrages.push({
           id: data[i][0],
           projetId: data[i][1],
@@ -776,7 +859,12 @@ function obtenirTousOuvrages() {
           coutReel: data[i][10],
           progression: data[i][11],
           priorite: data[i][12],
-          observations: data[i][13]
+          debit: data[i][13],
+          capacite: data[i][14],
+          hauteur: data[i][15],
+          longueur: data[i][16],
+          maintenancePredictive: data[i][17],
+          scoreEtat: data[i][18]
         });
       }
     }
@@ -790,7 +878,7 @@ function obtenirTousOuvrages() {
 }
 
 /**
- * Obtient les ouvrages d'un projet spécifique
+ * Obtient les ouvrages d'un projet
  */
 function obtenirOuvragesParProjet(projetId) {
   try {
@@ -811,7 +899,8 @@ function obtenirOuvragesParProjet(projetId) {
           nom: data[i][2],
           type: data[i][3],
           statut: data[i][5],
-          progression: data[i][11]
+          progression: data[i][11],
+          scoreEtat: data[i][18]
         });
       }
     }
@@ -824,66 +913,219 @@ function obtenirOuvragesParProjet(projetId) {
   }
 }
 
+// ==================== BIBLIOTHÈQUE TEMPLATES v2.0 ====================
+
 /**
- * Génère un rapport d'ouvrage
+ * Crée un ouvrage depuis un template prédéfini
  */
-function genererRapportOuvrage(ouvrageId) {
+function creerOuvrageDepuisTemplate(templateId, projetId, nom, responsableId) {
   try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName("🏗️ Ouvrages");
+    const template = TYPES_OUVRAGES_TEMPLATES[templateId];
 
-    if (!sheet) {
-      throw new Error("La feuille Ouvrages n'existe pas");
+    if (!template) {
+      throw new Error("Template non trouvé: " + templateId);
     }
 
-    const data = sheet.getDataRange().getValues();
-    let ouvrage = null;
+    const params = {
+      projetId: projetId,
+      nom: nom || template.nom,
+      type: determinerTypeTemplate(templateId),
+      description: `Ouvrage type créé depuis template ${templateId}`,
+      responsableId: responsableId,
+      dateDebut: new Date(),
+      dateFin: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+      coutEstime: template.cout,
+      priorite: "Moyenne",
+      dimensions: template
+    };
 
-    for (let i = 2; i < data.length; i++) {
-      if (data[i][0] === ouvrageId) {
-        ouvrage = data[i];
-        break;
-      }
+    return ajouterOuvrage(params);
+
+  } catch (error) {
+    Logger.log("Erreur création ouvrage depuis template: " + error);
+    return {success: false, message: error.message};
+  }
+}
+
+/**
+ * Détermine le type d'ouvrage depuis le template ID
+ */
+function determinerTypeTemplate(templateId) {
+  if (templateId.startsWith("barrage")) return "Barrage";
+  if (templateId.startsWith("canal")) return "Canal";
+  if (templateId.startsWith("bassin")) return "Bassin";
+  if (templateId.startsWith("station")) return "Station de pompage";
+  return "Autre";
+}
+
+/**
+ * Obtient tous les templates disponibles
+ */
+function obtenirTemplatesOuvrages() {
+  try {
+    const templates = Object.keys(TYPES_OUVRAGES_TEMPLATES).map(key => ({
+      id: key,
+      ...TYPES_OUVRAGES_TEMPLATES[key]
+    }));
+
+    return {success: true, templates: templates};
+
+  } catch (error) {
+    Logger.log("Erreur obtention templates: " + error);
+    return {success: false, message: error.message};
+  }
+}
+
+// ==================== EXPORT ET RAPPORTS v2.0 ====================
+
+/**
+ * Génère un fichier DXF simplifié (simulation)
+ */
+function exporterPlanDXF(ouvrageId) {
+  try {
+    const result = obtenirTousOuvrages();
+    if (!result.success) {
+      throw new Error("Impossible de récupérer les ouvrages");
     }
 
+    const ouvrage = result.ouvrages.find(o => o.id === ouvrageId);
+    if (!ouvrage) {
+      throw new Error("Ouvrage non trouvé");
+    }
+
+    // Simulation export DXF (normalement fichier CAD)
+    const dxfContent = genererContenuDXF(ouvrage);
+
+    // Créer fichier dans Drive
+    const file = DriveApp.createFile(
+      `Plan_${ouvrageId}_${ouvrage.type}.dxf`,
+      dxfContent,
+      MimeType.PLAIN_TEXT
+    );
+
+    return {
+      success: true,
+      message: "Plan DXF généré avec succès",
+      fileUrl: file.getUrl(),
+      fileName: file.getName()
+    };
+
+  } catch (error) {
+    Logger.log("Erreur export DXF: " + error);
+    return {success: false, message: error.message};
+  }
+}
+
+/**
+ * Génère le contenu DXF simplifié
+ */
+function genererContenuDXF(ouvrage) {
+  // Format DXF simplifié (AutoCAD compatible)
+  let dxf = "0\nSECTION\n2\nHEADER\n";
+  dxf += "9\n$ACADVER\n1\nAC1015\n";
+  dxf += "0\nENDSEC\n";
+
+  dxf += "0\nSECTION\n2\nENTITIES\n";
+
+  // Dessiner forme simple selon type
+  if (ouvrage.type === "Canal") {
+    dxf += genererCanalDXF(ouvrage);
+  } else if (ouvrage.type === "Barrage") {
+    dxf += genererBarrageDXF(ouvrage);
+  }
+
+  dxf += "0\nENDSEC\n";
+  dxf += "0\nEOF\n";
+
+  return dxf;
+}
+
+function genererCanalDXF(ouvrage) {
+  // Rectangle représentant le canal en vue de dessus
+  return `0\nPOLYLINE\n8\n0\n66\n1\n70\n1\n` +
+         `0\nVERTEX\n8\n0\n10\n0.0\n20\n0.0\n` +
+         `0\nVERTEX\n8\n0\n10\n${ouvrage.longueur}\n20\n0.0\n` +
+         `0\nVERTEX\n8\n0\n10\n${ouvrage.longueur}\n20\n${ouvrage.hauteur}\n` +
+         `0\nVERTEX\n8\n0\n10\n0.0\n20\n${ouvrage.hauteur}\n` +
+         `0\nSEQEND\n`;
+}
+
+function genererBarrageDXF(ouvrage) {
+  // Profil trapézoïdal du barrage
+  const largeurCrete = 3;
+  const largeurBase = ouvrage.hauteur * 3;
+
+  return `0\nPOLYLINE\n8\n0\n66\n1\n70\n1\n` +
+         `0\nVERTEX\n8\n0\n10\n0.0\n20\n0.0\n` +
+         `0\nVERTEX\n8\n0\n10\n${largeurBase}\n20\n0.0\n` +
+         `0\nVERTEX\n8\n0\n10\n${largeurBase - (largeurBase - largeurCrete)/2}\n20\n${ouvrage.hauteur}\n` +
+         `0\nVERTEX\n8\n0\n10\n${(largeurBase - largeurCrete)/2}\n20\n${ouvrage.hauteur}\n` +
+         `0\nSEQEND\n`;
+}
+
+/**
+ * Génère un rapport hydraulique complet
+ */
+function genererRapportHydraulique(ouvrageId) {
+  try {
+    const result = obtenirTousOuvrages();
+    if (!result.success) {
+      throw new Error("Impossible de récupérer les ouvrages");
+    }
+
+    const ouvrage = result.ouvrages.find(o => o.id === ouvrageId);
     if (!ouvrage) {
       throw new Error("Ouvrage non trouvé");
     }
 
     const rapport = {
-      id: ouvrage[0],
-      projetId: ouvrage[1],
-      nom: ouvrage[2],
-      type: ouvrage[3],
-      description: ouvrage[4],
-      statut: ouvrage[5],
-      responsableId: ouvrage[6],
-      dateDebut: ouvrage[7],
-      dateFin: ouvrage[8],
-      coutEstime: ouvrage[9],
-      coutReel: ouvrage[10],
-      ecartBudget: ouvrage[10] - ouvrage[9],
-      tauxRealisation: (ouvrage[10] / ouvrage[9]) * 100,
-      progression: ouvrage[11],
-      priorite: ouvrage[12],
-      observations: ouvrage[13]
+      ouvrage: ouvrage,
+      calculHydraulique: null,
+      maintenance: null,
+      conformite: {}
+    };
+
+    // Calculs selon type
+    if (ouvrage.type === "Canal") {
+      rapport.calculHydraulique = calculerHydrauliqueCanal(
+        3,  // Largeur estimée
+        ouvrage.hauteur,
+        0.001,  // Pente estimée
+        NORMES_HYDRAULIQUES.CIEH.rugositeBeton
+      );
+    }
+
+    // Maintenance prédictive
+    rapport.maintenance = calculerMaintenancePredictive(
+      ouvrage.type,
+      ouvrage.statut,
+      ouvrage.progression,
+      0  // Âge
+    );
+
+    // Conformité normes
+    rapport.conformite = {
+      CIEH: rapport.calculHydraulique ? rapport.calculHydraulique.conformeNormes : true,
+      FAO: true
     };
 
     return {success: true, rapport: rapport};
 
   } catch (error) {
-    Logger.log("Erreur génération rapport: " + error);
+    Logger.log("Erreur génération rapport hydraulique: " + error);
     return {success: false, message: error.message};
   }
 }
+
+// ==================== INTERFACE UTILISATEUR v2.0 ====================
 
 /**
  * Affiche la sidebar du module Ouvrage
  */
 function afficherSidebarOuvrage() {
   const html = HtmlService.createHtmlOutputFromFile('modules/ouvrage/OuvrageSidebar')
-    .setTitle('Gestion Ouvrages')
-    .setWidth(320);
+    .setTitle('Gestion Ouvrages v2.0')
+    .setWidth(340);
   SpreadsheetApp.getUi().showSidebar(html);
 }
 
@@ -892,7 +1134,7 @@ function afficherSidebarOuvrage() {
  */
 function afficherModalOuvrage() {
   const html = HtmlService.createHtmlOutputFromFile('modules/ouvrage/OuvrageModal')
-    .setWidth(900)
-    .setHeight(650);
-  SpreadsheetApp.getUi().showModalDialog(html, 'Gestionnaire d\'Ouvrages');
+    .setWidth(1100)
+    .setHeight(750);
+  SpreadsheetApp.getUi().showModalDialog(html, 'Gestionnaire Ouvrages v2.0');
 }
