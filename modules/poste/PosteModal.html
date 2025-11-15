@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+    .header { background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%); color: white; padding: 20px; }
+    .header h1 { font-size: 22px; margin-bottom: 5px; }
+    .container { padding: 20px; }
+    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #dee2e6; }
+    .tab { padding: 12px 20px; background: #f8f9fa; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; }
+    .tab.active { background: #34a853; color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .btn-primary { background: #34a853; color: white; }
+    .btn-success { background: #1a73e8; color: white; }
+    .btn-danger { background: #ea4335; color: white; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .data-table { width: 100%; background: white; border-radius: 8px; overflow: hidden; }
+    .data-table table { width: 100%; border-collapse: collapse; }
+    .data-table th { background: #34a853; color: white; padding: 12px; text-align: left; font-size: 12px; }
+    .data-table td { padding: 12px; border-bottom: 1px solid #dee2e6; font-size: 13px; }
+    .action-btn { padding: 5px 10px; margin: 0 2px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
+    .grille-card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 15px; border-left: 4px solid #34a853; }
+    .grille-card h4 { color: #34a853; margin-bottom: 10px; font-size: 16px; }
+    .grille-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 10px; }
+    .stat-item { background: #f5f5f5; padding: 10px; border-radius: 6px; text-align: center; }
+    .stat-item .label { font-size: 11px; color: #666; text-transform: uppercase; }
+    .stat-item .value { font-size: 18px; font-weight: 700; color: #34a853; margin-top: 5px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>💼 Gestionnaire de Postes</h1>
+    <p>Référentiel des Emplois et Grille Salariale</p>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('liste')">📋 Liste</button>
+      <button class="tab" onclick="switchTab('nouveau')">➕ Nouveau</button>
+      <button class="tab" onclick="switchTab('grille')">💰 Grille Salariale</button>
+      <button class="tab" onclick="switchTab('competences')">🎓 Compétences</button>
+    </div>
+
+    <!-- Onglet Liste -->
+    <div id="liste" class="tab-content active">
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Intitulé</th>
+              <th>Catégorie</th>
+              <th>Salaire Min-Max</th>
+              <th>Expérience</th>
+              <th>Niveau</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="listePostes">
+            <tr><td colspan="7" style="text-align:center;">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Onglet Nouveau -->
+    <div id="nouveau" class="tab-content">
+      <form id="formPoste">
+        <div class="form-group">
+          <label>Intitulé du Poste *</label>
+          <input type="text" id="intitule" placeholder="Ex: Topographe Senior" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Catégorie *</label>
+            <select id="categorie" required>
+              <option value="">Sélectionner...</option>
+              <option value="Topographe">Topographe</option>
+              <option value="Ingénieur">Ingénieur</option>
+              <option value="Technicien">Technicien</option>
+              <option value="Ouvrier">Ouvrier</option>
+              <option value="Administratif">Administratif</option>
+              <option value="Cadre">Cadre</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Niveau d'Étude *</label>
+            <select id="niveauEtude" required>
+              <option value="">Sélectionner...</option>
+              <option value="CAP/BEP">CAP/BEP</option>
+              <option value="Bac">Bac</option>
+              <option value="Bac+2">Bac+2</option>
+              <option value="Bac+3">Bac+3/Licence</option>
+              <option value="Bac+5">Bac+5/Master</option>
+              <option value="Doctorat">Doctorat</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description du Poste</label>
+          <textarea id="description" rows="3" placeholder="Missions et responsabilités"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Salaire Minimum (FCFA) *</label>
+            <input type="number" id="salaireMin" min="0" placeholder="Ex: 300000" required>
+          </div>
+          <div class="form-group">
+            <label>Salaire Maximum (FCFA) *</label>
+            <input type="number" id="salaireMax" min="0" placeholder="Ex: 500000" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Expérience Minimale (années) *</label>
+            <input type="number" id="experienceMin" min="0" max="30" value="0" required>
+          </div>
+          <div class="form-group">
+            <label>Statut</label>
+            <select id="statut">
+              <option value="Actif">Actif</option>
+              <option value="Inactif">Inactif</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Compétences Requises</label>
+          <textarea id="competences" rows="2" placeholder="Liste des compétences (séparées par des virgules)"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea id="notes" rows="2" placeholder="Informations complémentaires"></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">💾 Enregistrer le Poste</button>
+      </form>
+    </div>
+
+    <!-- Onglet Grille Salariale -->
+    <div id="grille" class="tab-content">
+      <h3 style="margin-bottom: 20px;">💰 Grille Salariale par Catégorie</h3>
+
+      <div class="grille-card">
+        <h4>👷 Topographes</h4>
+        <div class="grille-stats">
+          <div class="stat-item">
+            <div class="label">Postes</div>
+            <div class="value" id="nbTopographe">-</div>
+          </div>
+          <div class="stat-item">
+            <div class="label">Salaire Moyen</div>
+            <div class="value" id="moyTopographe" style="font-size: 14px;">- FCFA</div>
+          </div>
+          <div class="stat-item">
+            <div class="label">Fourchette</div>
+            <div class="value" id="fourchetteTopographe" style="font-size: 12px;">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grille-card" style="border-left-color: #1a73e8;">
+        <h4 style="color: #1a73e8;">👨‍💼 Ingénieurs</h4>
+        <div class="grille-stats">
+          <div class="stat-item">
+            <div class="label">Postes</div>
+            <div class="value" id="nbIngenieur" style="color: #1a73e8;">-</div>
+          </div>
+          <div class="stat-item">
+            <div class="label">Salaire Moyen</div>
+            <div class="value" id="moyIngenieur" style="font-size: 14px; color: #1a73e8;">- FCFA</div>
+          </div>
+          <div class="stat-item">
+            <div class="label">Fourchette</div>
+            <div class="value" id="fourchetteIngenieur" style="font-size: 12px; color: #1a73e8;">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grille-card" style="border-left-color: #fbbc04;">
+        <h4 style="color: #fbbc04;">🔧 Techniciens</h4>
+        <div class="grille-stats">
+          <div class="stat-item">
+            <div class="label">Postes</div>
+            <div class="value" id="nbTechnicien" style="color: #fbbc04;">-</div>
+          </div>
+          <div class="stat-item">
+            <div class="label">Salaire Moyen</div>
+            <div class="value" id="moyTechnicien" style="font-size: 14px; color: #fbbc04;">- FCFA</div>
+          </div>
+          <div class="stat-item">
+            <div class="label">Fourchette</div>
+            <div class="value" id="fourchetteTechnicien" style="font-size: 12px; color: #fbbc04;">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grille-card" style="border-left-color: #ea4335;">
+        <h4 style="color: #ea4335;">👷‍♂️ Ouvriers</h4>
+        <div class="grille-stats">
+          <div class="stat-item">
+            <div class="label">Postes</div>
+            <div class="value" id="nbOuvrier" style="color: #ea4335;">-</div>
+          </div>
+          <div class="stat-item">
+            <div class="label">Salaire Moyen</div>
+            <div class="value" id="moyOuvrier" style="font-size: 14px; color: #ea4335;">- FCFA</div>
+          </div>
+          <div class="stat-item">
+            <div class="label">Fourchette</div>
+            <div class="value" id="fourchetteOuvrier" style="font-size: 12px; color: #ea4335;">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grille-card" style="border-left-color: #9c27b0;">
+        <h4 style="color: #9c27b0;">📋 Administratifs</h4>
+        <div class="grille-stats">
+          <div class="stat-item">
+            <div class="label">Postes</div>
+            <div class="value" id="nbAdministratif" style="color: #9c27b0;">-</div>
+          </div>
+          <div class="stat-item">
+            <div class="label">Salaire Moyen</div>
+            <div class="value" id="moyAdministratif" style="font-size: 14px; color: #9c27b0;">- FCFA</div>
+          </div>
+          <div class="stat-item">
+            <div class="label">Fourchette</div>
+            <div class="value" id="fourchetteAdministratif" style="font-size: 12px; color: #9c27b0;">-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Compétences -->
+    <div id="competences" class="tab-content">
+      <h3 style="margin-bottom: 15px;">🎓 Compétences Requises par Poste</h3>
+      <div class="form-group">
+        <label>Sélectionner un poste</label>
+        <select id="selectPoste" onchange="afficherCompetences()">
+          <option value="">Choisir un poste...</option>
+        </select>
+      </div>
+      <div id="competencesDetail" style="background: white; padding: 20px; border-radius: 8px; margin-top: 15px; display: none;">
+        <h4 style="color: #34a853; margin-bottom: 15px;">Détails du Poste</h4>
+        <div id="competencesContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+      if (tabId === 'liste') chargerPostes();
+      if (tabId === 'grille') chargerGrilleSalariale();
+      if (tabId === 'competences') chargerSelectPostes();
+    }
+
+    function chargerPostes() {
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success) {
+          let html = '';
+          result.postes.forEach(p => {
+            html += `<tr>
+              <td>${p.id}</td>
+              <td>${p.intitule}</td>
+              <td>${p.categorie}</td>
+              <td>${p.salaireMin.toLocaleString()} - ${p.salaireMax.toLocaleString()} FCFA</td>
+              <td>${p.experienceMin} an${p.experienceMin > 1 ? 's' : ''}</td>
+              <td>${p.niveauEtude}</td>
+              <td>
+                <button class="action-btn btn-primary" onclick="editer(${p.id})">✏️</button>
+                <button class="action-btn btn-danger" onclick="desactiver(${p.id})">🚫</button>
+              </td>
+            </tr>`;
+          });
+          document.getElementById('listePostes').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">Aucun poste</td></tr>';
+        }
+      }).obtenirTousPostes();
+    }
+
+    function chargerGrilleSalariale() {
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success) {
+          const grille = result.grille;
+          Object.keys(grille).forEach(categorie => {
+            const data = grille[categorie];
+            const prefix = categorie.toLowerCase().replace(/[^a-z]/g, '');
+            document.getElementById('nb' + categorie).textContent = data.nb || 0;
+            document.getElementById('moy' + categorie).textContent = (data.moyenne || 0).toLocaleString() + ' FCFA';
+            document.getElementById('fourchette' + categorie).textContent =
+              (data.min || 0).toLocaleString() + ' - ' + (data.max || 0).toLocaleString() + ' FCFA';
+          });
+        }
+      }).obtenirGrilleSalariale();
+    }
+
+    function chargerSelectPostes() {
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success) {
+          let html = '<option value="">Choisir un poste...</option>';
+          result.postes.forEach(p => {
+            html += `<option value="${p.id}">${p.intitule} (${p.categorie})</option>`;
+          });
+          document.getElementById('selectPoste').innerHTML = html;
+        }
+      }).obtenirTousPostes();
+    }
+
+    document.getElementById('formPoste').onsubmit = function(e) {
+      e.preventDefault();
+
+      const salaireMin = parseInt(document.getElementById('salaireMin').value);
+      const salaireMax = parseInt(document.getElementById('salaireMax').value);
+
+      if (salaireMax < salaireMin) {
+        alert('Le salaire maximum doit être supérieur au salaire minimum');
+        return;
+      }
+
+      const data = {
+        intitule: document.getElementById('intitule').value,
+        categorie: document.getElementById('categorie').value,
+        description: document.getElementById('description').value,
+        salaireMin: salaireMin,
+        salaireMax: salaireMax,
+        niveauEtude: document.getElementById('niveauEtude').value,
+        experienceMin: document.getElementById('experienceMin').value,
+        statut: document.getElementById('statut').value,
+        competences: document.getElementById('competences').value,
+        notes: document.getElementById('notes').value
+      };
+
+      google.script.run.withSuccessHandler(function(result) {
+        alert(result.message);
+        if (result.success) {
+          document.getElementById('formPoste').reset();
+          switchTab('liste');
+        }
+      }).ajouterPoste(data.intitule, data.categorie, data.description, data.salaireMin, data.salaireMax,
+                      data.niveauEtude, data.experienceMin, data.statut, data.competences, data.notes);
+    };
+
+    function afficherCompetences() {
+      const posteId = document.getElementById('selectPoste').value;
+      if (!posteId) {
+        document.getElementById('competencesDetail').style.display = 'none';
+        return;
+      }
+
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success && result.poste) {
+          const p = result.poste;
+          let html = `
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px;">
+              <div><strong>Intitulé:</strong> ${p.intitule}</div>
+              <div><strong>Catégorie:</strong> ${p.categorie}</div>
+              <div><strong>Niveau d'étude:</strong> ${p.niveauEtude}</div>
+              <div><strong>Expérience:</strong> ${p.experienceMin} an${p.experienceMin > 1 ? 's' : ''}</div>
+              <div><strong>Salaire:</strong> ${p.salaireMin.toLocaleString()} - ${p.salaireMax.toLocaleString()} FCFA</div>
+              <div><strong>Statut:</strong> ${p.statut}</div>
+            </div>
+            ${p.description ? `<div style="margin-bottom: 10px;"><strong>Description:</strong><br>${p.description}</div>` : ''}
+            ${p.competences ? `<div style="margin-top: 15px; padding: 15px; background: #f5f5f5; border-radius: 6px;">
+              <strong style="color: #34a853;">🎓 Compétences Requises:</strong><br>
+              <ul style="margin-top: 10px; padding-left: 20px;">
+                ${p.competences.split(',').map(c => `<li>${c.trim()}</li>`).join('')}
+              </ul>
+            </div>` : ''}
+          `;
+          document.getElementById('competencesContent').innerHTML = html;
+          document.getElementById('competencesDetail').style.display = 'block';
+        }
+      }).obtenirPosteParId(posteId);
+    }
+
+    function editer(id) {
+      alert('Édition du poste: ' + id);
+    }
+
+    function desactiver(id) {
+      if (confirm('Désactiver le poste ' + id + ' ?')) {
+        google.script.run.withSuccessHandler(function(result) {
+          alert(result.message);
+          if (result.success) chargerPostes();
+        }).desactiverPoste(id);
+      }
+    }
+
+    window.onload = function() {
+      chargerPostes();
+    };
+  </script>
+</body>
+</html>

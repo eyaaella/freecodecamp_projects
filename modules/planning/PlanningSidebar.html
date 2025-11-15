@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+    .header { background: linear-gradient(135deg, #4285f4 0%, #1967d2 100%); color: white; padding: 20px; text-align: center; }
+    .header h2 { font-size: 18px; margin-bottom: 5px; }
+    .header p { font-size: 11px; opacity: 0.9; }
+    .container { padding: 15px; }
+    .stat-card { background: white; border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #4285f4; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .stat-card h3 { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
+    .stat-card .value { font-size: 22px; font-weight: 700; color: #4285f4; }
+    .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
+    .btn-primary { background: linear-gradient(135deg, #4285f4 0%, #1967d2 100%); color: white; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4); }
+    .btn-success { background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%); color: white; }
+    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4); }
+    .btn-info { background: linear-gradient(135deg, #00bcd4 0%, #0097a7 100%); color: white; }
+    .btn-info:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 188, 212, 0.4); }
+    .section-title { font-size: 13px; font-weight: 600; color: #4285f4; margin: 15px 0 10px; padding-bottom: 5px; border-bottom: 2px solid #4285f4; }
+    .menu-item { background: white; border-radius: 6px; padding: 10px 12px; margin-bottom: 6px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 8px; transition: all 0.2s; border: 1px solid #e0e0e0; }
+    .menu-item:hover { background: #4285f4; color: white; transform: translateX(3px); }
+    .filter { margin-bottom: 15px; }
+    .filter label { display: block; font-size: 11px; color: #666; margin-bottom: 5px; font-weight: 600; }
+    .filter select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; background: white; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>📅 Planning Général</h2>
+    <p>Suivi Temporel</p>
+  </div>
+
+  <div class="container">
+    <div class="stat-card">
+      <h3>Plannings Actifs</h3>
+      <div class="value" id="planningsActifs">-</div>
+    </div>
+
+    <div class="stat-card" style="border-left-color: #34a853;">
+      <h3>Taux Réalisation Moyen</h3>
+      <div class="value" id="tauxRealisation" style="color: #34a853;">-%</div>
+    </div>
+
+    <div class="stat-card" style="border-left-color: #ff9800;">
+      <h3>Écarts Significatifs</h3>
+      <div class="value" id="ecarts" style="color: #ff9800;">-</div>
+    </div>
+
+    <div class="section-title">🎯 Actions Rapides</div>
+    <button class="btn btn-success" onclick="nouveauPlanning()">
+      <span>➕</span>
+      <span>Nouveau Planning</span>
+    </button>
+    <button class="btn btn-info" onclick="vueGantt()">
+      <span>📊</span>
+      <span>Vue Gantt</span>
+    </button>
+    <button class="btn btn-primary" onclick="ouvrirGestionnaire()">
+      <span>📅</span>
+      <span>Calendrier Complet</span>
+    </button>
+
+    <div class="section-title">🔍 Filtres</div>
+    <div class="filter">
+      <label>Par Type</label>
+      <select id="filtreType" onchange="appliquerFiltre()">
+        <option value="">Tous les types</option>
+        <option value="Hebdomadaire">Hebdomadaire</option>
+        <option value="Mensuel">Mensuel</option>
+        <option value="Trimestriel">Trimestriel</option>
+        <option value="Annuel">Annuel</option>
+      </select>
+    </div>
+
+    <div class="filter">
+      <label>Par Projet</label>
+      <select id="filtreProjet" onchange="appliquerFiltre()">
+        <option value="">Tous les projets</option>
+      </select>
+    </div>
+
+    <div class="filter">
+      <label>Par Période</label>
+      <select id="filtrePeriode" onchange="appliquerFiltre()">
+        <option value="">Toutes les périodes</option>
+        <option value="semaine">Cette semaine</option>
+        <option value="mois">Ce mois</option>
+        <option value="trimestre">Ce trimestre</option>
+        <option value="annee">Cette année</option>
+      </select>
+    </div>
+
+    <div class="section-title">📊 Navigation</div>
+    <div class="menu-item" onclick="naviguer('tous')">
+      <span>📅</span>
+      <span>Voir tous les plannings</span>
+    </div>
+    <div class="menu-item" onclick="naviguer('encours')">
+      <span>⏳</span>
+      <span>En cours</span>
+    </div>
+    <div class="menu-item" onclick="naviguer('ecarts')">
+      <span>⚠️</span>
+      <span>Avec écarts</span>
+    </div>
+    <div class="menu-item" onclick="naviguer('gantt')">
+      <span>📊</span>
+      <span>Vue Gantt</span>
+    </div>
+    <div class="menu-item" onclick="retourMenu()">
+      <span>🏠</span>
+      <span>Menu Principal</span>
+    </div>
+  </div>
+
+  <script>
+    function nouveauPlanning() {
+      ouvrirGestionnaire();
+    }
+
+    function vueGantt() {
+      google.script.run.afficherModalPlanning('gantt');
+    }
+
+    function ouvrirGestionnaire() {
+      google.script.run.afficherModalPlanning();
+    }
+
+    function naviguer(dest) {
+      if (dest === 'tous') google.script.run.naviguerVersPlanning();
+      else if (dest === 'encours') google.script.run.naviguerVersPlanning('En cours');
+      else if (dest === 'ecarts') google.script.run.naviguerVersPlanning('ecarts');
+      else if (dest === 'gantt') google.script.run.afficherModalPlanning('gantt');
+    }
+
+    function retourMenu() {
+      google.script.run.afficherMenuPrincipal();
+    }
+
+    function appliquerFiltre() {
+      const type = document.getElementById('filtreType').value;
+      const projet = document.getElementById('filtreProjet').value;
+      const periode = document.getElementById('filtrePeriode').value;
+      google.script.run.naviguerVersPlanning(type, projet, periode);
+    }
+
+    // Charger les statistiques et projets au démarrage
+    window.onload = function() {
+      google.script.run
+        .withSuccessHandler(function(stats) {
+          document.getElementById('planningsActifs').textContent = stats.actifs || 0;
+          document.getElementById('tauxRealisation').textContent = (stats.tauxMoyen || 0).toFixed(1) + '%';
+          document.getElementById('ecarts').textContent = stats.ecarts || 0;
+        })
+        .obtenirStatistiquesPlanning();
+
+      // Charger les projets pour le filtre
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            let html = '<option value="">Tous les projets</option>';
+            result.projets.forEach(p => {
+              html += `<option value="${p.id}">${p.nom}</option>`;
+            });
+            document.getElementById('filtreProjet').innerHTML = html;
+          }
+        })
+        .obtenirTousProjets();
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+    .header { background: linear-gradient(135deg, #fbbc04 0%, #f9ab00 100%); color: white; padding: 20px; }
+    .header h1 { font-size: 22px; margin-bottom: 5px; }
+    .container { padding: 20px; }
+    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #dee2e6; }
+    .tab { padding: 12px 20px; background: #f8f9fa; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; }
+    .tab.active { background: #fbbc04; color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .btn-primary { background: #fbbc04; color: white; }
+    .btn-success { background: #34a853; color: white; }
+    .btn-danger { background: #ea4335; color: white; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .data-table { width: 100%; background: white; border-radius: 8px; overflow: hidden; overflow-x: auto; }
+    .data-table table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+    .data-table th { background: #fbbc04; color: white; padding: 12px; text-align: left; font-size: 12px; }
+    .data-table td { padding: 12px; border-bottom: 1px solid #dee2e6; font-size: 13px; }
+    .action-btn { padding: 5px 10px; margin: 0 2px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
+    .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .badge-success { background: #d4edda; color: #155724; }
+    .badge-warning { background: #fff3cd; color: #856404; }
+    .badge-danger { background: #f8d7da; color: #721c24; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🏗️ Gestionnaire d'Ouvrages</h1>
+    <p>CRUD Complet des Ouvrages Hydrauliques</p>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('liste')">📋 Liste</button>
+      <button class="tab" onclick="switchTab('nouveau')">➕ Nouveau</button>
+      <button class="tab" onclick="switchTab('recherche')">🔍 Recherche</button>
+      <button class="tab" onclick="switchTab('stats')">📊 Statistiques</button>
+    </div>
+
+    <!-- Onglet Liste -->
+    <div id="liste" class="tab-content active">
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nom</th>
+              <th>Type</th>
+              <th>Projet</th>
+              <th>Statut</th>
+              <th>Coût</th>
+              <th>Progression</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="listeOuvrages">
+            <tr><td colspan="8" style="text-align:center;">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Onglet Nouveau -->
+    <div id="nouveau" class="tab-content">
+      <form id="formOuvrage">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nom de l'Ouvrage *</label>
+            <input type="text" id="nom" required>
+          </div>
+          <div class="form-group">
+            <label>Projet ID *</label>
+            <input type="number" id="projetId" min="1" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type d'Ouvrage *</label>
+            <select id="type" required>
+              <option value="">Sélectionner...</option>
+              <option value="Barrage">Barrage</option>
+              <option value="Canal">Canal</option>
+              <option value="Bassin">Bassin</option>
+              <option value="Station de pompage">Station de pompage</option>
+              <option value="Prise d'eau">Prise d'eau</option>
+              <option value="Déversoir">Déversoir</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Responsable *</label>
+            <input type="text" id="responsable" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date Début *</label>
+            <input type="date" id="dateDebut" required>
+          </div>
+          <div class="form-group">
+            <label>Date Fin Prévue *</label>
+            <input type="date" id="dateFin" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Coût Estimé (FCFA) *</label>
+            <input type="number" id="cout" min="0" required>
+          </div>
+          <div class="form-group">
+            <label>Statut *</label>
+            <select id="statut" required>
+              <option value="">Sélectionner...</option>
+              <option value="Planifié">Planifié</option>
+              <option value="En cours">En cours</option>
+              <option value="Terminé">Terminé</option>
+              <option value="En attente">En attente</option>
+              <option value="Suspendu">Suspendu</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="description" rows="4"></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">💾 Enregistrer l'Ouvrage</button>
+      </form>
+    </div>
+
+    <!-- Onglet Recherche -->
+    <div id="recherche" class="tab-content">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Critère de recherche</label>
+          <select id="critere">
+            <option value="nom">Nom</option>
+            <option value="type">Type</option>
+            <option value="statut">Statut</option>
+            <option value="responsable">Responsable</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Valeur</label>
+          <input type="text" id="valeurRecherche">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="rechercher()">🔍 Rechercher</button>
+      <div id="resultatsRecherche" style="margin-top: 20px;"></div>
+    </div>
+
+    <!-- Onglet Stats -->
+    <div id="stats" class="tab-content">
+      <h3>📊 Statistiques des Ouvrages</h3>
+      <div id="statsContent" style="margin-top: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+          <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #fbbc04;">
+            <h4 style="color: #666; font-size: 12px; margin-bottom: 10px;">TOTAL OUVRAGES</h4>
+            <div style="font-size: 32px; font-weight: 700; color: #fbbc04;" id="statTotal">-</div>
+          </div>
+          <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #1a73e8;">
+            <h4 style="color: #666; font-size: 12px; margin-bottom: 10px;">EN COURS</h4>
+            <div style="font-size: 32px; font-weight: 700; color: #1a73e8;" id="statEnCours">-</div>
+          </div>
+          <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #34a853;">
+            <h4 style="color: #666; font-size: 12px; margin-bottom: 10px;">TERMINÉS</h4>
+            <div style="font-size: 32px; font-weight: 700; color: #34a853;" id="statTermines">-</div>
+          </div>
+          <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #ea4335;">
+            <h4 style="color: #666; font-size: 12px; margin-bottom: 10px;">BUDGET TOTAL</h4>
+            <div style="font-size: 24px; font-weight: 700; color: #ea4335;" id="statBudget">- FCFA</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+      if (tabId === 'liste') chargerOuvrages();
+      if (tabId === 'stats') chargerStats();
+    }
+
+    function chargerOuvrages() {
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success) {
+          let html = '';
+          result.ouvrages.forEach(o => {
+            let statutClass = o.statut === 'Terminé' ? 'badge-success' : o.statut === 'En cours' ? 'badge-warning' : 'badge-danger';
+            html += `<tr>
+              <td>${o.id}</td>
+              <td>${o.nom}</td>
+              <td>${o.type}</td>
+              <td>Projet #${o.projetId}</td>
+              <td><span class="badge ${statutClass}">${o.statut}</span></td>
+              <td>${(o.cout || 0).toLocaleString()} FCFA</td>
+              <td>${((o.progression || 0) * 100).toFixed(1)}%</td>
+              <td>
+                <button class="action-btn btn-primary" onclick="editer(${o.id})">✏️</button>
+                <button class="action-btn btn-danger" onclick="supprimer(${o.id})">🗑️</button>
+              </td>
+            </tr>`;
+          });
+          document.getElementById('listeOuvrages').innerHTML = html || '<tr><td colspan="8" style="text-align:center;">Aucun ouvrage</td></tr>';
+        }
+      }).withFailureHandler(function(error) {
+        document.getElementById('listeOuvrages').innerHTML = '<tr><td colspan="8" style="text-align:center; color: #ea4335;">Erreur: ' + error.message + '</td></tr>';
+      }).obtenirTousOuvrages();
+    }
+
+    function chargerStats() {
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success) {
+          document.getElementById('statTotal').textContent = result.stats.total || 0;
+          document.getElementById('statEnCours').textContent = result.stats.enCours || 0;
+          document.getElementById('statTermines').textContent = result.stats.termines || 0;
+          document.getElementById('statBudget').textContent = (result.stats.budget || 0).toLocaleString() + ' FCFA';
+        }
+      }).obtenirStatsOuvrages();
+    }
+
+    document.getElementById('formOuvrage').onsubmit = function(e) {
+      e.preventDefault();
+      const data = {
+        nom: document.getElementById('nom').value,
+        projetId: parseInt(document.getElementById('projetId').value),
+        type: document.getElementById('type').value,
+        description: document.getElementById('description').value,
+        responsable: document.getElementById('responsable').value,
+        dateDebut: document.getElementById('dateDebut').value,
+        dateFin: document.getElementById('dateFin').value,
+        cout: parseFloat(document.getElementById('cout').value),
+        statut: document.getElementById('statut').value
+      };
+
+      google.script.run.withSuccessHandler(function(result) {
+        alert(result.message);
+        if (result.success) {
+          document.getElementById('formOuvrage').reset();
+          switchTab('liste');
+        }
+      }).withFailureHandler(function(error) {
+        alert('Erreur: ' + error.message);
+      }).ajouterOuvrage(data.nom, data.projetId, data.type, data.description, data.responsable, data.dateDebut, data.dateFin, data.cout, data.statut);
+    };
+
+    function rechercher() {
+      const critere = document.getElementById('critere').value;
+      const valeur = document.getElementById('valeurRecherche').value;
+      google.script.run.withSuccessHandler(function(result) {
+        let html = '<div class="data-table"><table><thead><tr><th>ID</th><th>Nom</th><th>Type</th><th>Statut</th></tr></thead><tbody>';
+        if (result.success && result.resultats.length > 0) {
+          result.resultats.forEach(r => {
+            html += `<tr><td>${r.id}</td><td>${r.nom}</td><td>${r.type}</td><td>${r.statut}</td></tr>`;
+          });
+        } else {
+          html += '<tr><td colspan="4" style="text-align:center;">Aucun résultat</td></tr>';
+        }
+        html += '</tbody></table></div>';
+        document.getElementById('resultatsRecherche').innerHTML = html;
+      }).rechercherOuvrages(critere, valeur);
+    }
+
+    function editer(id) {
+      alert('Édition de l\'ouvrage: ' + id);
+    }
+
+    function supprimer(id) {
+      if (confirm('Supprimer l\'ouvrage #' + id + ' ?')) {
+        google.script.run.withSuccessHandler(function(result) {
+          alert(result.message);
+          if (result.success) chargerOuvrages();
+        }).supprimerOuvrage(id);
+      }
+    }
+
+    window.onload = function() {
+      chargerOuvrages();
+    };
+  </script>
+</body>
+</html>

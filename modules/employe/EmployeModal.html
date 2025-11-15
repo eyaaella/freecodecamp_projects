@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+    .header { background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%); color: white; padding: 20px; }
+    .header h1 { font-size: 22px; margin-bottom: 5px; }
+    .container { padding: 20px; }
+    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #dee2e6; }
+    .tab { padding: 12px 20px; background: #f8f9fa; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; }
+    .tab.active { background: #1a73e8; color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .btn-primary { background: #1a73e8; color: white; }
+    .btn-success { background: #34a853; color: white; }
+    .btn-danger { background: #ea4335; color: white; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .data-table { width: 100%; background: white; border-radius: 8px; overflow: hidden; }
+    .data-table table { width: 100%; border-collapse: collapse; }
+    .data-table th { background: #1a73e8; color: white; padding: 12px; text-align: left; font-size: 12px; }
+    .data-table td { padding: 12px; border-bottom: 1px solid #dee2e6; font-size: 13px; }
+    .action-btn { padding: 5px 10px; margin: 0 2px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
+    .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .badge-success { background: #34a853; color: white; }
+    .badge-warning { background: #fbbc04; color: white; }
+    .badge-danger { background: #ea4335; color: white; }
+    .alert { padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 13px; }
+    .alert-info { background: #e3f2fd; color: #1976d2; border-left: 4px solid #1976d2; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>👤 Gestionnaire d'Employés</h1>
+    <p>Gestion Complète des Ressources Humaines</p>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('liste')">📋 Liste</button>
+      <button class="tab" onclick="switchTab('nouveau')">➕ Nouveau</button>
+      <button class="tab" onclick="switchTab('recherche')">🔍 Recherche</button>
+      <button class="tab" onclick="switchTab('fiches')">📄 Fiches</button>
+    </div>
+
+    <!-- Onglet Liste -->
+    <div id="liste" class="tab-content active">
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nom Complet</th>
+              <th>Poste</th>
+              <th>Équipe</th>
+              <th>Téléphone</th>
+              <th>Statut</th>
+              <th>Ancienneté</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="listeEmployes">
+            <tr><td colspan="8" style="text-align:center;">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Onglet Nouveau -->
+    <div id="nouveau" class="tab-content">
+      <div class="alert alert-info">
+        📱 <strong>Format téléphone Cameroun:</strong> +237 6XX XXX XXX
+      </div>
+      <form id="formEmploye">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nom *</label>
+            <input type="text" id="nom" placeholder="Nom de famille" required>
+          </div>
+          <div class="form-group">
+            <label>Prénom *</label>
+            <input type="text" id="prenom" placeholder="Prénom" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email *</label>
+            <input type="email" id="email" placeholder="exemple@topogest.cm" required>
+          </div>
+          <div class="form-group">
+            <label>Téléphone (+237) *</label>
+            <input type="tel" id="telephone" placeholder="+237 6XX XXX XXX" pattern="\+237\s?6[0-9]{8}" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Poste (PosteID) *</label>
+            <input type="number" id="posteId" placeholder="ID du poste" required>
+          </div>
+          <div class="form-group">
+            <label>Équipe (EquipeID)</label>
+            <input type="number" id="equipeId" placeholder="ID de l'équipe">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date d'Embauche *</label>
+            <input type="date" id="dateEmbauche" required>
+          </div>
+          <div class="form-group">
+            <label>Date de Naissance *</label>
+            <input type="date" id="dateNaissance" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Statut *</label>
+            <select id="statut" required>
+              <option value="Actif">Actif</option>
+              <option value="Congé">Congé</option>
+              <option value="Suspendu">Suspendu</option>
+              <option value="Démissionnaire">Démissionnaire</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Salaire (FCFA) *</label>
+            <input type="number" id="salaire" min="0" placeholder="Montant en FCFA" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Compétences</label>
+          <textarea id="competences" rows="2" placeholder="Liste des compétences (séparées par des virgules)"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Certifications</label>
+          <textarea id="certifications" rows="2" placeholder="Certifications obtenues"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea id="notes" rows="2" placeholder="Notes complémentaires"></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">💾 Enregistrer l'Employé</button>
+      </form>
+    </div>
+
+    <!-- Onglet Recherche -->
+    <div id="recherche" class="tab-content">
+      <h3 style="margin-bottom: 15px;">🔍 Rechercher un Employé</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Critère de recherche</label>
+          <select id="critere">
+            <option value="nom">Nom</option>
+            <option value="prenom">Prénom</option>
+            <option value="email">Email</option>
+            <option value="telephone">Téléphone</option>
+            <option value="poste">Poste</option>
+            <option value="equipe">Équipe</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Valeur</label>
+          <input type="text" id="valeurRecherche" placeholder="Entrez votre recherche...">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="rechercher()">🔍 Rechercher</button>
+      <div id="resultatsRecherche" style="margin-top: 20px;"></div>
+    </div>
+
+    <!-- Onglet Fiches -->
+    <div id="fiches" class="tab-content">
+      <h3 style="margin-bottom: 15px;">📄 Fiches Individuelles</h3>
+      <div class="form-group">
+        <label>Sélectionner un employé</label>
+        <select id="selectEmploye" onchange="afficherFiche()">
+          <option value="">Choisir un employé...</option>
+        </select>
+      </div>
+      <div id="ficheDetail" style="background: white; padding: 20px; border-radius: 8px; margin-top: 15px; display: none;">
+        <h4 style="color: #1a73e8; margin-bottom: 15px;">Détails de l'Employé</h4>
+        <div id="ficheContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+      if (tabId === 'liste') chargerEmployes();
+      if (tabId === 'fiches') chargerSelectEmployes();
+    }
+
+    function chargerEmployes() {
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success) {
+          let html = '';
+          result.employes.forEach(e => {
+            const badgeClass = e.statut === 'Actif' ? 'badge-success' : e.statut === 'Congé' ? 'badge-warning' : 'badge-danger';
+            const anciennete = calculerAnciennete(e.dateEmbauche);
+            html += `<tr>
+              <td>${e.id}</td>
+              <td>${e.nom} ${e.prenom}</td>
+              <td>${e.poste}</td>
+              <td>${e.equipe || '-'}</td>
+              <td>${e.telephone}</td>
+              <td><span class="badge ${badgeClass}">${e.statut}</span></td>
+              <td>${anciennete}</td>
+              <td>
+                <button class="action-btn btn-primary" onclick="editer(${e.id})">✏️</button>
+                <button class="action-btn btn-danger" onclick="supprimer(${e.id})">🗑️</button>
+              </td>
+            </tr>`;
+          });
+          document.getElementById('listeEmployes').innerHTML = html || '<tr><td colspan="8" style="text-align:center;">Aucun employé</td></tr>';
+        }
+      }).obtenirEmployesActifs();
+    }
+
+    function chargerSelectEmployes() {
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success) {
+          let html = '<option value="">Choisir un employé...</option>';
+          result.employes.forEach(e => {
+            html += `<option value="${e.id}">${e.nom} ${e.prenom} - ${e.poste}</option>`;
+          });
+          document.getElementById('selectEmploye').innerHTML = html;
+        }
+      }).obtenirEmployesActifs();
+    }
+
+    function calculerAnciennete(dateEmbauche) {
+      if (!dateEmbauche) return '-';
+      const diff = new Date() - new Date(dateEmbauche);
+      const years = Math.floor(diff / (1000 * 60 * 60 * 24 * 365));
+      return years + ' an' + (years > 1 ? 's' : '');
+    }
+
+    document.getElementById('formEmploye').onsubmit = function(e) {
+      e.preventDefault();
+
+      // Validation téléphone Cameroun
+      const tel = document.getElementById('telephone').value;
+      if (!/^\+237\s?6[0-9]{8}$/.test(tel)) {
+        alert('Format téléphone invalide. Utilisez: +237 6XX XXX XXX');
+        return;
+      }
+
+      const data = {
+        nom: document.getElementById('nom').value,
+        prenom: document.getElementById('prenom').value,
+        email: document.getElementById('email').value,
+        telephone: tel,
+        posteId: document.getElementById('posteId').value,
+        equipeId: document.getElementById('equipeId').value,
+        dateEmbauche: document.getElementById('dateEmbauche').value,
+        dateNaissance: document.getElementById('dateNaissance').value,
+        statut: document.getElementById('statut').value,
+        salaire: document.getElementById('salaire').value,
+        competences: document.getElementById('competences').value,
+        certifications: document.getElementById('certifications').value,
+        notes: document.getElementById('notes').value
+      };
+
+      google.script.run.withSuccessHandler(function(result) {
+        alert(result.message);
+        if (result.success) {
+          document.getElementById('formEmploye').reset();
+          switchTab('liste');
+        }
+      }).ajouterEmploye(data.nom, data.prenom, data.email, data.telephone, data.posteId, data.equipeId,
+                         data.dateEmbauche, data.dateNaissance, data.statut, data.salaire,
+                         data.competences, data.certifications, data.notes);
+    };
+
+    function rechercher() {
+      const critere = document.getElementById('critere').value;
+      const valeur = document.getElementById('valeurRecherche').value;
+
+      if (!valeur) {
+        alert('Veuillez entrer une valeur de recherche');
+        return;
+      }
+
+      google.script.run.withSuccessHandler(function(result) {
+        let html = '<div class="data-table"><table><thead><tr><th>ID</th><th>Nom Complet</th><th>Email</th><th>Téléphone</th><th>Poste</th></tr></thead><tbody>';
+        if (result.success && result.resultats.length > 0) {
+          result.resultats.forEach(r => {
+            html += `<tr><td>${r.id}</td><td>${r.nom} ${r.prenom}</td><td>${r.email}</td><td>${r.telephone}</td><td>${r.poste}</td></tr>`;
+          });
+        } else {
+          html += '<tr><td colspan="5" style="text-align:center;">Aucun résultat</td></tr>';
+        }
+        html += '</tbody></table></div>';
+        document.getElementById('resultatsRecherche').innerHTML = html;
+      }).rechercherEmployes(critere, valeur);
+    }
+
+    function afficherFiche() {
+      const employeId = document.getElementById('selectEmploye').value;
+      if (!employeId) {
+        document.getElementById('ficheDetail').style.display = 'none';
+        return;
+      }
+
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success && result.employe) {
+          const e = result.employe;
+          let html = `
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+              <div><strong>Nom complet:</strong> ${e.nom} ${e.prenom}</div>
+              <div><strong>Email:</strong> ${e.email}</div>
+              <div><strong>Téléphone:</strong> ${e.telephone}</div>
+              <div><strong>Poste:</strong> ${e.poste}</div>
+              <div><strong>Équipe:</strong> ${e.equipe || '-'}</div>
+              <div><strong>Statut:</strong> ${e.statut}</div>
+              <div><strong>Date embauche:</strong> ${e.dateEmbauche}</div>
+              <div><strong>Date naissance:</strong> ${e.dateNaissance}</div>
+              <div><strong>Salaire:</strong> ${e.salaire.toLocaleString()} FCFA</div>
+              <div><strong>Ancienneté:</strong> ${calculerAnciennete(e.dateEmbauche)}</div>
+            </div>
+            ${e.competences ? `<div style="margin-top: 15px;"><strong>Compétences:</strong> ${e.competences}</div>` : ''}
+            ${e.certifications ? `<div style="margin-top: 10px;"><strong>Certifications:</strong> ${e.certifications}</div>` : ''}
+          `;
+          document.getElementById('ficheContent').innerHTML = html;
+          document.getElementById('ficheDetail').style.display = 'block';
+        }
+      }).obtenirEmployeParId(employeId);
+    }
+
+    function editer(id) {
+      alert('Édition de l\'employé: ' + id);
+    }
+
+    function supprimer(id) {
+      if (confirm('Supprimer l\'employé ' + id + ' ?')) {
+        google.script.run.withSuccessHandler(function(result) {
+          alert(result.message);
+          if (result.success) chargerEmployes();
+        }).supprimerEmploye(id);
+      }
+    }
+
+    window.onload = function() {
+      chargerEmployes();
+    };
+  </script>
+</body>
+</html>

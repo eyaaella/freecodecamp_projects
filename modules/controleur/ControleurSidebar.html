@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+    .header { background: linear-gradient(135deg, #137333 0%, #0d5025 100%); color: white; padding: 20px; text-align: center; }
+    .header h2 { font-size: 18px; margin-bottom: 5px; }
+    .header p { font-size: 11px; opacity: 0.9; }
+    .container { padding: 15px; }
+    .stat-card { background: white; border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #137333; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .stat-card h3 { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
+    .stat-card .value { font-size: 22px; font-weight: 700; color: #137333; }
+    .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
+    .btn-primary { background: linear-gradient(135deg, #137333 0%, #0d5025 100%); color: white; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(19, 115, 51, 0.4); }
+    .btn-success { background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%); color: white; }
+    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4); }
+    .btn-info { background: linear-gradient(135deg, #00796b 0%, #004d40 100%); color: white; }
+    .btn-info:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 121, 107, 0.4); }
+    .section-title { font-size: 13px; font-weight: 600; color: #137333; margin: 15px 0 10px; padding-bottom: 5px; border-bottom: 2px solid #137333; }
+    .menu-item { background: white; border-radius: 6px; padding: 10px 12px; margin-bottom: 6px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 8px; transition: all 0.2s; border: 1px solid #e0e0e0; }
+    .menu-item:hover { background: #137333; color: white; transform: translateX(3px); }
+    .filter { margin-bottom: 15px; }
+    .filter label { display: block; font-size: 11px; color: #666; margin-bottom: 5px; font-weight: 600; }
+    .filter select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; background: white; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>✓ Contrôleurs Externes</h2>
+    <p>Bureau de Contrôle</p>
+  </div>
+
+  <div class="container">
+    <div class="stat-card">
+      <h3>Contrôleurs Totaux</h3>
+      <div class="value" id="controleursTotaux">-</div>
+    </div>
+
+    <div class="stat-card" style="border-left-color: #34a853;">
+      <h3>Actifs</h3>
+      <div class="value" id="controleursActifs" style="color: #34a853;">-</div>
+    </div>
+
+    <div class="stat-card" style="border-left-color: #4285f4;">
+      <h3>Contrôles ce Mois</h3>
+      <div class="value" id="controlesMois" style="color: #4285f4;">-</div>
+    </div>
+
+    <div class="section-title">🎯 Actions Rapides</div>
+    <button class="btn btn-success" onclick="nouveauControleur()">
+      <span>➕</span>
+      <span>Nouveau Contrôleur</span>
+    </button>
+    <button class="btn btn-info" onclick="affecterMission()">
+      <span>📋</span>
+      <span>Affecter Mission</span>
+    </button>
+    <button class="btn btn-primary" onclick="ouvrirGestionnaire()">
+      <span>📊</span>
+      <span>Statistiques</span>
+    </button>
+
+    <div class="section-title">🔍 Filtres</div>
+    <div class="filter">
+      <label>Par Spécialité</label>
+      <select id="filtreSpecialite" onchange="appliquerFiltre()">
+        <option value="">Toutes les spécialités</option>
+        <option value="Génie civil">Génie civil</option>
+        <option value="Topographie">Topographie</option>
+        <option value="Irrigation">Irrigation</option>
+        <option value="Environnement">Environnement</option>
+        <option value="Géotechnique">Géotechnique</option>
+      </select>
+    </div>
+
+    <div class="filter">
+      <label>Par Zone</label>
+      <select id="filtreZone" onchange="appliquerFiltre()">
+        <option value="">Toutes les zones</option>
+        <option value="Nord">Nord</option>
+        <option value="Sud">Sud</option>
+        <option value="Est">Est</option>
+        <option value="Ouest">Ouest</option>
+        <option value="Centre">Centre</option>
+      </select>
+    </div>
+
+    <div class="section-title">📊 Navigation</div>
+    <div class="menu-item" onclick="naviguer('tous')">
+      <span>✓</span>
+      <span>Voir tous les contrôleurs</span>
+    </div>
+    <div class="menu-item" onclick="naviguer('actifs')">
+      <span>⭐</span>
+      <span>Contrôleurs actifs</span>
+    </div>
+    <div class="menu-item" onclick="naviguer('specialite')">
+      <span>🎓</span>
+      <span>Par spécialité</span>
+    </div>
+    <div class="menu-item" onclick="naviguer('missions')">
+      <span>📋</span>
+      <span>Missions en cours</span>
+    </div>
+    <div class="menu-item" onclick="retourMenu()">
+      <span>🏠</span>
+      <span>Menu Principal</span>
+    </div>
+  </div>
+
+  <script>
+    function nouveauControleur() {
+      ouvrirGestionnaire();
+    }
+
+    function affecterMission() {
+      ouvrirGestionnaire();
+    }
+
+    function ouvrirGestionnaire() {
+      google.script.run.afficherModalControleur();
+    }
+
+    function naviguer(dest) {
+      if (dest === 'tous') google.script.run.naviguerVersControleurs();
+      else if (dest === 'actifs') google.script.run.naviguerVersControleurs('Actif');
+      else if (dest === 'specialite') google.script.run.naviguerVersControleurs('specialite');
+      else if (dest === 'missions') google.script.run.naviguerVersControleurs('missions');
+    }
+
+    function retourMenu() {
+      google.script.run.afficherMenuPrincipal();
+    }
+
+    function appliquerFiltre() {
+      const specialite = document.getElementById('filtreSpecialite').value;
+      const zone = document.getElementById('filtreZone').value;
+      google.script.run.naviguerVersControleurs(specialite, zone);
+    }
+
+    // Charger les statistiques au démarrage
+    window.onload = function() {
+      google.script.run
+        .withSuccessHandler(function(stats) {
+          document.getElementById('controleursTotaux').textContent = stats.total || 0;
+          document.getElementById('controleursActifs').textContent = stats.actifs || 0;
+          document.getElementById('controlesMois').textContent = stats.controlesMois || 0;
+        })
+        .obtenirStatistiquesControleurs();
+    };
+  </script>
+</body>
+</html>

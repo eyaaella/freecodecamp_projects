@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+    .header { background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%); color: white; padding: 20px; }
+    .header h1 { font-size: 22px; margin-bottom: 5px; }
+    .container { padding: 20px; max-height: 600px; overflow-y: auto; }
+    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #dee2e6; flex-wrap: wrap; }
+    .tab { padding: 12px 20px; background: #f8f9fa; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; border-top-left-radius: 8px; border-top-right-radius: 8px; }
+    .tab.active { background: #1a73e8; color: white; }
+    .tab:hover { background: #e9ecef; }
+    .tab.active:hover { background: #174ea6; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1); }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-right: 10px; }
+    .btn-primary { background: #1a73e8; color: white; }
+    .btn-primary:hover { background: #174ea6; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4); }
+    .btn-success { background: #34a853; color: white; }
+    .btn-danger { background: #ea4335; color: white; }
+    .btn-warning { background: #fbbc04; color: #333; }
+    .data-table { width: 100%; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow-x: auto; }
+    .data-table table { width: 100%; min-width: 1400px; border-collapse: collapse; }
+    .data-table th { background: #1a73e8; color: white; padding: 12px; text-align: left; font-size: 12px; white-space: nowrap; }
+    .data-table td { padding: 12px; border-bottom: 1px solid #dee2e6; font-size: 13px; }
+    .data-table tr:hover { background: #f8f9fa; }
+    .action-btn { padding: 5px 10px; margin: 0 2px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
+    .badge { display: inline-block; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .badge-success { background: #34a853; color: white; }
+    .badge-warning { background: #fbbc04; color: #333; }
+    .badge-danger { background: #ea4335; color: white; }
+    .badge-info { background: #1a73e8; color: white; }
+    .badge-secondary { background: #9aa0a6; color: white; }
+    .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+    .stat-card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid #1a73e8; }
+    .stat-card h3 { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
+    .stat-card .value { font-size: 24px; font-weight: 700; color: #1a73e8; }
+    .alert { padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+    .alert-danger { background: #fce8e6; border-left: 4px solid #ea4335; color: #c5221f; }
+    .montant-calcule { background: #e6f4ea; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #34a853; }
+    .montant-calcule h4 { color: #137333; margin-bottom: 10px; }
+    .montant-calcule .total { font-size: 28px; font-weight: 700; color: #137333; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🧾 Gestionnaire de Factures</h1>
+    <p>Facturation Clients - Cameroun (FCFA)</p>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('liste')">📋 Liste</button>
+      <button class="tab" onclick="switchTab('nouvelle')">➕ Nouvelle</button>
+      <button class="tab" onclick="switchTab('paiement')">💳 Paiement</button>
+      <button class="tab" onclick="switchTab('retards')">⚠️ Retards</button>
+      <button class="tab" onclick="switchTab('stats')">📊 Statistiques</button>
+    </div>
+
+    <!-- Onglet Liste -->
+    <div id="liste" class="tab-content active">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <h3>CA Total TTC</h3>
+          <div class="value" id="totalCA">-</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #34a853;">
+          <h3>Montant Payé</h3>
+          <div class="value" id="totalPaye" style="color: #34a853;">-</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #ea4335;">
+          <h3>Créances</h3>
+          <div class="value" id="totalCreances" style="color: #ea4335;">-</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #fbbc04;">
+          <h3>Taux Recouvrement</h3>
+          <div class="value" id="tauxRecouvrement" style="color: #fbbc04;">-%</div>
+        </div>
+      </div>
+
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>N° Facture</th>
+              <th>Projet</th>
+              <th>Client</th>
+              <th>Date</th>
+              <th>Échéance</th>
+              <th>HT (FCFA)</th>
+              <th>TVA</th>
+              <th>TTC (FCFA)</th>
+              <th>Payé (FCFA)</th>
+              <th>Restant</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="listeFactures">
+            <tr><td colspan="12" style="text-align:center;">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Onglet Nouvelle -->
+    <div id="nouvelle" class="tab-content">
+      <form id="formFacture">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Projet *</label>
+            <select id="projetId" required>
+              <option value="">Sélectionner un projet...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Client *</label>
+            <input type="text" id="client" required placeholder="Nom du client">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date Facture *</label>
+            <input type="date" id="dateFacture" required>
+          </div>
+          <div class="form-group">
+            <label>Date Échéance *</label>
+            <input type="date" id="dateEcheance" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Libellé *</label>
+          <input type="text" id="libelle" required placeholder="Description de la prestation">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Montant HT (FCFA) *</label>
+            <input type="number" id="montantHT" min="0" step="1000" required placeholder="0" oninput="calculerMontants()">
+          </div>
+          <div class="form-group">
+            <label>Taux TVA (%) *</label>
+            <select id="tauxTVA" onchange="calculerMontants()">
+              <option value="0">0% (Exonéré)</option>
+              <option value="19.25" selected>19,25% (Standard Cameroun)</option>
+              <option value="5.5">5,5% (Réduit)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="montant-calcule">
+          <h4>💰 Calcul Automatique:</h4>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+            <div>
+              <small style="color: #666;">Montant TVA:</small><br>
+              <strong id="montantTVACalc" style="font-size: 18px;">0 FCFA</strong>
+            </div>
+            <div>
+              <small style="color: #666;">Montant TTC:</small><br>
+              <strong id="montantTTCCalc" class="total">0 FCFA</strong>
+            </div>
+            <div>
+              <small style="color: #666;">En lettres:</small><br>
+              <small id="montantLettres" style="font-style: italic;">-</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Mode de Paiement</label>
+            <select id="modePaiement">
+              <option value="Virement">Virement bancaire</option>
+              <option value="Chèque">Chèque</option>
+              <option value="Espèces">Espèces</option>
+              <option value="Mobile Money">Mobile Money</option>
+              <option value="Autre">Autre</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Statut</label>
+            <select id="statut">
+              <option value="Brouillon">Brouillon</option>
+              <option value="Émise" selected>Émise</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Observations</label>
+          <textarea id="observations" rows="3" placeholder="Notes ou remarques..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-success">💾 Enregistrer Facture</button>
+        <button type="button" class="btn btn-danger" onclick="document.getElementById('formFacture').reset(); calculerMontants();">🔄 Réinitialiser</button>
+      </form>
+    </div>
+
+    <!-- Onglet Paiement -->
+    <div id="paiement" class="tab-content">
+      <h3 style="margin-bottom: 15px;">💳 Enregistrement de Paiement</h3>
+
+      <form id="formPaiement">
+        <div class="form-group">
+          <label>Numéro de Facture *</label>
+          <select id="factureIdPaiement" required onchange="afficherDetailFacture()">
+            <option value="">Sélectionner une facture...</option>
+          </select>
+        </div>
+
+        <div id="detailFacture" style="display: none; background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
+          <h4>Détails de la facture:</h4>
+          <p><strong>Client:</strong> <span id="detailClient">-</span></p>
+          <p><strong>Montant TTC:</strong> <span id="detailMontant">-</span></p>
+          <p><strong>Déjà payé:</strong> <span id="detailPaye">-</span></p>
+          <p><strong>Restant dû:</strong> <span id="detailRestant" style="color: #ea4335; font-weight: bold;">-</span></p>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Montant du Paiement (FCFA) *</label>
+            <input type="number" id="montantPaiement" min="0" step="1000" required placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Date du Paiement *</label>
+            <input type="date" id="datePaiement" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Mode de Paiement</label>
+          <select id="modePaiementEnreg">
+            <option value="Virement">Virement bancaire</option>
+            <option value="Chèque">Chèque</option>
+            <option value="Espèces">Espèces</option>
+            <option value="Mobile Money">Mobile Money</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Référence du Paiement</label>
+          <input type="text" id="referencePaiement" placeholder="N° de transaction, chèque...">
+        </div>
+
+        <button type="submit" class="btn btn-success">✅ Enregistrer Paiement</button>
+      </form>
+    </div>
+
+    <!-- Onglet Retards -->
+    <div id="retards" class="tab-content">
+      <div class="alert alert-danger">
+        <strong>⚠️ Factures en Retard de Paiement</strong><br>
+        Les factures ci-dessous ont dépassé leur date d'échéance.
+      </div>
+
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>N° Facture</th>
+              <th>Client</th>
+              <th>Date Échéance</th>
+              <th>Retard (jours)</th>
+              <th>Montant Dû (FCFA)</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="listeRetards">
+            <tr><td colspan="6" style="text-align:center; color: #34a853;">✅ Aucune facture en retard</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Onglet Stats -->
+    <div id="stats" class="tab-content">
+      <h3 style="margin-bottom: 15px;">📊 Statistiques de Facturation</h3>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <h3>Nb Factures Émises</h3>
+          <div class="value">-</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #34a853;">
+          <h3>Nb Factures Payées</h3>
+          <div class="value" style="color: #34a853;">-</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #ea4335;">
+          <h3>Nb En Retard</h3>
+          <div class="value" style="color: #ea4335;">-</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #fbbc04;">
+          <h3>Délai Moyen (jours)</h3>
+          <div class="value" style="color: #fbbc04;">-</div>
+        </div>
+      </div>
+
+      <h4 style="margin: 20px 0 10px;">Top Clients par CA</h4>
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Nb Factures</th>
+              <th>CA TTC (FCFA)</th>
+              <th>Montant Payé</th>
+              <th>Taux Recouvrement</th>
+            </tr>
+          </thead>
+          <tbody id="statsClients">
+            <tr><td colspan="5" style="text-align:center;">Aucune donnée</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+
+      if (tabId === 'liste') chargerFactures();
+      else if (tabId === 'retards') chargerRetards();
+      else if (tabId === 'stats') chargerStats();
+    }
+
+    function calculerMontants() {
+      const ht = parseFloat(document.getElementById('montantHT').value) || 0;
+      const tva = parseFloat(document.getElementById('tauxTVA').value) || 0;
+
+      const montantTVA = ht * (tva / 100);
+      const montantTTC = ht + montantTVA;
+
+      document.getElementById('montantTVACalc').textContent = montantTVA.toLocaleString() + ' FCFA';
+      document.getElementById('montantTTCCalc').textContent = montantTTC.toLocaleString() + ' FCFA';
+
+      // Simplification en lettres
+      if (montantTTC > 0) {
+        document.getElementById('montantLettres').textContent = 'Voir facture';
+      }
+    }
+
+    function chargerFactures() {
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success && result.factures) {
+          let html = '';
+          let totalCA = 0, totalPaye = 0;
+
+          result.factures.forEach(f => {
+            totalCA += f.montantTTC || 0;
+            totalPaye += f.montantPaye || 0;
+
+            const restant = (f.montantTTC || 0) - (f.montantPaye || 0);
+            let statutBadge = 'info';
+            if (f.statut === 'Payée') statutBadge = 'success';
+            else if (f.statut === 'En retard') statutBadge = 'danger';
+            else if (f.statut === 'Payée partiellement') statutBadge = 'warning';
+            else if (f.statut === 'Annulée') statutBadge = 'secondary';
+
+            html += `<tr>
+              <td><strong>${f.numeroFacture}</strong></td>
+              <td>${f.projet}</td>
+              <td>${f.client}</td>
+              <td>${new Date(f.dateFacture).toLocaleDateString('fr-FR')}</td>
+              <td>${new Date(f.dateEcheance).toLocaleDateString('fr-FR')}</td>
+              <td>${(f.montantHT || 0).toLocaleString()} FCFA</td>
+              <td>${f.tauxTVA}%</td>
+              <td>${(f.montantTTC || 0).toLocaleString()} FCFA</td>
+              <td>${(f.montantPaye || 0).toLocaleString()} FCFA</td>
+              <td>${restant.toLocaleString()} FCFA</td>
+              <td><span class="badge badge-${statutBadge}">${f.statut}</span></td>
+              <td>
+                <button class="action-btn btn-success" onclick="editer('${f.id}')">✏️</button>
+                <button class="action-btn btn-primary" onclick="enregistrerPaiement('${f.id}')">💳</button>
+                <button class="action-btn btn-danger" onclick="annuler('${f.id}')">❌</button>
+              </td>
+            </tr>`;
+          });
+
+          document.getElementById('listeFactures').innerHTML = html || '<tr><td colspan="12" style="text-align:center;">Aucune facture</td></tr>';
+
+          const totalCreances = totalCA - totalPaye;
+          const tauxRecouvrement = totalCA > 0 ? ((totalPaye / totalCA) * 100).toFixed(1) : 0;
+
+          document.getElementById('totalCA').textContent = totalCA.toLocaleString() + ' FCFA';
+          document.getElementById('totalPaye').textContent = totalPaye.toLocaleString() + ' FCFA';
+          document.getElementById('totalCreances').textContent = totalCreances.toLocaleString() + ' FCFA';
+          document.getElementById('tauxRecouvrement').textContent = tauxRecouvrement + '%';
+        }
+      }).obtenirToutesFactures();
+    }
+
+    function chargerRetards() {
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success && result.retards && result.retards.length > 0) {
+          let html = '';
+          result.retards.forEach(r => {
+            const retardJours = Math.floor((new Date() - new Date(r.dateEcheance)) / (1000 * 60 * 60 * 24));
+            let severite = retardJours > 60 ? 'danger' : retardJours > 30 ? 'warning' : 'info';
+
+            html += `<tr style="background: ${severite === 'danger' ? '#fce8e6' : '#fef7e0'};">
+              <td><strong>${r.numeroFacture}</strong></td>
+              <td>${r.client}</td>
+              <td>${new Date(r.dateEcheance).toLocaleDateString('fr-FR')}</td>
+              <td style="color: #ea4335; font-weight: bold;">+${retardJours} jours</td>
+              <td>${r.montantRestant.toLocaleString()} FCFA</td>
+              <td>
+                <button class="action-btn btn-primary" onclick="relancer('${r.id}')">📧 Relancer</button>
+                <button class="action-btn btn-success" onclick="enregistrerPaiement('${r.id}')">💳 Payer</button>
+              </td>
+            </tr>`;
+          });
+          document.getElementById('listeRetards').innerHTML = html;
+        }
+      }).obtenirFacturesEnRetard();
+    }
+
+    function chargerStats() {
+      // TODO: Implémenter stats par client
+    }
+
+    function afficherDetailFacture() {
+      // TODO: Afficher détails facture sélectionnée
+      document.getElementById('detailFacture').style.display = 'block';
+    }
+
+    document.getElementById('formFacture').onsubmit = function(e) {
+      e.preventDefault();
+      const data = {
+        projetId: document.getElementById('projetId').value,
+        client: document.getElementById('client').value,
+        dateFacture: document.getElementById('dateFacture').value,
+        dateEcheance: document.getElementById('dateEcheance').value,
+        libelle: document.getElementById('libelle').value,
+        montantHT: parseFloat(document.getElementById('montantHT').value),
+        tauxTVA: parseFloat(document.getElementById('tauxTVA').value),
+        modePaiement: document.getElementById('modePaiement').value,
+        statut: document.getElementById('statut').value,
+        observations: document.getElementById('observations').value
+      };
+
+      google.script.run.withSuccessHandler(function(result) {
+        alert(result.message);
+        if (result.success) {
+          document.getElementById('formFacture').reset();
+          calculerMontants();
+          switchTab('liste');
+        }
+      }).ajouterFacture(data);
+    };
+
+    document.getElementById('formPaiement').onsubmit = function(e) {
+      e.preventDefault();
+      const factureId = document.getElementById('factureIdPaiement').value;
+      const montant = parseFloat(document.getElementById('montantPaiement').value);
+      const date = document.getElementById('datePaiement').value;
+
+      google.script.run.withSuccessHandler(function(result) {
+        alert(result.message);
+        if (result.success) {
+          document.getElementById('formPaiement').reset();
+          document.getElementById('detailFacture').style.display = 'none';
+          switchTab('liste');
+        }
+      }).enregistrerPaiement(factureId, montant, date);
+    };
+
+    function editer(id) {
+      alert('Édition de la facture: ' + id);
+    }
+
+    function enregistrerPaiement(id) {
+      switchTab('paiement');
+      document.getElementById('factureIdPaiement').value = id;
+      afficherDetailFacture();
+    }
+
+    function annuler(id) {
+      if (confirm('Annuler cette facture ?')) {
+        google.script.run.withSuccessHandler(function(result) {
+          alert(result.message);
+          if (result.success) chargerFactures();
+        }).annulerFacture(id);
+      }
+    }
+
+    function relancer(id) {
+      alert('Envoi de relance pour la facture: ' + id);
+    }
+
+    window.onload = function() {
+      chargerFactures();
+      calculerMontants();
+      // Définir date du jour par défaut
+      document.getElementById('dateFacture').valueAsDate = new Date();
+      const echeance = new Date();
+      echeance.setDate(echeance.getDate() + 30);
+      document.getElementById('dateEcheance').valueAsDate = echeance;
+      document.getElementById('datePaiement').valueAsDate = new Date();
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+    .header { background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%); color: white; padding: 20px; }
+    .header h1 { font-size: 22px; margin-bottom: 5px; }
+    .container { padding: 20px; }
+    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #dee2e6; }
+    .tab { padding: 12px 20px; background: #f8f9fa; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; }
+    .tab.active { background: #9c27b0; color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .btn-primary { background: #9c27b0; color: white; }
+    .btn-success { background: #34a853; color: white; }
+    .btn-danger { background: #ea4335; color: white; }
+    .btn-warning { background: #fbbc04; color: white; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .data-table { width: 100%; background: white; border-radius: 8px; overflow: hidden; }
+    .data-table table { width: 100%; border-collapse: collapse; }
+    .data-table th { background: #9c27b0; color: white; padding: 12px; text-align: left; font-size: 12px; }
+    .data-table td { padding: 12px; border-bottom: 1px solid #dee2e6; font-size: 13px; }
+    .action-btn { padding: 5px 10px; margin: 0 2px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
+    .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .badge-success { background: #34a853; color: white; }
+    .badge-warning { background: #fbbc04; color: white; }
+    .badge-danger { background: #ea4335; color: white; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>👥 Gestionnaire d'Équipes</h1>
+    <p>Gestion Complète des Équipes Terrain</p>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('liste')">📋 Liste</button>
+      <button class="tab" onclick="switchTab('nouvelle')">➕ Nouvelle</button>
+      <button class="tab" onclick="switchTab('affectations')">📍 Affectations</button>
+      <button class="tab" onclick="switchTab('stats')">📊 Stats</button>
+    </div>
+
+    <!-- Onglet Liste -->
+    <div id="liste" class="tab-content active">
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nom Équipe</th>
+              <th>Chef</th>
+              <th>Spécialité</th>
+              <th>Membres</th>
+              <th>Statut</th>
+              <th>Taux Occupation</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="listeEquipes">
+            <tr><td colspan="8" style="text-align:center;">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Onglet Nouvelle -->
+    <div id="nouvelle" class="tab-content">
+      <form id="formEquipe">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nom de l'Équipe *</label>
+            <input type="text" id="nomEquipe" placeholder="Ex: Équipe Topo Nord" required>
+          </div>
+          <div class="form-group">
+            <label>Chef d'Équipe (EmployeID) *</label>
+            <input type="number" id="chefEquipe" placeholder="ID Employé" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Spécialité *</label>
+            <select id="specialite" required>
+              <option value="">Sélectionner...</option>
+              <option value="Topographie">Topographie</option>
+              <option value="Génie civil">Génie civil</option>
+              <option value="Irrigation">Irrigation</option>
+              <option value="Mixte">Mixte</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nombre de Membres *</label>
+            <input type="number" id="nbMembres" min="1" max="20" value="3" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Statut *</label>
+            <select id="statut" required>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="En mission">En mission</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Zone d'Intervention</label>
+            <input type="text" id="zoneIntervention" placeholder="Ex: Nord, Centre, Sud">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Matériel Assigné</label>
+          <textarea id="materielAssigne" rows="2" placeholder="Liste du matériel (GPS RTK, Station totale, etc.)"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea id="notes" rows="2" placeholder="Notes complémentaires"></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">💾 Enregistrer l'Équipe</button>
+      </form>
+    </div>
+
+    <!-- Onglet Affectations -->
+    <div id="affectations" class="tab-content">
+      <h3 style="margin-bottom: 15px;">📍 Affectations des Équipes</h3>
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Équipe</th>
+              <th>Projet</th>
+              <th>Chantier</th>
+              <th>Date Début</th>
+              <th>Date Fin</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="listeAffectations">
+            <tr><td colspan="7" style="text-align:center;">Aucune affectation</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Onglet Stats -->
+    <div id="stats" class="tab-content">
+      <h3>📊 Statistiques des Équipes</h3>
+      <div id="statsContent" style="margin-top: 20px;">
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 15px;">
+          <h4 style="color: #9c27b0; margin-bottom: 10px;">Répartition par Spécialité</h4>
+          <div id="statSpecialites">Chargement...</div>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 15px;">
+          <h4 style="color: #9c27b0; margin-bottom: 10px;">Taux d'Occupation Moyen</h4>
+          <div id="statOccupation">Chargement...</div>
+        </div>
+        <div style="background: white; padding: 20px; border-radius: 8px;">
+          <h4 style="color: #9c27b0; margin-bottom: 10px;">Équipes les Plus Actives</h4>
+          <div id="statActives">Chargement...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+      if (tabId === 'liste') chargerEquipes();
+      if (tabId === 'stats') chargerStats();
+      if (tabId === 'affectations') chargerAffectations();
+    }
+
+    function chargerEquipes() {
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success) {
+          let html = '';
+          result.equipes.forEach(e => {
+            const badgeClass = e.statut === 'Active' ? 'badge-success' : e.statut === 'En mission' ? 'badge-warning' : 'badge-danger';
+            html += `<tr>
+              <td>${e.id}</td>
+              <td>${e.nom}</td>
+              <td>${e.chef}</td>
+              <td>${e.specialite}</td>
+              <td>${e.nbMembres}</td>
+              <td><span class="badge ${badgeClass}">${e.statut}</span></td>
+              <td>${e.tauxOccupation}%</td>
+              <td>
+                <button class="action-btn btn-primary" onclick="editer(${e.id})">✏️</button>
+                <button class="action-btn btn-danger" onclick="dissoudre(${e.id})">🗑️</button>
+              </td>
+            </tr>`;
+          });
+          document.getElementById('listeEquipes').innerHTML = html || '<tr><td colspan="8" style="text-align:center;">Aucune équipe</td></tr>';
+        }
+      }).obtenirToutesEquipes();
+    }
+
+    function chargerAffectations() {
+      // TODO: Charger les affectations depuis la BD
+      console.log('Chargement des affectations');
+    }
+
+    function chargerStats() {
+      // TODO: Charger les statistiques
+      console.log('Chargement des stats');
+    }
+
+    document.getElementById('formEquipe').onsubmit = function(e) {
+      e.preventDefault();
+      const data = {
+        nom: document.getElementById('nomEquipe').value,
+        chefId: document.getElementById('chefEquipe').value,
+        specialite: document.getElementById('specialite').value,
+        nbMembres: document.getElementById('nbMembres').value,
+        statut: document.getElementById('statut').value,
+        zone: document.getElementById('zoneIntervention').value,
+        materiel: document.getElementById('materielAssigne').value,
+        notes: document.getElementById('notes').value
+      };
+
+      google.script.run.withSuccessHandler(function(result) {
+        alert(result.message);
+        if (result.success) {
+          document.getElementById('formEquipe').reset();
+          switchTab('liste');
+        }
+      }).ajouterEquipe(data.nom, data.chefId, data.specialite, data.nbMembres, data.statut, data.zone, data.materiel, data.notes);
+    };
+
+    function editer(id) {
+      alert('Édition de l\'équipe: ' + id);
+    }
+
+    function dissoudre(id) {
+      if (confirm('Dissoudre l\'équipe ' + id + ' ?')) {
+        google.script.run.withSuccessHandler(function(result) {
+          alert(result.message);
+          if (result.success) chargerEquipes();
+        }).dissoudreEquipe(id);
+      }
+    }
+
+    window.onload = function() {
+      chargerEquipes();
+    };
+  </script>
+</body>
+</html>

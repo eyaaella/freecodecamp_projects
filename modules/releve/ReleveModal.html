@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+    .header { background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%); color: white; padding: 20px; }
+    .header h1 { font-size: 22px; margin-bottom: 5px; }
+    .container { padding: 20px; }
+    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #dee2e6; }
+    .tab { padding: 12px 20px; background: #f8f9fa; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; }
+    .tab.active { background: #1a73e8; color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
+    .form-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-right: 8px; margin-bottom: 8px; }
+    .btn-primary { background: #1a73e8; color: white; }
+    .btn-success { background: #34a853; color: white; }
+    .btn-danger { background: #ea4335; color: white; }
+    .btn-warning { background: #fbbc04; color: white; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .data-table { width: 100%; background: white; border-radius: 8px; overflow: hidden; overflow-x: auto; }
+    .data-table table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+    .data-table th { background: #1a73e8; color: white; padding: 12px; text-align: left; font-size: 12px; }
+    .data-table td { padding: 12px; border-bottom: 1px solid #dee2e6; font-size: 13px; }
+    .action-btn { padding: 5px 10px; margin: 0 2px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
+    .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .badge-success { background: #d4edda; color: #155724; }
+    .badge-warning { background: #fff3cd; color: #856404; }
+    .badge-danger { background: #f8d7da; color: #721c24; }
+    .export-section { background: white; padding: 20px; border-radius: 8px; }
+    .export-section h3 { color: #1a73e8; margin-bottom: 15px; }
+    .coords-display { background: #f8f9fa; padding: 15px; border-radius: 6px; margin-top: 15px; }
+    .coords-display code { font-family: 'Courier New', monospace; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📐 Gestionnaire de Relevés Topographiques</h1>
+    <p>CRUD Complet des Relevés GPS/Topo</p>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('liste')">📋 Liste</button>
+      <button class="tab" onclick="switchTab('nouveau')">➕ Nouveau</button>
+      <button class="tab" onclick="switchTab('carte')">🗺️ Carte</button>
+      <button class="tab" onclick="switchTab('export')">📊 Export</button>
+    </div>
+
+    <!-- Onglet Liste -->
+    <div id="liste" class="tab-content active">
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Date</th>
+              <th>X (m)</th>
+              <th>Y (m)</th>
+              <th>Z (m)</th>
+              <th>Type</th>
+              <th>Précision</th>
+              <th>Validé</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="listeReleves">
+            <tr><td colspan="9" style="text-align:center;">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Onglet Nouveau -->
+    <div id="nouveau" class="tab-content">
+      <form id="formReleve">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tâche ID *</label>
+            <input type="number" id="tacheId" min="1" required>
+          </div>
+          <div class="form-group">
+            <label>Employé ID *</label>
+            <input type="number" id="employeId" min="1" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Date et Heure du Relevé *</label>
+          <input type="datetime-local" id="dateReleve" required>
+        </div>
+
+        <h3 style="color: #1a73e8; margin: 20px 0 10px; font-size: 14px;">📍 Coordonnées Cartésiennes (UTM)</h3>
+        <div class="form-row-3">
+          <div class="form-group">
+            <label>X (m) *</label>
+            <input type="number" id="coordX" step="0.001" required>
+          </div>
+          <div class="form-group">
+            <label>Y (m) *</label>
+            <input type="number" id="coordY" step="0.001" required>
+          </div>
+          <div class="form-group">
+            <label>Z - Altitude (m) *</label>
+            <input type="number" id="coordZ" step="0.001" required>
+          </div>
+        </div>
+
+        <h3 style="color: #34a853; margin: 20px 0 10px; font-size: 14px;">🌍 Coordonnées Géographiques (WGS84)</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Latitude (°)</label>
+            <input type="number" id="latitude" step="0.0000001">
+          </div>
+          <div class="form-group">
+            <label>Longitude (°)</label>
+            <input type="number" id="longitude" step="0.0000001">
+          </div>
+        </div>
+
+        <h3 style="color: #fbbc04; margin: 20px 0 10px; font-size: 14px;">⚙️ Informations Techniques</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type de Relevé *</label>
+            <select id="typeReleve" required>
+              <option value="">Sélectionner...</option>
+              <option value="Nivellement">Nivellement</option>
+              <option value="Implantation">Implantation</option>
+              <option value="Contrôle">Contrôle</option>
+              <option value="Levé">Levé</option>
+              <option value="Géoréférencement">Géoréférencement</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Méthode *</label>
+            <select id="methode" required>
+              <option value="">Sélectionner...</option>
+              <option value="GPS RTK">GPS RTK</option>
+              <option value="GPS Différentiel">GPS Différentiel</option>
+              <option value="Station Totale">Station Totale</option>
+              <option value="Niveau">Niveau</option>
+              <option value="Drone">Drone</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Instrument Utilisé *</label>
+            <input type="text" id="instrument" required>
+          </div>
+          <div class="form-group">
+            <label>Précision (cm) *</label>
+            <input type="number" id="precision" min="0" step="0.1" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Description du Point</label>
+          <textarea id="description" rows="3" placeholder="Ex: Axe du canal, Borne repère, Point NGF, etc."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-success">💾 Enregistrer le Relevé</button>
+      </form>
+    </div>
+
+    <!-- Onglet Carte -->
+    <div id="carte" class="tab-content">
+      <h3>🗺️ Carte Interactive des Relevés</h3>
+      <div id="carteContent" style="margin-top: 20px; background: white; padding: 40px; border-radius: 8px; text-align: center;">
+        <p style="color: #666;">
+          🗺️ Visualisation cartographique à venir...<br>
+          <small>Affichera tous les points relevés sur une carte interactive</small>
+        </p>
+        <div style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 6px;">
+          <p style="font-size: 12px; color: #888;">
+            Fonctionnalités prévues:<br>
+            • Affichage des points en UTM<br>
+            • Export vers Google Maps<br>
+            • Génération de KML/KMZ<br>
+            • Calculs de distances et surfaces
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Export -->
+    <div id="export" class="tab-content">
+      <div class="export-section">
+        <h3>📊 Export des Relevés Topographiques</h3>
+        <p style="color: #666; margin-bottom: 20px;">Exporter les données dans différents formats professionnels</p>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
+          <button class="btn btn-primary" onclick="exporterXYZ()">
+            📐 Export XYZ (Texte)
+          </button>
+          <button class="btn btn-success" onclick="exporterCSV()">
+            📊 Export CSV (Excel)
+          </button>
+          <button class="btn btn-warning" onclick="exporterKML()">
+            🗺️ Export KML (Google Earth)
+          </button>
+          <button class="btn btn-danger" onclick="exporterShapefile()">
+            🌍 Export Shapefile (SIG)
+          </button>
+        </div>
+
+        <div id="exportPreview" class="coords-display" style="display: none;">
+          <h4 style="margin-bottom: 10px;">Aperçu de l'export:</h4>
+          <pre id="exportContent" style="overflow-x: auto; font-size: 11px;"></pre>
+        </div>
+
+        <div style="margin-top: 30px; padding: 15px; background: #e3f2fd; border-left: 4px solid #1a73e8; border-radius: 4px;">
+          <h4 style="color: #1a73e8; margin-bottom: 10px;">ℹ️ Formats d'Export</h4>
+          <ul style="font-size: 12px; color: #555; margin-left: 20px;">
+            <li><strong>XYZ:</strong> Format texte standard (X Y Z Description)</li>
+            <li><strong>CSV:</strong> Compatible Excel, LibreOffice, QGIS</li>
+            <li><strong>KML:</strong> Compatible Google Earth, Google Maps</li>
+            <li><strong>Shapefile:</strong> Format SIG standard (ArcGIS, QGIS)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+      if (tabId === 'liste') chargerReleves();
+    }
+
+    function chargerReleves() {
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success) {
+          let html = '';
+          result.releves.forEach(r => {
+            let valideClass = r.valide ? 'badge-success' : 'badge-warning';
+            let valideText = r.valide ? '✅ Oui' : '⏳ À valider';
+            html += `<tr>
+              <td>${r.id}</td>
+              <td>${r.dateReleve}</td>
+              <td>${r.coordX.toFixed(3)}</td>
+              <td>${r.coordY.toFixed(3)}</td>
+              <td>${r.coordZ.toFixed(3)}</td>
+              <td>${r.typeReleve}</td>
+              <td>${r.precision} cm</td>
+              <td><span class="badge ${valideClass}">${valideText}</span></td>
+              <td>
+                <button class="action-btn btn-success" onclick="valider(${r.id})" ${r.valide ? 'disabled' : ''}>✓</button>
+                <button class="action-btn btn-primary" onclick="editer(${r.id})">✏️</button>
+                <button class="action-btn btn-danger" onclick="supprimer(${r.id})">🗑️</button>
+              </td>
+            </tr>`;
+          });
+          document.getElementById('listeReleves').innerHTML = html || '<tr><td colspan="9" style="text-align:center;">Aucun relevé</td></tr>';
+        }
+      }).withFailureHandler(function(error) {
+        document.getElementById('listeReleves').innerHTML = '<tr><td colspan="9" style="text-align:center; color: #ea4335;">Erreur: ' + error.message + '</td></tr>';
+      }).obtenirTousReleves();
+    }
+
+    document.getElementById('formReleve').onsubmit = function(e) {
+      e.preventDefault();
+      const data = {
+        tacheId: parseInt(document.getElementById('tacheId').value),
+        employeId: parseInt(document.getElementById('employeId').value),
+        dateReleve: document.getElementById('dateReleve').value,
+        coordX: parseFloat(document.getElementById('coordX').value),
+        coordY: parseFloat(document.getElementById('coordY').value),
+        coordZ: parseFloat(document.getElementById('coordZ').value),
+        latitude: document.getElementById('latitude').value ? parseFloat(document.getElementById('latitude').value) : null,
+        longitude: document.getElementById('longitude').value ? parseFloat(document.getElementById('longitude').value) : null,
+        typeReleve: document.getElementById('typeReleve').value,
+        methode: document.getElementById('methode').value,
+        instrument: document.getElementById('instrument').value,
+        precision: parseFloat(document.getElementById('precision').value),
+        description: document.getElementById('description').value
+      };
+
+      google.script.run.withSuccessHandler(function(result) {
+        alert(result.message);
+        if (result.success) {
+          document.getElementById('formReleve').reset();
+          switchTab('liste');
+        }
+      }).withFailureHandler(function(error) {
+        alert('Erreur: ' + error.message);
+      }).ajouterReleve(data.tacheId, data.employeId, data.dateReleve, data.coordX, data.coordY, data.coordZ,
+                       data.latitude, data.longitude, data.typeReleve, data.methode, data.instrument, data.precision, data.description);
+    };
+
+    function valider(id) {
+      if (confirm('Valider le relevé #' + id + ' ?')) {
+        google.script.run.withSuccessHandler(function(result) {
+          alert(result.message);
+          if (result.success) chargerReleves();
+        }).validerReleve(id);
+      }
+    }
+
+    function editer(id) {
+      alert('Édition du relevé: ' + id);
+    }
+
+    function supprimer(id) {
+      if (confirm('Supprimer le relevé #' + id + ' ?')) {
+        google.script.run.withSuccessHandler(function(result) {
+          alert(result.message);
+          if (result.success) chargerReleves();
+        }).supprimerReleve(id);
+      }
+    }
+
+    function exporterXYZ() {
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success) {
+          document.getElementById('exportPreview').style.display = 'block';
+          document.getElementById('exportContent').textContent = result.data;
+          alert('Export XYZ généré! ' + result.count + ' points');
+        }
+      }).exporterXYZ();
+    }
+
+    function exporterCSV() {
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success) {
+          document.getElementById('exportPreview').style.display = 'block';
+          document.getElementById('exportContent').textContent = result.data;
+          alert('Export CSV généré! ' + result.count + ' lignes');
+        }
+      }).exporterCSV();
+    }
+
+    function exporterKML() {
+      alert('Export KML à venir...\nGénérera un fichier compatible Google Earth');
+    }
+
+    function exporterShapefile() {
+      alert('Export Shapefile à venir...\nGénérera un fichier compatible ArcGIS/QGIS');
+    }
+
+    window.onload = function() {
+      chargerReleves();
+      // Set default date to now
+      const now = new Date();
+      const dateStr = now.toISOString().slice(0, 16);
+      document.getElementById('dateReleve').value = dateStr;
+    };
+  </script>
+</body>
+</html>

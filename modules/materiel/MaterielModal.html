@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+    .header { background: linear-gradient(135deg, #fbbc04 0%, #f9ab00 100%); color: white; padding: 20px; }
+    .header h1 { font-size: 22px; margin-bottom: 5px; }
+    .container { padding: 20px; }
+    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #dee2e6; }
+    .tab { padding: 12px 20px; background: #f8f9fa; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; }
+    .tab.active { background: #fbbc04; color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .btn-primary { background: #fbbc04; color: white; }
+    .btn-success { background: #34a853; color: white; }
+    .btn-danger { background: #ea4335; color: white; }
+    .btn-warning { background: #ff9800; color: white; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .data-table { width: 100%; background: white; border-radius: 8px; overflow: hidden; }
+    .data-table table { width: 100%; border-collapse: collapse; }
+    .data-table th { background: #fbbc04; color: white; padding: 12px; text-align: left; font-size: 12px; }
+    .data-table td { padding: 12px; border-bottom: 1px solid #dee2e6; font-size: 13px; }
+    .action-btn { padding: 5px 10px; margin: 0 2px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
+    .badge { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .badge-success { background: #34a853; color: white; }
+    .badge-warning { background: #fbbc04; color: white; }
+    .badge-danger { background: #ea4335; color: white; }
+    .badge-info { background: #1a73e8; color: white; }
+    .alert-card { background: white; border-left: 4px solid #ea4335; padding: 15px; margin-bottom: 10px; border-radius: 6px; }
+    .alert-card h4 { color: #ea4335; margin-bottom: 5px; font-size: 14px; }
+    .alert-card p { font-size: 12px; color: #666; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🔧 Gestionnaire de Matériel</h1>
+    <p>Inventaire et Maintenance de l'Équipement</p>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('inventaire')">📦 Inventaire</button>
+      <button class="tab" onclick="switchTab('nouveau')">➕ Nouveau</button>
+      <button class="tab" onclick="switchTab('affectations')">👥 Affectations</button>
+      <button class="tab" onclick="switchTab('maintenance')">🔧 Maintenance</button>
+    </div>
+
+    <!-- Onglet Inventaire -->
+    <div id="inventaire" class="tab-content active">
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nom</th>
+              <th>Type</th>
+              <th>N° Série</th>
+              <th>Statut</th>
+              <th>Affectation</th>
+              <th>Prochain Entretien</th>
+              <th>Alertes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="listeMateriel">
+            <tr><td colspan="9" style="text-align:center;">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Onglet Nouveau -->
+    <div id="nouveau" class="tab-content">
+      <form id="formMateriel">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nom du Matériel *</label>
+            <input type="text" id="nomMateriel" placeholder="Ex: GPS RTK Trimble R10" required>
+          </div>
+          <div class="form-group">
+            <label>Type *</label>
+            <select id="typeMateriel" required>
+              <option value="">Sélectionner...</option>
+              <option value="GPS RTK">GPS RTK</option>
+              <option value="Station totale">Station totale</option>
+              <option value="Niveau">Niveau</option>
+              <option value="Drone">Drone</option>
+              <option value="Théodolite">Théodolite</option>
+              <option value="Scanner 3D">Scanner 3D</option>
+              <option value="Autre">Autre</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Marque *</label>
+            <input type="text" id="marque" placeholder="Ex: Trimble, Leica, Topcon" required>
+          </div>
+          <div class="form-group">
+            <label>Modèle *</label>
+            <input type="text" id="modele" placeholder="Ex: R10, TS16" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Numéro de Série *</label>
+            <input type="text" id="numeroSerie" placeholder="Numéro unique" required>
+          </div>
+          <div class="form-group">
+            <label>Date d'Acquisition *</label>
+            <input type="date" id="dateAcquisition" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Dernier Entretien</label>
+            <input type="date" id="dernierEntretien">
+          </div>
+          <div class="form-group">
+            <label>Prochain Entretien *</label>
+            <input type="date" id="prochainEntretien" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Statut *</label>
+            <select id="statut" required>
+              <option value="Disponible">Disponible</option>
+              <option value="En service">En service</option>
+              <option value="En maintenance">En maintenance</option>
+              <option value="Hors service">Hors service</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Affecté à (EmployeID/EquipeID)</label>
+            <input type="text" id="affecteA" placeholder="Ex: EMP-123 ou EQP-5">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Valeur (FCFA) *</label>
+            <input type="number" id="valeur" min="0" placeholder="Valeur d'achat" required>
+          </div>
+          <div class="form-group">
+            <label>État *</label>
+            <select id="etat" required>
+              <option value="Excellent">Excellent</option>
+              <option value="Bon">Bon</option>
+              <option value="Moyen">Moyen</option>
+              <option value="Mauvais">Mauvais</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea id="notes" rows="2" placeholder="Informations complémentaires"></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">💾 Enregistrer le Matériel</button>
+      </form>
+    </div>
+
+    <!-- Onglet Affectations -->
+    <div id="affectations" class="tab-content">
+      <h3 style="margin-bottom: 15px;">👥 Affectations du Matériel</h3>
+      <div class="form-row" style="margin-bottom: 20px;">
+        <div class="form-group">
+          <label>Matériel</label>
+          <select id="materielAAffecter">
+            <option value="">Sélectionner...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Affecter à</label>
+          <input type="text" id="affecterA" placeholder="EmployeID ou EquipeID">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="affecterMateriel()">📌 Affecter</button>
+
+      <div style="margin-top: 20px;">
+        <h4 style="margin-bottom: 10px;">Affectations Actuelles</h4>
+        <div class="data-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Matériel</th>
+                <th>Type</th>
+                <th>Affecté à</th>
+                <th>Date Affectation</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="listeAffectations">
+              <tr><td colspan="5" style="text-align:center;">Aucune affectation</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Maintenance -->
+    <div id="maintenance" class="tab-content">
+      <h3 style="margin-bottom: 15px;">🔧 Alertes de Maintenance</h3>
+      <div id="alertesMaintenance">
+        <div class="alert-card">
+          <h4>⚠️ GPS RTK Trimble R10 - S/N: 12345</h4>
+          <p>Entretien prévu le 15/11/2025 - <strong>Dans 5 jours</strong></p>
+          <div style="margin-top: 10px;">
+            <button class="btn btn-warning" onclick="planifierEntretien(1)">📅 Planifier</button>
+            <button class="btn btn-success" onclick="marquerEffectue(1)">✅ Effectué</button>
+          </div>
+        </div>
+        <div class="alert-card" style="border-left-color: #ea4335;">
+          <h4>🚨 Station Totale Leica TS16 - S/N: 67890</h4>
+          <p>Entretien en retard depuis le 01/11/2025 - <strong>14 jours de retard</strong></p>
+          <div style="margin-top: 10px;">
+            <button class="btn btn-danger" onclick="maintenanceUrgente(2)">🚨 Urgent</button>
+            <button class="btn btn-success" onclick="marquerEffectue(2)">✅ Effectué</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 30px;">
+        <h4 style="margin-bottom: 15px;">📝 Enregistrer un Entretien</h4>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Matériel</label>
+            <select id="materielMaintenance">
+              <option value="">Sélectionner...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date d'Entretien</label>
+            <input type="date" id="dateEntretien">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description des Travaux</label>
+          <textarea id="travauxEffectues" rows="3" placeholder="Détails de l'entretien effectué"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Prochain Entretien</label>
+          <input type="date" id="prochainEntretienMaintenance">
+        </div>
+        <button class="btn btn-success" onclick="enregistrerEntretien()">💾 Enregistrer l'Entretien</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+      if (tabId === 'inventaire') chargerMateriel();
+      if (tabId === 'affectations') chargerAffectations();
+      if (tabId === 'maintenance') chargerAlertes();
+    }
+
+    function chargerMateriel() {
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success) {
+          let html = '';
+          result.materiel.forEach(m => {
+            const badgeClass = m.statut === 'Disponible' ? 'badge-success' :
+                              m.statut === 'En service' ? 'badge-info' :
+                              m.statut === 'En maintenance' ? 'badge-warning' : 'badge-danger';
+            const alerte = m.alerteMaintenance ? '⚠️' : '';
+            html += `<tr>
+              <td>${m.id}</td>
+              <td>${m.nom}</td>
+              <td>${m.type}</td>
+              <td>${m.numeroSerie}</td>
+              <td><span class="badge ${badgeClass}">${m.statut}</span></td>
+              <td>${m.affecteA || '-'}</td>
+              <td>${m.prochainEntretien || '-'}</td>
+              <td>${alerte}</td>
+              <td>
+                <button class="action-btn btn-primary" onclick="editer(${m.id})">✏️</button>
+                <button class="action-btn btn-danger" onclick="supprimer(${m.id})">🗑️</button>
+              </td>
+            </tr>`;
+          });
+          document.getElementById('listeMateriel').innerHTML = html || '<tr><td colspan="9" style="text-align:center;">Aucun matériel</td></tr>';
+        }
+      }).obtenirToutMateriel();
+    }
+
+    function chargerAffectations() {
+      // TODO: Charger les affectations
+      console.log('Chargement des affectations');
+    }
+
+    function chargerAlertes() {
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success && result.alertes.length > 0) {
+          let html = '';
+          result.alertes.forEach(a => {
+            const classe = a.retard > 0 ? 'border-left-color: #ea4335;' : '';
+            const icone = a.retard > 0 ? '🚨' : '⚠️';
+            html += `<div class="alert-card" style="${classe}">
+              <h4>${icone} ${a.nom} - S/N: ${a.numeroSerie}</h4>
+              <p>${a.message}</p>
+              <div style="margin-top: 10px;">
+                <button class="btn ${a.retard > 0 ? 'btn-danger' : 'btn-warning'}" onclick="planifierEntretien(${a.id})">📅 Planifier</button>
+                <button class="btn btn-success" onclick="marquerEffectue(${a.id})">✅ Effectué</button>
+              </div>
+            </div>`;
+          });
+          document.getElementById('alertesMaintenance').innerHTML = html;
+        }
+      }).obtenirAlertesMaintenance();
+    }
+
+    document.getElementById('formMateriel').onsubmit = function(e) {
+      e.preventDefault();
+      const data = {
+        nom: document.getElementById('nomMateriel').value,
+        type: document.getElementById('typeMateriel').value,
+        marque: document.getElementById('marque').value,
+        modele: document.getElementById('modele').value,
+        numeroSerie: document.getElementById('numeroSerie').value,
+        dateAcquisition: document.getElementById('dateAcquisition').value,
+        dernierEntretien: document.getElementById('dernierEntretien').value,
+        prochainEntretien: document.getElementById('prochainEntretien').value,
+        statut: document.getElementById('statut').value,
+        affecteA: document.getElementById('affecteA').value,
+        valeur: document.getElementById('valeur').value,
+        etat: document.getElementById('etat').value,
+        notes: document.getElementById('notes').value
+      };
+
+      google.script.run.withSuccessHandler(function(result) {
+        alert(result.message);
+        if (result.success) {
+          document.getElementById('formMateriel').reset();
+          switchTab('inventaire');
+        }
+      }).ajouterMateriel(data.nom, data.type, data.marque, data.modele, data.numeroSerie,
+                         data.dateAcquisition, data.dernierEntretien, data.prochainEntretien,
+                         data.statut, data.affecteA, data.valeur, data.etat, data.notes);
+    };
+
+    function affecterMateriel() {
+      const materielId = document.getElementById('materielAAffecter').value;
+      const affecteA = document.getElementById('affecterA').value;
+
+      if (!materielId || !affecteA) {
+        alert('Veuillez sélectionner un matériel et une affectation');
+        return;
+      }
+
+      google.script.run.withSuccessHandler(function(result) {
+        alert(result.message);
+        if (result.success) chargerAffectations();
+      }).affecterMateriel(materielId, affecteA);
+    }
+
+    function enregistrerEntretien() {
+      const materielId = document.getElementById('materielMaintenance').value;
+      const dateEntretien = document.getElementById('dateEntretien').value;
+      const travaux = document.getElementById('travauxEffectues').value;
+      const prochainEntretien = document.getElementById('prochainEntretienMaintenance').value;
+
+      if (!materielId || !dateEntretien) {
+        alert('Veuillez remplir les champs obligatoires');
+        return;
+      }
+
+      google.script.run.withSuccessHandler(function(result) {
+        alert(result.message);
+        if (result.success) {
+          document.getElementById('dateEntretien').value = '';
+          document.getElementById('travauxEffectues').value = '';
+          document.getElementById('prochainEntretienMaintenance').value = '';
+          chargerAlertes();
+        }
+      }).enregistrerEntretien(materielId, dateEntretien, travaux, prochainEntretien);
+    }
+
+    function planifierEntretien(id) {
+      alert('Planification de l\'entretien pour le matériel: ' + id);
+    }
+
+    function marquerEffectue(id) {
+      if (confirm('Marquer l\'entretien comme effectué ?')) {
+        google.script.run.withSuccessHandler(function(result) {
+          alert(result.message);
+          if (result.success) chargerAlertes();
+        }).marquerEntretienEffectue(id);
+      }
+    }
+
+    function maintenanceUrgente(id) {
+      alert('Maintenance urgente pour le matériel: ' + id);
+    }
+
+    function editer(id) {
+      alert('Édition du matériel: ' + id);
+    }
+
+    function supprimer(id) {
+      if (confirm('Supprimer le matériel ' + id + ' ?')) {
+        google.script.run.withSuccessHandler(function(result) {
+          alert(result.message);
+          if (result.success) chargerMateriel();
+        }).supprimerMateriel(id);
+      }
+    }
+
+    window.onload = function() {
+      chargerMateriel();
+    };
+  </script>
+</body>
+</html>

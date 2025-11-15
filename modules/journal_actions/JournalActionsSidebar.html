@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journal d'Actions</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Google Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #5f6368 0%, #80868b 100%);
+            padding: 16px;
+            color: #202124;
+        }
+
+        .sidebar-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #5f6368 0%, #80868b 100%);
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e8eaed;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: #5f6368;
+            margin-bottom: 4px;
+        }
+
+        .stat-value.error {
+            color: #ea4335;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #5f6368;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .action-buttons {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #5f6368 0%, #80868b 100%);
+            box-shadow: 0 2px 8px rgba(95, 99, 104, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(95, 99, 104, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #5f6368;
+            border: 2px solid #5f6368;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #34a853 0%, #137333 100%);
+            color: white;
+        }
+
+        .btn-export:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4);
+        }
+
+        .filters-section {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e8eaed;
+        }
+
+        .filters-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #5f6368;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group {
+            margin-bottom: 16px;
+        }
+
+        .filter-label {
+            font-size: 13px;
+            color: #5f6368;
+            margin-bottom: 6px;
+            display: block;
+            font-weight: 500;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #5f6368;
+            box-shadow: 0 0 0 3px rgba(95, 99, 104, 0.1);
+        }
+
+        .menu-section {
+            padding: 20px;
+            border-top: 1px solid #e8eaed;
+        }
+
+        .menu-item {
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #202124;
+        }
+
+        .menu-item:hover {
+            background: #f8f9fa;
+            transform: translateX(4px);
+        }
+
+        .menu-item.active {
+            background: #e8eaed;
+            color: #5f6368;
+            font-weight: 500;
+        }
+
+        .badge {
+            background: #5f6368;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-error {
+            background: #ea4335;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #5f6368;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #5f6368;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #fce8e6;
+            color: #c5221f;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 16px 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .success-message {
+            background: #e6f4ea;
+            color: #137333;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 16px 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .quick-search {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #5f6368;
+            font-size: 16px;
+        }
+
+        input[type="text"] {
+            padding-left: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar-container">
+        <div class="header">
+            <h1><span>📝</span> Journal d'Actions</h1>
+            <p>Audit Trail Système</p>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-value" id="statAujourdhui">-</div>
+                <div class="stat-label">Aujourd'hui</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statSemaine">-</div>
+                <div class="stat-label">Cette Semaine</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value error" id="statErreurs">-</div>
+                <div class="stat-label">Erreurs</div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="afficherModalJournalActions()">
+                <span>🔍</span> Rechercher Actions
+            </button>
+            <button class="btn btn-secondary" onclick="afficherFiltresAvances()">
+                <span>⚙️</span> Filtres Avancés
+            </button>
+            <button class="btn btn-export" onclick="exporterJournal()">
+                <span>📊</span> Exporter CSV
+            </button>
+        </div>
+
+        <div class="filters-section">
+            <div class="filters-title">🔍 Filtres Rapides</div>
+
+            <div class="filter-group">
+                <label class="filter-label">Recherche rapide</label>
+                <div class="quick-search">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchQuick" placeholder="Rechercher..." onchange="rechercherRapide()">
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Type d'Action</label>
+                <select id="filterType" onchange="appliquerFiltres()">
+                    <option value="">Tous les types</option>
+                    <option value="CREATE">CREATE</option>
+                    <option value="UPDATE">UPDATE</option>
+                    <option value="DELETE">DELETE</option>
+                    <option value="LOGIN">LOGIN</option>
+                    <option value="EXPORT">EXPORT</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Utilisateur</label>
+                <select id="filterUtilisateur" onchange="appliquerFiltres()">
+                    <option value="">Tous les utilisateurs</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Module</label>
+                <select id="filterModule" onchange="appliquerFiltres()">
+                    <option value="">Tous les modules</option>
+                    <option value="Projet">Projet</option>
+                    <option value="Employe">Employé</option>
+                    <option value="Vehicule">Véhicule</option>
+                    <option value="Equipement">Équipement</option>
+                    <option value="Utilisateur">Utilisateur</option>
+                    <option value="Notification">Notification</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Période</label>
+                <select id="filterPeriode" onchange="appliquerFiltres()">
+                    <option value="today">Aujourd'hui</option>
+                    <option value="week">Cette semaine</option>
+                    <option value="month">Ce mois</option>
+                    <option value="all">Tout</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-item active" onclick="naviguerVersJournal('tout')">
+                <span>📋 Voir tout le journal</span>
+            </div>
+            <div class="menu-item" onclick="naviguerVersJournal('erreurs')">
+                <span>⚠️ Erreurs seulement</span>
+                <span class="badge badge-error" id="badgeErreurs">0</span>
+            </div>
+            <div class="menu-item" onclick="naviguerVersJournal('24h')">
+                <span>🕐 Dernières 24h</span>
+            </div>
+            <div class="menu-item" onclick="naviguerVersJournal('export')">
+                <span>📊 Exporter rapport</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let actionsData = [];
+        let filtresActifs = {};
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            chargerStatistiques();
+            chargerUtilisateurs();
+        });
+
+        function chargerStatistiques() {
+            afficherLoading();
+
+            google.script.run
+                .withSuccessHandler(function(stats) {
+                    cacherLoading();
+                    if (stats && stats.success) {
+                        document.getElementById('statAujourdhui').textContent = stats.aujourdhui || 0;
+                        document.getElementById('statSemaine').textContent = stats.semaine || 0;
+                        document.getElementById('statErreurs').textContent = stats.erreurs || 0;
+                        document.getElementById('badgeErreurs').textContent = stats.erreurs || 0;
+                    } else {
+                        afficherErreur(stats.message || 'Erreur lors du chargement des statistiques');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    cacherLoading();
+                    afficherErreur('Erreur: ' + error.message);
+                })
+                .obtenirStatistiquesJournalActions();
+        }
+
+        function chargerUtilisateurs() {
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result && result.success) {
+                        const select = document.getElementById('filterUtilisateur');
+                        const options = result.data.map(u =>
+                            `<option value="${u.id}">${u.nomUtilisateur}</option>`
+                        ).join('');
+                        select.innerHTML = '<option value="">Tous les utilisateurs</option>' + options;
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Erreur chargement utilisateurs:', error);
+                })
+                .obtenirUtilisateursActifs();
+        }
+
+        function afficherModalJournalActions() {
+            google.script.run
+                .withSuccessHandler(function(html) {
+                    if (html) {
+                        const modal = window.open('', '_blank', 'width=1200,height=800');
+                        modal.document.write(html);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    afficherErreur('Erreur lors de l\'ouverture du modal: ' + error.message);
+                })
+                .afficherModalJournalActions();
+        }
+
+        function afficherFiltresAvances() {
+            afficherModalJournalActions();
+            // Le modal s'ouvrira sur l'onglet recherche
+        }
+
+        function exporterJournal() {
+            const filtres = {
+                type: document.getElementById('filterType').value,
+                utilisateur: document.getElementById('filterUtilisateur').value,
+                module: document.getElementById('filterModule').value,
+                periode: document.getElementById('filterPeriode').value
+            };
+
+            afficherSucces('Préparation de l\'export...');
+
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result && result.success) {
+                        afficherSucces('Export CSV généré avec succès! ' + result.fichier);
+                    } else {
+                        afficherErreur(result.message || 'Erreur lors de l\'export');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    afficherErreur('Erreur: ' + error.message);
+                })
+                .exporterJournal(filtres);
+        }
+
+        function naviguerVersJournal(vue) {
+            // Mettre à jour l'élément actif
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // Charger la vue appropriée
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result && result.success) {
+                        afficherSucces('Vue chargée: ' + vue);
+                        if (vue === 'export') {
+                            exporterJournal();
+                        } else {
+                            chargerStatistiques();
+                        }
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    afficherErreur('Erreur de navigation: ' + error.message);
+                })
+                .naviguerVersVueJournal(vue);
+        }
+
+        function rechercherRapide() {
+            const terme = document.getElementById('searchQuick').value;
+            if (!terme) return;
+
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result && result.success) {
+                        afficherSucces(`${result.count || 0} résultat(s) trouvé(s)`);
+                        // Ouvrir le modal avec les résultats
+                        afficherModalJournalActions();
+                    } else {
+                        afficherErreur('Aucun résultat trouvé');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    afficherErreur('Erreur: ' + error.message);
+                })
+                .rechercherActions(terme);
+        }
+
+        function appliquerFiltres() {
+            const type = document.getElementById('filterType').value;
+            const utilisateur = document.getElementById('filterUtilisateur').value;
+            const module = document.getElementById('filterModule').value;
+            const periode = document.getElementById('filterPeriode').value;
+
+            filtresActifs = {
+                type: type,
+                utilisateur: utilisateur,
+                module: module,
+                periode: periode
+            };
+
+            google.script.run
+                .withSuccessHandler(function(stats) {
+                    if (stats && stats.success) {
+                        document.getElementById('statAujourdhui').textContent = stats.aujourdhui || 0;
+                        document.getElementById('statSemaine').textContent = stats.semaine || 0;
+                        document.getElementById('statErreurs').textContent = stats.erreurs || 0;
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    afficherErreur('Erreur lors de l\'application des filtres: ' + error.message);
+                })
+                .filtrerJournalActions(filtresActifs);
+        }
+
+        function afficherLoading() {
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.innerHTML = `
+                <div style="grid-column: 1 / -1;">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <div>Chargement des statistiques...</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function cacherLoading() {
+            // Le contenu sera remplacé par les stats
+        }
+
+        function afficherErreur(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function afficherSucces(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

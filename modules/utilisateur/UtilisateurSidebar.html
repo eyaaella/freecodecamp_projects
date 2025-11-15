@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <base target="_top">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Utilisateurs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Google Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #174ea6 0%, #1967d2 100%);
+            padding: 16px;
+            color: #202124;
+        }
+
+        .sidebar-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #174ea6 0%, #1967d2 100%);
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e8eaed;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: #174ea6;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #5f6368;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .action-buttons {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #174ea6 0%, #1967d2 100%);
+            box-shadow: 0 2px 8px rgba(23, 78, 166, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(23, 78, 166, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #174ea6;
+            border: 2px solid #174ea6;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .filters-section {
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e8eaed;
+        }
+
+        .filters-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #5f6368;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group {
+            margin-bottom: 16px;
+        }
+
+        .filter-label {
+            font-size: 13px;
+            color: #5f6368;
+            margin-bottom: 6px;
+            display: block;
+            font-weight: 500;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #174ea6;
+            box-shadow: 0 0 0 3px rgba(23, 78, 166, 0.1);
+        }
+
+        .menu-section {
+            padding: 20px;
+            border-top: 1px solid #e8eaed;
+        }
+
+        .menu-item {
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #202124;
+        }
+
+        .menu-item:hover {
+            background: #f8f9fa;
+            transform: translateX(4px);
+        }
+
+        .menu-item.active {
+            background: #e8f0fe;
+            color: #174ea6;
+            font-weight: 500;
+        }
+
+        .badge {
+            background: #174ea6;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #5f6368;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #174ea6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #fce8e6;
+            color: #c5221f;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 16px 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .success-message {
+            background: #e6f4ea;
+            color: #137333;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 16px 20px;
+            font-size: 14px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar-container">
+        <div class="header">
+            <h1><span>🔐</span> Gestion Utilisateurs</h1>
+            <p>Comptes et Permissions</p>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-value" id="statTotal">-</div>
+                <div class="stat-label">Total Utilisateurs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statActifs">-</div>
+                <div class="stat-label">Actifs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="statAdmins">-</div>
+                <div class="stat-label">Admins</div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="afficherModalUtilisateur()">
+                <span>➕</span> Nouvel Utilisateur
+            </button>
+            <button class="btn btn-secondary" onclick="afficherPermissions()">
+                <span>🔑</span> Gérer Permissions
+            </button>
+        </div>
+
+        <div class="filters-section">
+            <div class="filters-title">🔍 Filtres</div>
+
+            <div class="filter-group">
+                <label class="filter-label">Niveau d'Accès</label>
+                <select id="filterNiveau" onchange="appliquerFiltres()">
+                    <option value="">Tous les niveaux</option>
+                    <option value="Admin">Administrateur</option>
+                    <option value="Chef Projet">Chef de Projet</option>
+                    <option value="Topographe">Topographe</option>
+                    <option value="Lecture">Lecture seule</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Statut</label>
+                <select id="filterStatut" onchange="appliquerFiltres()">
+                    <option value="">Tous</option>
+                    <option value="actif">Actifs</option>
+                    <option value="inactif">Inactifs</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <div class="menu-item active" onclick="naviguerVersUtilisateurs('tous')">
+                <span>👥 Voir tous les utilisateurs</span>
+            </div>
+            <div class="menu-item" onclick="naviguerVersUtilisateurs('connexions')">
+                <span>🔄 Historique des connexions</span>
+            </div>
+            <div class="menu-item" onclick="naviguerVersUtilisateurs('audit')">
+                <span>📋 Journal d'audit</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let utilisateursData = [];
+        let filtresActifs = {};
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            chargerStatistiques();
+        });
+
+        function chargerStatistiques() {
+            afficherLoading();
+
+            google.script.run
+                .withSuccessHandler(function(stats) {
+                    cacherLoading();
+                    if (stats && stats.success) {
+                        document.getElementById('statTotal').textContent = stats.total || 0;
+                        document.getElementById('statActifs').textContent = stats.actifs || 0;
+                        document.getElementById('statAdmins').textContent = stats.admins || 0;
+                    } else {
+                        afficherErreur(stats.message || 'Erreur lors du chargement des statistiques');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    cacherLoading();
+                    afficherErreur('Erreur: ' + error.message);
+                })
+                .obtenirStatistiquesUtilisateurs();
+        }
+
+        function afficherModalUtilisateur() {
+            google.script.run
+                .withSuccessHandler(function(html) {
+                    if (html) {
+                        const modal = window.open('', '_blank', 'width=1000,height=700');
+                        modal.document.write(html);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    afficherErreur('Erreur lors de l\'ouverture du modal: ' + error.message);
+                })
+                .afficherModalUtilisateur();
+        }
+
+        function afficherPermissions() {
+            google.script.run
+                .withSuccessHandler(function(html) {
+                    if (html) {
+                        const modal = window.open('', '_blank', 'width=900,height=600');
+                        modal.document.write(html);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    afficherErreur('Erreur lors de l\'ouverture des permissions: ' + error.message);
+                })
+                .afficherModalPermissions();
+        }
+
+        function naviguerVersUtilisateurs(vue) {
+            // Mettre à jour l'élément actif
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // Charger la vue appropriée
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    if (result && result.success) {
+                        afficherSucces('Vue chargée: ' + vue);
+                        // Rafraîchir les statistiques
+                        chargerStatistiques();
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    afficherErreur('Erreur de navigation: ' + error.message);
+                })
+                .naviguerVersVueUtilisateurs(vue);
+        }
+
+        function appliquerFiltres() {
+            const niveau = document.getElementById('filterNiveau').value;
+            const statut = document.getElementById('filterStatut').value;
+
+            filtresActifs = {
+                niveau: niveau,
+                statut: statut
+            };
+
+            google.script.run
+                .withSuccessHandler(function(stats) {
+                    if (stats && stats.success) {
+                        document.getElementById('statTotal').textContent = stats.total || 0;
+                        document.getElementById('statActifs').textContent = stats.actifs || 0;
+                        document.getElementById('statAdmins').textContent = stats.admins || 0;
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    afficherErreur('Erreur lors de l\'application des filtres: ' + error.message);
+                })
+                .filtrerUtilisateurs(filtresActifs);
+        }
+
+        function afficherLoading() {
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.innerHTML = `
+                <div style="grid-column: 1 / -1;">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <div>Chargement des statistiques...</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function cacherLoading() {
+            // Le contenu sera remplacé par les stats
+        }
+
+        function afficherErreur(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function afficherSucces(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
