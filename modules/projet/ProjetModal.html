@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+    .header { background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%); color: white; padding: 20px; }
+    .header h1 { font-size: 22px; margin-bottom: 5px; }
+    .container { padding: 20px; }
+    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #dee2e6; }
+    .tab { padding: 12px 20px; background: #f8f9fa; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; }
+    .tab.active { background: #1a73e8; color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .btn-primary { background: #1a73e8; color: white; }
+    .btn-success { background: #34a853; color: white; }
+    .btn-danger { background: #ea4335; color: white; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    .data-table { width: 100%; background: white; border-radius: 8px; overflow: hidden; }
+    .data-table table { width: 100%; border-collapse: collapse; }
+    .data-table th { background: #1a73e8; color: white; padding: 12px; text-align: left; font-size: 12px; }
+    .data-table td { padding: 12px; border-bottom: 1px solid #dee2e6; font-size: 13px; }
+    .action-btn { padding: 5px 10px; margin: 0 2px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📁 Gestionnaire de Projets</h1>
+    <p>CRUD Complet des Projets d'Aménagement</p>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('liste')">📋 Liste</button>
+      <button class="tab" onclick="switchTab('nouveau')">➕ Nouveau</button>
+      <button class="tab" onclick="switchTab('recherche')">🔍 Recherche</button>
+      <button class="tab" onclick="switchTab('stats')">📊 Statistiques</button>
+    </div>
+
+    <!-- Onglet Liste -->
+    <div id="liste" class="tab-content active">
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nom</th>
+              <th>Localisation</th>
+              <th>Statut</th>
+              <th>Budget</th>
+              <th>Progression</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="listeProjets">
+            <tr><td colspan="7" style="text-align:center;">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Onglet Nouveau -->
+    <div id="nouveau" class="tab-content">
+      <form id="formProjet">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nom du Projet *</label>
+            <input type="text" id="nom" required>
+          </div>
+          <div class="form-group">
+            <label>Localisation *</label>
+            <input type="text" id="localisation" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date Début *</label>
+            <input type="date" id="dateDebut" required>
+          </div>
+          <div class="form-group">
+            <label>Date Fin Prévue *</label>
+            <input type="date" id="dateFin" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Superficie (ha) *</label>
+            <input type="number" id="superficie" min="0" step="0.01" required>
+          </div>
+          <div class="form-group">
+            <label>Budget Total (FCFA) *</label>
+            <input type="number" id="budget" min="0" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Chef de Projet *</label>
+            <input type="text" id="chefProjet" required>
+          </div>
+          <div class="form-group">
+            <label>Priorité *</label>
+            <select id="priorite" required>
+              <option value="">Sélectionner...</option>
+              <option value="Haute">Haute</option>
+              <option value="Moyenne">Moyenne</option>
+              <option value="Basse">Basse</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="description" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">💾 Enregistrer</button>
+      </form>
+    </div>
+
+    <!-- Onglet Recherche -->
+    <div id="recherche" class="tab-content">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Critère de recherche</label>
+          <select id="critere">
+            <option value="nom">Nom</option>
+            <option value="localisation">Localisation</option>
+            <option value="statut">Statut</option>
+            <option value="chefProjet">Chef de Projet</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Valeur</label>
+          <input type="text" id="valeurRecherche">
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="rechercher()">🔍 Rechercher</button>
+      <div id="resultatsRecherche" style="margin-top: 20px;"></div>
+    </div>
+
+    <!-- Onglet Stats -->
+    <div id="stats" class="tab-content">
+      <h3>📊 Statistiques des Projets</h3>
+      <div id="statsContent">Chargement...</div>
+    </div>
+  </div>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+      if (tabId === 'liste') chargerProjets();
+    }
+
+    function chargerProjets() {
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success) {
+          let html = '';
+          result.projets.forEach(p => {
+            html += `<tr>
+              <td>${p.id}</td>
+              <td>${p.nom}</td>
+              <td>${p.localisation}</td>
+              <td>${p.statut}</td>
+              <td>${p.budget.toLocaleString()} FCFA</td>
+              <td>${(p.progression * 100).toFixed(1)}%</td>
+              <td>
+                <button class="action-btn btn-primary" onclick="editer('${p.id}')">✏️</button>
+                <button class="action-btn btn-danger" onclick="supprimer('${p.id}')">🗑️</button>
+              </td>
+            </tr>`;
+          });
+          document.getElementById('listeProjets').innerHTML = html || '<tr><td colspan="7" style="text-align:center;">Aucun projet</td></tr>';
+        }
+      }).obtenirTousProjets();
+    }
+
+    document.getElementById('formProjet').onsubmit = function(e) {
+      e.preventDefault();
+      const data = {
+        nom: document.getElementById('nom').value,
+        dateDebut: document.getElementById('dateDebut').value,
+        dateFin: document.getElementById('dateFin').value,
+        description: document.getElementById('description').value,
+        localisation: document.getElementById('localisation').value,
+        superficie: document.getElementById('superficie').value,
+        budget: document.getElementById('budget').value,
+        chefProjet: document.getElementById('chefProjet').value,
+        priorite: document.getElementById('priorite').value
+      };
+
+      google.script.run.withSuccessHandler(function(result) {
+        alert(result.message);
+        if (result.success) {
+          document.getElementById('formProjet').reset();
+          switchTab('liste');
+        }
+      }).ajouterProjet(data.nom, data.dateDebut, data.dateFin, data.description, data.localisation, data.superficie, data.budget, data.chefProjet, data.priorite);
+    };
+
+    function rechercher() {
+      const critere = document.getElementById('critere').value;
+      const valeur = document.getElementById('valeurRecherche').value;
+      google.script.run.withSuccessHandler(function(result) {
+        let html = '<div class="data-table"><table><thead><tr><th>ID</th><th>Nom</th><th>Localisation</th><th>Statut</th></tr></thead><tbody>';
+        if (result.success && result.resultats.length > 0) {
+          result.resultats.forEach(r => {
+            html += `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[5]}</td><td>${r[7]}</td></tr>`;
+          });
+        } else {
+          html += '<tr><td colspan="4">Aucun résultat</td></tr>';
+        }
+        html += '</tbody></table></div>';
+        document.getElementById('resultatsRecherche').innerHTML = html;
+      }).rechercherProjets(critere, valeur);
+    }
+
+    function editer(id) {
+      alert('Édition du projet: ' + id);
+    }
+
+    function supprimer(id) {
+      if (confirm('Supprimer le projet ' + id + ' ?')) {
+        google.script.run.withSuccessHandler(function(result) {
+          alert(result.message);
+          if (result.success) chargerProjets();
+        }).supprimerProjet(id);
+      }
+    }
+
+    window.onload = function() {
+      chargerProjets();
+    };
+  </script>
+</body>
+</html>

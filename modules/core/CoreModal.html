@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+      color: white;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #dee2e6;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 12px 20px;
+      background: #f8f9fa;
+      border: none;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      color: #666;
+    }
+
+    .tab:hover {
+      background: #e9ecef;
+      color: #1a73e8;
+    }
+
+    .tab.active {
+      background: #1a73e8;
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .search-bar {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .search-bar input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .search-bar select {
+      padding: 12px 15px;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 14px;
+      min-width: 150px;
+    }
+
+    .search-bar button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .search-bar button:hover {
+      background: linear-gradient(135deg, #174ea6 0%, #1557a0 100%);
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #174ea6 0%, #1557a0 100%);
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: linear-gradient(135deg, #2d8e47 0%, #267a3c 100%);
+      box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #fbbc04 0%, #ea8600 100%);
+      color: #333;
+    }
+
+    .btn-warning:hover {
+      background: linear-gradient(135deg, #ea8600 0%, #ce7500 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(251, 188, 4, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ea4335 0%, #d33426 100%);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: linear-gradient(135deg, #d33426 0%, #b92b1d 100%);
+      box-shadow: 0 4px 12px rgba(234, 67, 53, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .data-table {
+      width: 100%;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .data-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th {
+      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .data-table td {
+      padding: 12px;
+      border-bottom: 1px solid #dee2e6;
+      font-size: 13px;
+    }
+
+    .data-table tr:hover {
+      background: #f8f9fa;
+    }
+
+    .data-table tr:nth-child(even) {
+      background: #f8f9fa;
+    }
+
+    .data-table tr:nth-child(even):hover {
+      background: #e9ecef;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #1a73e8;
+      border-bottom: 2px solid #1a73e8;
+      padding-bottom: 5px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-left: 4px solid #1a73e8;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .stat-card h3 {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a73e8;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-success {
+      background: #34a853;
+      color: white;
+    }
+
+    .badge-warning {
+      background: #fbbc04;
+      color: #333;
+    }
+
+    .badge-danger {
+      background: #ea4335;
+      color: white;
+    }
+
+    .badge-info {
+      background: #1a73e8;
+      color: white;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #1a73e8;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+    }
+
+    .action-btn {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+
+    .empty-state .icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      opacity: 0.3;
+    }
+
+    .empty-state h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎛️ TopoGest Pro - Gestionnaire Complet</h1>
+    <p>Interface de gestion centralisée pour tous les modules</p>
+  </div>
+
+  <div class="container">
+    <!-- Onglets principaux -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('vue-ensemble')">📊 Vue d'Ensemble</button>
+      <button class="tab" onclick="switchTab('gestion')">📁 Gestion</button>
+      <button class="tab" onclick="switchTab('ressources')">👥 Ressources</button>
+      <button class="tab" onclick="switchTab('finances')">💰 Finances</button>
+      <button class="tab" onclick="switchTab('rapports')">📈 Rapports</button>
+      <button class="tab" onclick="switchTab('parametres')">⚙️ Paramètres</button>
+    </div>
+
+    <!-- Onglet Vue d'Ensemble -->
+    <div id="vue-ensemble" class="tab-content active">
+      <div class="stats-grid">
+        <div class="stat-card" style="border-left-color: #1a73e8;">
+          <h3>Projets Actifs</h3>
+          <div class="value">-</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #34a853;">
+          <h3>Tâches en Cours</h3>
+          <div class="value">-</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #fbbc04;">
+          <h3>Budget Total</h3>
+          <div class="value">- FCFA</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #ea4335;">
+          <h3>Alertes</h3>
+          <div class="value">-</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📊 Activité Récente</div>
+        <div class="data-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Utilisateur</th>
+                <th>Action</th>
+                <th>Module</th>
+              </tr>
+            </thead>
+            <tbody id="activiteRecente">
+              <tr>
+                <td colspan="4">
+                  <div class="empty-state">
+                    <div class="icon">📋</div>
+                    <h3>Aucune activité récente</h3>
+                    <p>Les actions récentes s'afficheront ici</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Gestion -->
+    <div id="gestion" class="tab-content">
+      <div class="search-bar">
+        <select id="moduleGestion">
+          <option value="projets">📁 Projets</option>
+          <option value="ouvrages">🏗️ Ouvrages</option>
+          <option value="taches">✅ Tâches</option>
+          <option value="releves">📐 Relevés</option>
+          <option value="documents">📄 Documents</option>
+          <option value="planning">📅 Planning</option>
+        </select>
+        <input type="text" id="rechercheGestion" placeholder="Rechercher...">
+        <button onclick="rechercher('gestion')">🔍 Rechercher</button>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-success" onclick="nouveau()">
+          <span>➕</span>
+          <span>Nouveau</span>
+        </button>
+        <button class="btn btn-primary" onclick="rafraichir()">
+          <span>🔄</span>
+          <span>Rafraîchir</span>
+        </button>
+        <button class="btn btn-warning" onclick="exporter()">
+          <span>📥</span>
+          <span>Exporter</span>
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-title" id="titreGestion">📁 Projets</div>
+        <div class="data-table">
+          <table>
+            <thead id="enTeteGestion">
+              <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Statut</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="donneesGestion">
+              <tr>
+                <td colspan="5">
+                  <div class="empty-state">
+                    <div class="icon">📁</div>
+                    <h3>Aucune donnée</h3>
+                    <p>Sélectionnez un module pour afficher les données</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Ressources -->
+    <div id="ressources" class="tab-content">
+      <div class="stats-grid">
+        <div class="stat-card" style="border-left-color: #1a73e8;">
+          <h3>Total Employés</h3>
+          <div class="value">-</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #34a853;">
+          <h3>Équipes Actives</h3>
+          <div class="value">-</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #fbbc04;">
+          <h3>Matériel Disponible</h3>
+          <div class="value">-</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #ea4335;">
+          <h3>Matériel en Maintenance</h3>
+          <div class="value">-</div>
+        </div>
+      </div>
+
+      <div class="search-bar">
+        <select id="moduleRessources">
+          <option value="employes">👤 Employés</option>
+          <option value="equipes">👥 Équipes</option>
+          <option value="materiel">🔧 Matériel</option>
+          <option value="postes">💼 Postes</option>
+        </select>
+        <input type="text" id="rechercheRessources" placeholder="Rechercher...">
+        <button onclick="rechercher('ressources')">🔍 Rechercher</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👥 Ressources Humaines et Matérielles</div>
+        <div class="data-table">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Type</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="donneesRessources">
+              <tr>
+                <td colspan="5">
+                  <div class="empty-state">
+                    <div class="icon">👥</div>
+                    <h3>Aucune ressource</h3>
+                    <p>Sélectionnez un type de ressource pour afficher les données</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Finances -->
+    <div id="finances" class="tab-content">
+      <div class="stats-grid">
+        <div class="stat-card" style="border-left-color: #1a73e8;">
+          <h3>Budget Total</h3>
+          <div class="value">- FCFA</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #fbbc04;">
+          <h3>Budget Utilisé</h3>
+          <div class="value">- FCFA</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #34a853;">
+          <h3>Factures Émises</h3>
+          <div class="value">- FCFA</div>
+        </div>
+        <div class="stat-card" style="border-left-color: #ea4335;">
+          <h3>Impayés</h3>
+          <div class="value">- FCFA</div>
+        </div>
+      </div>
+
+      <div class="search-bar">
+        <select id="moduleFinances">
+          <option value="budget">💰 Budget</option>
+          <option value="factures">🧾 Factures</option>
+        </select>
+        <input type="text" id="rechercheFinances" placeholder="Rechercher...">
+        <button onclick="rechercher('finances')">🔍 Rechercher</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">💰 Gestion Financière</div>
+        <div class="data-table">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Projet</th>
+                <th>Montant</th>
+                <th>Statut</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="donneesFinances">
+              <tr>
+                <td colspan="6">
+                  <div class="empty-state">
+                    <div class="icon">💰</div>
+                    <h3>Aucune donnée financière</h3>
+                    <p>Sélectionnez un module pour afficher les données</p>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Rapports -->
+    <div id="rapports" class="tab-content">
+      <div class="card">
+        <div class="card-title">📈 Génération de Rapports</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type de Rapport</label>
+            <select id="typeRapport">
+              <option value="projets">Rapport de Projets</option>
+              <option value="activites">Rapport d'Activités</option>
+              <option value="finances">Rapport Financier</option>
+              <option value="ressources">Rapport Ressources</option>
+              <option value="performance">Rapport de Performance</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Période</label>
+            <select id="periodeRapport">
+              <option value="jour">Aujourd'hui</option>
+              <option value="semaine">Cette Semaine</option>
+              <option value="mois">Ce Mois</option>
+              <option value="trimestre">Ce Trimestre</option>
+              <option value="annee">Cette Année</option>
+              <option value="personnalise">Personnalisé</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date Début</label>
+            <input type="date" id="dateDebut">
+          </div>
+
+          <div class="form-group">
+            <label>Date Fin</label>
+            <input type="date" id="dateFin">
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="genererRapport()">
+            <span>📊</span>
+            <span>Générer Rapport</span>
+          </button>
+          <button class="btn btn-success" onclick="exporterRapport('pdf')">
+            <span>📄</span>
+            <span>Exporter PDF</span>
+          </button>
+          <button class="btn btn-warning" onclick="exporterRapport('excel')">
+            <span>📊</span>
+            <span>Exporter Excel</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 Aperçu du Rapport</div>
+        <div id="apercuRapport">
+          <div class="empty-state">
+            <div class="icon">📊</div>
+            <h3>Aucun rapport généré</h3>
+            <p>Sélectionnez les paramètres et générez un rapport</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Paramètres -->
+    <div id="parametres" class="tab-content">
+      <div class="card">
+        <div class="card-title">⚙️ Configuration Système</div>
+
+        <div class="form-group">
+          <label>Nom de l'Application</label>
+          <input type="text" id="nomApp" value="TopoGest Pro">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Fuseau Horaire</label>
+            <select id="fuseauHoraire">
+              <option value="Africa/Douala">Africa/Douala (Cameroun)</option>
+              <option value="Africa/Lagos">Africa/Lagos</option>
+              <option value="Africa/Libreville">Africa/Libreville</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Devise</label>
+            <select id="devise">
+              <option value="FCFA">FCFA</option>
+              <option value="EUR">EUR</option>
+              <option value="USD">USD</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Email Administrateur</label>
+          <input type="email" id="emailAdmin" value="admin@topogest.cm">
+        </div>
+
+        <div class="form-group">
+          <label>Téléphone Support</label>
+          <input type="tel" id="telSupport" value="+237 6XX XXX XXX">
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-success" onclick="sauvegarderParametres()">
+            <span>💾</span>
+            <span>Sauvegarder</span>
+          </button>
+          <button class="btn btn-warning" onclick="reinitialiserParametres()">
+            <span>🔄</span>
+            <span>Réinitialiser</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🛠️ Outils de Maintenance</div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="verifierIntegrite()">
+            <span>🔍</span>
+            <span>Vérifier Intégrité</span>
+          </button>
+          <button class="btn btn-success" onclick="sauvegarder()">
+            <span>💾</span>
+            <span>Sauvegarde Complète</span>
+          </button>
+          <button class="btn btn-warning" onclick="nettoyerDonnees()">
+            <span>🗑️</span>
+            <span>Nettoyer Données</span>
+          </button>
+          <button class="btn btn-danger" onclick="reinitialiserSysteme()">
+            <span>⚠️</span>
+            <span>Réinitialiser Système</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Chargement en cours...</p>
+    </div>
+  </div>
+
+  <script>
+    // Gestion des onglets
+    function switchTab(tabId) {
+      // Masquer tous les contenus
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+
+      // Désactiver tous les onglets
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      // Activer l'onglet sélectionné
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    // Recherche
+    function rechercher(section) {
+      showLoading();
+      // TODO: Implémenter la recherche réelle
+      setTimeout(() => {
+        hideLoading();
+        alert('Fonction de recherche en cours d\'implémentation');
+      }, 1000);
+    }
+
+    // Nouveau
+    function nouveau() {
+      alert('Fonction "Nouveau" en cours d\'implémentation');
+    }
+
+    // Rafraîchir
+    function rafraichir() {
+      showLoading();
+      setTimeout(() => {
+        hideLoading();
+        alert('Données rafraîchies');
+      }, 1000);
+    }
+
+    // Exporter
+    function exporter() {
+      alert('Fonction d\'export en cours d\'implémentation');
+    }
+
+    // Générer rapport
+    function genererRapport() {
+      showLoading();
+      const type = document.getElementById('typeRapport').value;
+      const periode = document.getElementById('periodeRapport').value;
+
+      setTimeout(() => {
+        hideLoading();
+        document.getElementById('apercuRapport').innerHTML = `
+          <div style="padding: 20px;">
+            <h3>Rapport ${type} - ${periode}</h3>
+            <p>Rapport généré le ${new Date().toLocaleDateString('fr-FR')}</p>
+            <p><em>Contenu du rapport à implémenter...</em></p>
+          </div>
+        `;
+      }, 1500);
+    }
+
+    // Exporter rapport
+    function exporterRapport(format) {
+      alert(`Export en ${format.toUpperCase()} en cours d'implémentation`);
+    }
+
+    // Sauvegarder paramètres
+    function sauvegarderParametres() {
+      showLoading();
+      setTimeout(() => {
+        hideLoading();
+        alert('✅ Paramètres sauvegardés avec succès!');
+      }, 1000);
+    }
+
+    // Réinitialiser paramètres
+    function reinitialiserParametres() {
+      if (confirm('Voulez-vous réinitialiser les paramètres ?')) {
+        alert('Paramètres réinitialisés');
+      }
+    }
+
+    // Vérifier intégrité
+    function verifierIntegrite() {
+      showLoading();
+      google.script.run
+        .withSuccessHandler(function() {
+          hideLoading();
+        })
+        .withFailureHandler(handleError)
+        .afficherRapportIntegrite();
+    }
+
+    // Sauvegarder
+    function sauvegarder() {
+      if (confirm('Voulez-vous créer une sauvegarde complète ?')) {
+        showLoading();
+        google.script.run
+          .withSuccessHandler(function(result) {
+            hideLoading();
+            alert('✅ ' + result.message);
+          })
+          .withFailureHandler(handleError)
+          .sauvegardeAutomatique();
+      }
+    }
+
+    // Nettoyer données
+    function nettoyerDonnees() {
+      if (confirm('Voulez-vous nettoyer les données anciennes ?')) {
+        showLoading();
+        google.script.run
+          .withSuccessHandler(function(result) {
+            hideLoading();
+            alert('✅ ' + result.message);
+          })
+          .withFailureHandler(handleError)
+          .nettoyerDonneesAnciennes();
+      }
+    }
+
+    // Réinitialiser système
+    function reinitialiserSysteme() {
+      if (confirm('⚠️ ATTENTION: Voulez-vous vraiment réinitialiser tout le système ?')) {
+        if (confirm('Cette action est IRRÉVERSIBLE. Continuer ?')) {
+          showLoading();
+          google.script.run
+            .withSuccessHandler(function() {
+              hideLoading();
+              alert('✅ Système réinitialisé!');
+              window.location.reload();
+            })
+            .withFailureHandler(handleError)
+            .initialiserSysteme();
+        }
+      }
+    }
+
+    // Afficher loading
+    function showLoading() {
+      document.getElementById('loading').style.display = 'block';
+    }
+
+    // Masquer loading
+    function hideLoading() {
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    // Gestion erreurs
+    function handleError(error) {
+      hideLoading();
+      console.error('Erreur:', error);
+      alert('❌ Erreur: ' + error.message);
+    }
+
+    // Initialisation
+    window.onload = function() {
+      // Charger les données initiales
+      // TODO: Implémenter le chargement réel des données
+      console.log('Gestionnaire TopoGest Pro initialisé');
+    };
+  </script>
+</body>
+</html>
