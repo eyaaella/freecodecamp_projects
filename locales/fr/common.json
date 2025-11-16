@@ -1,0 +1,155 @@
+{
+  "app": {
+    "name": "TopoGest Pro",
+    "version": "4.0.0",
+    "tagline": "Système de Gestion Topographique Ultra-Avancé",
+    "description": "IA, ML, Blockchain & Support Multilingue"
+  },
+  "navigation": {
+    "dashboard": "Tableau de Bord",
+    "projects": "Projets",
+    "structures": "Ouvrages",
+    "tasks": "Tâches",
+    "surveys": "Relevés",
+    "teams": "Équipes",
+    "employees": "Employés",
+    "equipment": "Matériel",
+    "positions": "Postes",
+    "users": "Utilisateurs",
+    "journal": "Journal",
+    "notifications": "Notifications",
+    "documents": "Documents",
+    "planning": "Planning",
+    "quality": "Contrôle Qualité",
+    "budget": "Budget",
+    "invoices": "Factures",
+    "payments": "Paiements",
+    "training": "Formation",
+    "collaboration": "Collaboration",
+    "ai_analytics": "IA & Analytics"
+  },
+  "actions": {
+    "create": "Créer",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "search": "Rechercher",
+    "filter": "Filtrer",
+    "export": "Exporter",
+    "import": "Importer",
+    "print": "Imprimer",
+    "download": "Télécharger",
+    "upload": "Téléverser",
+    "refresh": "Actualiser",
+    "submit": "Soumettre",
+    "validate": "Valider",
+    "reject": "Rejeter",
+    "approve": "Approuver",
+    "send": "Envoyer",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "previous": "Précédent",
+    "finish": "Terminer"
+  },
+  "status": {
+    "active": "Actif",
+    "inactive": "Inactif",
+    "pending": "En attente",
+    "in_progress": "En cours",
+    "completed": "Terminé",
+    "cancelled": "Annulé",
+    "draft": "Brouillon",
+    "validated": "Validé",
+    "rejected": "Rejeté",
+    "paid": "Payé",
+    "unpaid": "Impayé",
+    "overdue": "En retard",
+    "on_hold": "En pause"
+  },
+  "time": {
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "tomorrow": "Demain",
+    "this_week": "Cette semaine",
+    "this_month": "Ce mois",
+    "this_year": "Cette année",
+    "last_week": "Semaine dernière",
+    "last_month": "Mois dernier",
+    "last_year": "Année dernière",
+    "days": "jours",
+    "hours": "heures",
+    "minutes": "minutes",
+    "seconds": "secondes"
+  },
+  "messages": {
+    "success": {
+      "created": "Création réussie",
+      "updated": "Modification réussie",
+      "deleted": "Suppression réussie",
+      "saved": "Enregistrement réussi"
+    },
+    "error": {
+      "generic": "Une erreur s'est produite",
+      "network": "Erreur réseau",
+      "unauthorized": "Non autorisé",
+      "not_found": "Non trouvé",
+      "validation": "Erreur de validation"
+    },
+    "warning": {
+      "unsaved_changes": "Modifications non enregistrées",
+      "delete_confirmation": "Êtes-vous sûr de vouloir supprimer?",
+      "irreversible": "Cette action est irréversible"
+    },
+    "info": {
+      "loading": "Chargement en cours...",
+      "no_data": "Aucune donnée disponible",
+      "offline": "Mode hors ligne",
+      "syncing": "Synchronisation..."
+    }
+  },
+  "currency": {
+    "fcfa": "FCFA",
+    "cny": "¥",
+    "usd": "$",
+    "eur": "€"
+  },
+  "units": {
+    "meter": "m",
+    "kilometer": "km",
+    "hectare": "ha",
+    "cubic_meter": "m³",
+    "liter": "L",
+    "kilogram": "kg",
+    "tonne": "t"
+  },
+  "settings": {
+    "language": "Langue",
+    "theme": "Thème",
+    "notifications": "Notifications",
+    "privacy": "Confidentialité",
+    "security": "Sécurité",
+    "profile": "Profil",
+    "preferences": "Préférences",
+    "logout": "Déconnexion"
+  },
+  "features": {
+    "evm": "EVM (Earned Value Management)",
+    "ai_predictions": "Prévisions IA",
+    "hydraulics": "Calculs Hydrauliques",
+    "cpm": "CPM (Chemin Critique)",
+    "blockchain": "Blockchain",
+    "3d_modeling": "Modélisation 3D",
+    "ar_vr": "Réalité Augmentée",
+    "iot": "IoT & Capteurs",
+    "drones": "Intégration Drones",
+    "mobile_money": "Mobile Money",
+    "ml": "Machine Learning",
+    "ocr": "OCR Documents",
+    "voice": "Commandes Vocales",
+    "biometric": "Authentification Biométrique",
+    "offline": "Mode Hors Ligne",
+    "pwa": "Application Progressive"
+  }
+}
