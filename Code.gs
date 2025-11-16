@@ -1,42 +1,62 @@
 /**
  * ===============================================================================
- * TOPOGEST PRO - SYSTÈME DE GESTION TOPOGRAPHIQUE
+ * TOPOGEST PRO v2.0 - SYSTÈME DE GESTION TOPOGRAPHIQUE AVANCÉ
  * Cameroun - Aménagement des Périmètres Agricoles en Réseau Gravitaire
  * ===============================================================================
  *
- * Version: 1.0.0 - Production Ready
- * Date: 2024
+ * Version: 2.0.0 - Production Ready avec IA et Analytics Avancés
+ * Date: 2025-11-16
  *
  * DESCRIPTION:
  * Système complet de gestion pour services topographiques avec 17 modules
  * intégrés couvrant projets, ouvrages, tâches, relevés, ressources humaines,
  * matériel, finances, documents et planning.
  *
+ * NOUVEAUTÉS v2.0:
+ * - EVM (Earned Value Management) avec KPIs temps réel
+ * - IA Prédictive: Maintenance, Délais, Budget
+ * - Hydraulique: Calculs Manning, FAO, CIEH
+ * - CPM (Critical Path Method) pour planning
+ * - DXF Export AutoCAD pour plans
+ * - Cache Manager avec TTL
+ * - API REST (doGet/doPost)
+ * - Multi-channel Notifications
+ * - Document Versioning
+ * - Dark Mode UI
+ * - Chart.js 4.4.0 Integration
+ * - TVA Cameroun 19.25% automatique
+ * - Validation GPS UTM Zone 33N
+ * - Téléphone Cameroun +237 6XX XXX XXX
+ *
  * MODULES INCLUS:
- * - CORE: Coordination générale
- * - PROJET: Gestion projets d'aménagement
- * - OUVRAGE: Gestion ouvrages (barrages, canaux, bassins)
- * - TACHE: Gestion tâches terrain
- * - RELEVE: Relevés topographiques GPS
- * - EQUIPE: Gestion équipes terrain
- * - EMPLOYE: Gestion employés
- * - MATERIEL: Gestion matériel topographique
- * - POSTE: Référentiel postes
- * - UTILISATEUR: Gestion utilisateurs et permissions
- * - JOURNAL_ACTIONS: Journal d'activité système
- * - NOTIFICATION: Système de notifications
- * - DOCUMENT: Gestion documents techniques
- * - PLANNING: Planning général projets
- * - CONTROLEUR: Référentiel contrôleurs externes
- * - BUDGET: Gestion budgétaire
- * - FACTURE: Gestion facturation
+ * - CORE: Coordination générale + Dashboard Analytics
+ * - PROJET: Gestion projets + EVM + Gantt + IA Prévisions
+ * - OUVRAGE: Gestion ouvrages + Calculs hydrauliques + Maintenance prédictive
+ * - TACHE: Gestion tâches + CPM + Chemin critique
+ * - RELEVE: Relevés GPS + Validation UTM + Transformations coordonnées
+ * - EQUIPE: Gestion équipes + Productivité KPIs
+ * - EMPLOYE: Gestion employés + Validation téléphone Cameroun
+ * - MATERIEL: Gestion matériel + Maintenance prédictive IA
+ * - POSTE: Référentiel postes + Grilles salariales
+ * - UTILISATEUR: Gestion utilisateurs + SHA-256 + Rôles avancés
+ * - JOURNAL: Journal d'activité + Détection anomalies
+ * - NOTIFICATION: Notifications multi-canal (Email/SMS/InApp/Push)
+ * - DOCUMENT: GED + Versioning + Google Drive Integration
+ * - PLANNING: Planning + Détection conflits + Optimisation ressources
+ * - CONTROLEUR: Contrôle qualité + Non-conformités
+ * - BUDGET: Gestion budgétaire + Alertes dépassement
+ * - FACTURE: Facturation + TVA 19.25% + Numérotation auto
  *
  * TECHNOLOGIES:
  * - Google Apps Script
  * - Google Sheets (formules avancées en français avec ;)
  * - HTML5/CSS3/JavaScript pour interfaces
+ * - Chart.js 4.4.0 pour visualisations
+ * - Google Material Design (GAFAM)
+ * - SHA-256 pour sécurité
+ * - Cache Service pour performance
  *
- * AUTEUR: TopoGest Pro Team
+ * AUTEUR: TopoGest Pro Development Team
  * ===============================================================================
  */
 
@@ -51,7 +71,7 @@
 function onOpen() {
   const ui = SpreadsheetApp.getUi();
 
-  ui.createMenu('🏗️ TopoGest Pro')
+  ui.createMenu('🏗️ TopoGest Pro v2.0')
     .addItem('📊 Tableau de Bord', 'naviguerVersTableauDeBord')
     .addSeparator()
 
@@ -245,14 +265,18 @@ function initialiserSystemeComplet() {
 
     // Message de succès
     ui.alert(
-      '✅ Système Initialisé!',
-      'TopoGest Pro est maintenant prêt à l\'emploi.\n\n' +
+      '✅ Système Initialisé - TopoGest Pro v2.0!',
+      'TopoGest Pro v2.0 est maintenant prêt à l\'emploi.\n\n' +
       '17 modules ont été créés avec succès:\n' +
-      '• Gestion (Projets, Ouvrages, Tâches, Relevés)\n' +
-      '• Ressources (Équipes, Employés, Matériel, Postes)\n' +
-      '• Finance (Budget, Factures)\n' +
-      '• Documents (Documents, Planning, Contrôleurs)\n' +
-      '• Système (Utilisateurs, Journal, Notifications)\n\n' +
+      '• Gestion (Projets + EVM, Ouvrages + Hydraulique, Tâches + CPM, Relevés GPS)\n' +
+      '• Ressources (Équipes, Employés, Matériel + IA Prédictive, Postes)\n' +
+      '• Finance (Budget + Alertes, Factures + TVA 19.25%)\n' +
+      '• Documents (Documents + Versioning, Planning + Conflits, Contrôleurs)\n' +
+      '• Système (Utilisateurs + SHA-256, Journal + Anomalies, Notifications Multi-canal)\n\n' +
+      '🆕 Nouveautés v2.0:\n' +
+      '• IA Prédictive | EVM | CPM | Hydraulique\n' +
+      '• DXF Export | Cache Manager | API REST\n' +
+      '• Dark Mode | Chart.js 4.4.0\n\n' +
       'Consultez le Tableau de Bord pour commencer.',
       ui.ButtonSet.OK
     );
@@ -275,64 +299,86 @@ function afficherDocumentation() {
   const ui = SpreadsheetApp.getUi();
 
   const doc = `
-📚 DOCUMENTATION TOPOGEST PRO
-================================
+📚 DOCUMENTATION TOPOGEST PRO v2.0
+========================================
 
 🎯 MODULES DISPONIBLES:
 
 GESTION:
-• Projets: Gestion complète des projets d'aménagement
-• Ouvrages: Suivi des ouvrages (barrages, canaux, bassins)
-• Tâches: Organisation des tâches terrain
-• Relevés: Enregistrement relevés topographiques GPS
+• Projets: Gestion complète + EVM + Gantt + IA Prévisions
+• Ouvrages: Suivi + Calculs Hydrauliques (Manning, FAO, CIEH)
+• Tâches: Organisation + CPM + Chemin Critique
+• Relevés: GPS + Validation UTM Zone 33N + Transformations
 
 RESSOURCES:
-• Équipes: Gestion des équipes terrain
-• Employés: Gestion du personnel
-• Matériel: Suivi matériel topographique
-• Postes: Référentiel des postes
+• Équipes: Gestion + KPIs Productivité
+• Employés: Gestion + Validation Tél Cameroun (+237 6XX XXX XXX)
+• Matériel: Suivi + Maintenance Prédictive IA
+• Postes: Référentiel + Grilles Salariales
 
 FINANCE:
-• Budget: Gestion budgétaire par projet
-• Factures: Facturation clients
+• Budget: Gestion + Alertes Dépassement
+• Factures: Facturation + TVA 19.25% Auto + Numérotation
 
 DOCUMENTS:
-• Documents: GED des documents techniques
-• Planning: Planning général
-• Contrôleurs: Référentiel contrôleurs
+• Documents: GED + Versioning (v1.0, v1.1, v2.0)
+• Planning: Planning + Détection Conflits + Optimisation
+• Contrôleurs: Contrôle Qualité + Non-conformités
 
 SYSTÈME:
-• Utilisateurs: Gestion utilisateurs et permissions
-• Notifications: Système d'alertes
-• Journal: Traçabilité des actions
+• Utilisateurs: Gestion + SHA-256 + Rôles Avancés
+• Notifications: Multi-canal (Email/SMS/InApp/Push)
+• Journal: Traçabilité + Détection Anomalies
 
 📖 UTILISATION:
 
-1. Menu principal: Accès via "TopoGest Pro" dans la barre de menu
+1. Menu principal: Accès via "TopoGest Pro v2.0" dans la barre
 2. Navigation: Cliquez sur le module désiré
-3. Saisie: Directement dans les feuilles
-4. CRUD: Utilisez les modals pour créer/modifier/supprimer
-5. Recherche: Fonctions de recherche dans chaque module
-6. Export: Fonctions d'export disponibles
+3. Sidebars: Interfaces 320px avec stats, filtres, actions
+4. Modals: Interfaces 1100x750px avec 5-6 tabs
+5. CRUD: Créer/Modifier/Supprimer avec validation
+6. Export: DXF AutoCAD, Excel, PDF
+7. API: Endpoints REST (doGet/doPost)
 
-🛠️ FONCTIONNALITÉS:
+🛠️ FONCTIONNALITÉS v2.0:
 
-• Formules automatiques avancées
-• Validation stricte des données
+✅ CORE:
+• Formules françaises avancées (séparateur ;)
+• Validation stricte données Cameroun
 • Mise en forme conditionnelle
-• Graphiques en temps réel
-• KPIs et statistiques
-• Alertes automatiques
-• Sauvegarde automatique
-• Audit trail complet
+• Graphiques Chart.js 4.4.0
+• KPIs temps réel
+• Cache Manager TTL
+• Dark Mode UI
+
+🆕 IA & ANALYTICS:
+• EVM (BAC, PV, EV, AC, CPI, SPI, EAC, VAC)
+• IA Prédictive Maintenance (scoring, priorités)
+• IA Prévisions Délais (tendances, recommandations)
+• IA Budget (dépassements prévisionnels)
+• CPM Chemin Critique (forward/backward pass)
+
+🔧 CALCULS AVANCÉS:
+• Manning Canaux (débit, vitesse, conformité)
+• FAO Irrigation (besoins eau, rendement)
+• CIEH Normes Hydrauliques
+• UTM ↔ WGS84 Transformations
+
+🌍 SPÉCIFICITÉS CAMEROUN:
+• Zone UTM: 33N
+• X: 200k-900k, Y: 200k-1500k, Alt: 0-4100m
+• Téléphone: +237 6XX XXX XXX
+• Devise: FCFA
+• TVA: 19.25% automatique
 
 📞 SUPPORT:
 
 Email: support@topogest.cm
 Tél: +237 6XX XXX XXX
+Version: 2.0.0 (2025-11-16)
   `;
 
-  ui.alert('📚 Documentation TopoGest Pro', doc, ui.ButtonSet.OK);
+  ui.alert('📚 Documentation TopoGest Pro v2.0', doc, ui.ButtonSet.OK);
 }
 
 /**
@@ -342,13 +388,16 @@ function afficherAPropos() {
   const ui = SpreadsheetApp.getUi();
 
   const about = `
-🏗️ TOPOGEST PRO
-Version 1.0.0 - Production Ready
+🏗️ TOPOGEST PRO v2.0
+Version 2.0.0 - Production Ready
+IA & Analytics Avancés
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 📍 LOCALISATION:
 Cameroun - Afrique Centrale
+Zone UTM: 33N
+Devise: FCFA | TVA: 19.25%
 
 🎯 MISSION:
 Système complet de gestion pour services
@@ -362,13 +411,29 @@ de périmètres agricoles en réseau gravitaire.
 • DOCUMENT, PLANNING, CONTROLEUR
 • BUDGET, FACTURE
 
+🆕 NOUVEAUTÉS v2.0:
+• EVM (Earned Value Management)
+• IA Prédictive (Maintenance, Délais, Budget)
+• Calculs Hydrauliques (Manning, FAO, CIEH)
+• CPM (Critical Path Method)
+• DXF Export AutoCAD
+• Cache Manager TTL
+• Notifications multi-canal
+• Document Versioning
+• Dark Mode UI
+• Chart.js 4.4.0
+
 💡 TECHNOLOGIES:
 • Google Apps Script
-• Google Sheets
+• Google Sheets (formules françaises)
 • HTML5/CSS3/JavaScript
+• Chart.js 4.4.0
+• Google Material Design (GAFAM)
+• SHA-256 Encryption
+• Cache Service
 
 👨‍💻 DÉVELOPPEMENT:
-TopoGest Pro Team - 2024
+TopoGest Pro Development Team - 2025
 
 📄 LICENCE:
 Tous droits réservés
@@ -376,9 +441,10 @@ Tous droits réservés
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 🌟 Fait avec passion pour l'excellence
+🚀 Powered by AI & Advanced Analytics
   `;
 
-  ui.alert('ℹ️ À propos de TopoGest Pro', about, ui.ButtonSet.OK);
+  ui.alert('ℹ️ À propos de TopoGest Pro v2.0', about, ui.ButtonSet.OK);
 }
 
 /**
@@ -531,34 +597,57 @@ function exporterSystemeComplet() {
 
 const SYSTEM_INFO = {
   NAME: 'TopoGest Pro',
-  VERSION: '1.0.0',
-  BUILD: 'Production Ready',
-  DATE: '2024',
+  VERSION: '2.0.0',
+  BUILD: 'Production Ready - IA & Analytics Avancés',
+  DATE: '2025-11-16',
   LOCALE: 'fr_FR',
   TIMEZONE: 'Africa/Douala',
   COUNTRY: 'Cameroun',
+  UTM_ZONE: '33N',
+  TVA: 0.1925, // 19.25%
+  DEVISE: 'FCFA',
 
   MODULES: [
     'CORE', 'PROJET', 'OUVRAGE', 'TACHE', 'RELEVE',
     'EQUIPE', 'EMPLOYE', 'MATERIEL', 'POSTE',
-    'UTILISATEUR', 'JOURNAL_ACTIONS', 'NOTIFICATION',
+    'UTILISATEUR', 'JOURNAL', 'NOTIFICATION',
     'DOCUMENT', 'PLANNING', 'CONTROLEUR',
     'BUDGET', 'FACTURE'
   ],
 
   FEATURES: [
-    'Gestion projets d\'aménagement',
-    'Suivi ouvrages hydrauliques',
-    'Organisation tâches terrain',
-    'Relevés topographiques GPS',
-    'Gestion ressources humaines',
-    'Suivi matériel topographique',
-    'Gestion budgétaire',
-    'Facturation clients',
-    'GED documents techniques',
-    'Planning projets',
-    'Système notifications',
-    'Audit trail complet'
+    'Gestion projets d\'aménagement avec EVM',
+    'Suivi ouvrages hydrauliques avec calculs CIEH/FAO',
+    'Organisation tâches terrain avec CPM',
+    'Relevés topographiques GPS UTM Zone 33N',
+    'Gestion ressources humaines avec KPIs',
+    'Suivi matériel avec maintenance prédictive IA',
+    'Gestion budgétaire avec alertes',
+    'Facturation clients avec TVA 19.25%',
+    'GED documents avec versioning',
+    'Planning projets avec détection conflits',
+    'Notifications multi-canal (Email/SMS/InApp/Push)',
+    'Audit trail complet avec détection anomalies',
+    'IA Prévisions: Délais, Budget, Maintenance',
+    'Export DXF AutoCAD',
+    'Dashboard Analytics temps réel',
+    'Cache Manager avec TTL',
+    'API REST (doGet/doPost)',
+    'Dark Mode UI',
+    'Chart.js 4.4.0 Integration'
+  ],
+
+  NEW_V2: [
+    'EVM (Earned Value Management)',
+    'IA Prédictive (Maintenance, Délais, Budget)',
+    'Calculs Hydrauliques (Manning, FAO, CIEH)',
+    'CPM (Critical Path Method)',
+    'DXF Export AutoCAD',
+    'Cache Manager TTL',
+    'Multi-channel Notifications',
+    'Document Versioning',
+    'Dark Mode',
+    'Chart.js 4.4.0'
   ]
 };
 

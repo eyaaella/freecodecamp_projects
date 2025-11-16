@@ -4,150 +4,471 @@
   <base target="_top">
   <meta charset="UTF-8">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
-    .header { background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%); color: white; padding: 20px; text-align: center; }
-    .header h2 { font-size: 18px; margin-bottom: 5px; }
-    .header p { font-size: 11px; opacity: 0.9; }
-    .container { padding: 15px; }
-    .stat-card { background: white; border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #1a73e8; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .stat-card h3 { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
-    .stat-card .value { font-size: 22px; font-weight: 700; color: #1a73e8; }
-    .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
-    .btn-primary { background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%); color: white; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4); }
-    .btn-success { background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%); color: white; }
-    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4); }
-    .btn-warning { background: linear-gradient(135deg, #fbbc04 0%, #f9ab00 100%); color: white; }
-    .btn-warning:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(251, 188, 4, 0.4); }
-    .section-title { font-size: 13px; font-weight: 600; color: #1a73e8; margin: 15px 0 10px; padding-bottom: 5px; border-bottom: 2px solid #1a73e8; }
-    .menu-item { background: white; border-radius: 6px; padding: 10px 12px; margin-bottom: 6px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 8px; transition: all 0.2s; border: 1px solid #e0e0e0; }
-    .menu-item:hover { background: #1a73e8; color: white; transform: translateX(3px); }
-    .filter { margin-bottom: 15px; }
-    .filter select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; }
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f9fa;
+      --text-primary: #333333;
+      --text-secondary: #666666;
+      --border-color: #dee2e6;
+      --accent-primary: #1a73e8;
+      --accent-success: #34a853;
+      --accent-warning: #fbbc04;
+      --accent-danger: #ea4335;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      font-size: 13px;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      padding: 15px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .header h2 {
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 11px;
+      opacity: 0.9;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .stat-card {
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      padding: 12px;
+      border-left: 3px solid var(--accent-primary);
+    }
+
+    .stat-card h3 {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .stat-card .value {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--accent-primary);
+    }
+
+    .stat-card .unit {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .section {
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 15px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-primary);
+      margin-bottom: 10px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid var(--accent-primary);
+    }
+
+    .filter-group {
+      margin-bottom: 10px;
+    }
+
+    .filter-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: var(--text-secondary);
+    }
+
+    .filter-group select,
+    .filter-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 12px;
+      background: var(--bg-primary);
+    }
+
+    .filter-group select:focus,
+    .filter-group input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, #174ea6 100%);
+      color: white;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--accent-success) 0%, #2d8e47 100%);
+      color: white;
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, var(--accent-warning) 0%, #ea8600 100%);
+      color: #333;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--accent-danger) 0%, #d33426 100%);
+      color: white;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .map-preview {
+      width: 100%;
+      height: 180px;
+      background: #e8f0fe;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-primary);
+      font-size: 12px;
+      margin-top: 10px;
+      border: 2px dashed var(--accent-primary);
+    }
+
+    .alert {
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .alert-warning {
+      background: #fff3cd;
+      color: #856404;
+      border-left: 3px solid var(--accent-warning);
+    }
+
+    .alert-danger {
+      background: #f8d7da;
+      color: #721c24;
+      border-left: 3px solid var(--accent-danger);
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .spinner {
+      border: 3px solid var(--border-color);
+      border-top: 3px solid var(--accent-primary);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
   <div class="header">
-    <h2>📐 Relevés Topographiques</h2>
-    <p>GPS - UTM - Altitude</p>
+    <h2>📐 Relevés Topo v2.0</h2>
+    <p>Gestion GPS & Calculs</p>
   </div>
 
-  <div class="container">
-    <div class="stat-card">
-      <h3>Relevés Totaux</h3>
-      <div class="value" id="relevesTotal">-</div>
+  <!-- Statistiques -->
+  <div class="stats-grid">
+    <div class="stat-card" style="border-left-color: #1a73e8;">
+      <h3>Points Total</h3>
+      <div class="value" id="totalPoints">-</div>
+      <div class="unit">points</div>
     </div>
-
     <div class="stat-card" style="border-left-color: #34a853;">
-      <h3>Validés</h3>
-      <div class="value" style="color: #34a853;" id="relevesValides">-</div>
+      <h3>Précision Moy.</h3>
+      <div class="value" id="precisionMoy">-</div>
+      <div class="unit">cm</div>
     </div>
-
     <div class="stat-card" style="border-left-color: #fbbc04;">
-      <h3>Précision Moyenne</h3>
-      <div class="value" style="color: #fbbc04;" id="precisionMoyenne">- cm</div>
+      <h3>Surface</h3>
+      <div class="value" id="surfaceCouv">-</div>
+      <div class="unit">ha</div>
     </div>
+    <div class="stat-card" style="border-left-color: #ea4335;">
+      <h3>Anomalies</h3>
+      <div class="value" id="anomalies">-</div>
+      <div class="unit">détectées</div>
+    </div>
+  </div>
 
-    <div class="section-title">🎯 Actions Rapides</div>
-    <button class="btn btn-success" onclick="nouveauReleve()">
-      <span>➕</span>
-      <span>Nouveau Relevé</span>
-    </button>
-    <button class="btn btn-primary" onclick="ouvrirGestionnaire()">
-      <span>📐</span>
-      <span>Gestionnaire Complet</span>
-    </button>
-    <button class="btn btn-warning" onclick="importerGPS()">
-      <span>📍</span>
-      <span>Importer GPS</span>
-    </button>
+  <!-- Alertes -->
+  <div id="alertes"></div>
 
+  <!-- Filtres -->
+  <div class="section">
     <div class="section-title">🔍 Filtres</div>
-    <div class="filter">
-      <select id="filtreType" onchange="appliquerFiltre()">
-        <option value="">Tous les types</option>
-        <option value="Nivellement">Nivellement</option>
-        <option value="Implantation">Implantation</option>
-        <option value="Contrôle">Contrôle</option>
-        <option value="Levé">Levé</option>
-      </select>
-    </div>
-    <div class="filter">
-      <select id="filtreValidite" onchange="appliquerFiltre()">
-        <option value="">Tous</option>
-        <option value="Validé">Validé</option>
-        <option value="À valider">À valider</option>
-        <option value="Rejeté">Rejeté</option>
+
+    <div class="filter-group">
+      <label>Projet</label>
+      <select id="filterProjet">
+        <option value="">Tous les projets</option>
+        <option value="PROJ001">PROJ001</option>
+        <option value="PROJ002">PROJ002</option>
+        <option value="PROJ003">PROJ003</option>
       </select>
     </div>
 
-    <div class="section-title">📊 Navigation</div>
-    <div class="menu-item" onclick="naviguer('releves')">
-      <span>📐</span>
-      <span>Voir tous les relevés</span>
+    <div class="filter-group">
+      <label>Ouvrage</label>
+      <select id="filterOuvrage">
+        <option value="">Tous les ouvrages</option>
+        <option value="OUV001">OUV001</option>
+        <option value="OUV002">OUV002</option>
+        <option value="OUV003">OUV003</option>
+      </select>
     </div>
-    <div class="menu-item" onclick="naviguer('carte')">
-      <span>🗺️</span>
-      <span>Carte Interactive</span>
+
+    <div class="filter-group">
+      <label>Type Appareil</label>
+      <select id="filterAppareil">
+        <option value="">Tous les types</option>
+        <option value="GPS RTK">GPS RTK</option>
+        <option value="GPS Différentiel">GPS Différentiel</option>
+        <option value="Station Totale">Station Totale</option>
+        <option value="Niveau">Niveau</option>
+      </select>
     </div>
-    <div class="menu-item" onclick="naviguer('export')">
-      <span>📊</span>
-      <span>Export XYZ/KML</span>
+
+    <div class="filter-group">
+      <label>Opérateur</label>
+      <select id="filterOperateur">
+        <option value="">Tous les opérateurs</option>
+        <option value="Mbarga Jean">Mbarga Jean</option>
+        <option value="Nkolo Marie">Nkolo Marie</option>
+      </select>
     </div>
-    <div class="menu-item" onclick="retourMenu()">
-      <span>🏠</span>
-      <span>Menu Principal</span>
+
+    <button class="btn btn-primary" onclick="appliquerFiltres()">
+      🔍 Filtrer
+    </button>
+  </div>
+
+  <!-- Actions -->
+  <div class="section">
+    <div class="section-title">⚡ Actions Rapides</div>
+
+    <button class="btn btn-success" onclick="ouvrirModal()">
+      ➕ Nouveau Relevé
+    </button>
+
+    <button class="btn btn-primary" onclick="importerGPS()">
+      📥 Import GPS
+    </button>
+
+    <button class="btn btn-warning" onclick="calculerDistances()">
+      📏 Calculs
+    </button>
+
+    <button class="btn btn-danger" onclick="detecterAnomalies()">
+      ⚠️ Détecter Anomalies
+    </button>
+  </div>
+
+  <!-- Export -->
+  <div class="section">
+    <div class="section-title">📤 Export</div>
+
+    <button class="btn btn-primary" onclick="exporterFormat('CSV')">
+      📄 Export CSV
+    </button>
+
+    <button class="btn btn-primary" onclick="exporterFormat('DXF')">
+      🗺️ Export DXF
+    </button>
+
+    <button class="btn btn-primary" onclick="exporterFormat('KML')">
+      🌍 Export KML
+    </button>
+  </div>
+
+  <!-- Carte Preview -->
+  <div class="section">
+    <div class="section-title">🗺️ Carte</div>
+    <div class="map-preview" id="mapPreview">
+      📍 Visualisation points<br>
+      (Cliquer pour détails)
     </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Chargement...</p>
   </div>
 
   <script>
-    function nouveauReleve() {
-      ouvrirGestionnaire();
+    window.onload = function() {
+      chargerStats();
+      verifierAnomalies();
+    };
+
+    function chargerStats() {
+      showLoading();
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success && result.kpis) {
+            document.getElementById('totalPoints').textContent = result.kpis.totalPoints || 0;
+            document.getElementById('precisionMoy').textContent = (result.kpis.precisionMoyenne || 0).toFixed(1);
+            document.getElementById('surfaceCouv').textContent = result.kpis.surfaceCouverteHa || 0;
+            document.getElementById('anomalies').textContent = result.kpis.anomalies || 0;
+          }
+          hideLoading();
+        })
+        .withFailureHandler(handleError)
+        .obtenirKPIsReleves();
     }
 
-    function ouvrirGestionnaire() {
+    function verifierAnomalies() {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success && result.total > 0) {
+            const alertDiv = document.getElementById('alertes');
+            alertDiv.innerHTML = `
+              <div class="alert alert-${result.total > 5 ? 'danger' : 'warning'}">
+                ⚠️ ${result.total} anomalie(s) détectée(s)
+                ${result.critiques > 0 ? `<br>🚨 ${result.critiques} critique(s)` : ''}
+              </div>
+            `;
+          }
+        })
+        .detecterAnomalies();
+    }
+
+    function ouvrirModal() {
       google.script.run.afficherModalReleve();
     }
 
     function importerGPS() {
-      alert('Importation de données GPS à venir...');
-      // TODO: Implémenter l'import GPS
+      alert('📥 Import GPS à implémenter\n\nFormats supportés: GPX, CSV, RINEX');
     }
 
-    function naviguer(dest) {
-      if (dest === 'releves') google.script.run.naviguerVersReleves();
-      else if (dest === 'carte') google.script.run.naviguerVersCarteReleves();
-      else if (dest === 'export') google.script.run.afficherExportReleves();
+    function calculerDistances() {
+      showLoading();
+      const projet = document.getElementById('filterProjet').value;
+
+      google.script.run
+        .withSuccessHandler(function(result) {
+          hideLoading();
+          alert(`📏 Calculs effectués\n\nPoints: ${result.releves.length}`);
+        })
+        .withFailureHandler(handleError)
+        .obtenirTousReleves(projet);
     }
 
-    function retourMenu() {
-      google.script.run.afficherMenuPrincipal();
+    function detecterAnomalies() {
+      showLoading();
+      google.script.run
+        .withSuccessHandler(function(result) {
+          hideLoading();
+          if (result.success) {
+            alert(`⚠️ Détection anomalies\n\nTotal: ${result.total}\n${result.total > 0 ? 'Voir détails dans modal' : 'Aucune anomalie'}`);
+            verifierAnomalies();
+          }
+        })
+        .withFailureHandler(handleError)
+        .detecterAnomalies();
     }
 
-    function appliquerFiltre() {
-      const type = document.getElementById('filtreType').value;
-      const validite = document.getElementById('filtreValidite').value;
-      let msg = 'Filtres: ';
-      if (type) msg += 'Type=' + type + ' ';
-      if (validite) msg += 'Validité=' + validite;
-      if (!type && !validite) msg += 'Tous';
-      alert(msg);
-    }
-
-    function chargerStats() {
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success) {
-          document.getElementById('relevesTotal').textContent = result.stats.total || 0;
-          document.getElementById('relevesValides').textContent = result.stats.valides || 0;
-          document.getElementById('precisionMoyenne').textContent = (result.stats.precision || 0).toFixed(1) + ' cm';
-        }
-      }).obtenirStatsReleves();
-    }
-
-    window.onload = function() {
+    function appliquerFiltres() {
+      const projet = document.getElementById('filterProjet').value;
+      alert(`Filtres appliqués\nProjet: ${projet || 'Tous'}`);
       chargerStats();
-    };
+    }
+
+    function exporterFormat(format) {
+      showLoading();
+      const projet = document.getElementById('filterProjet').value;
+
+      let functionName;
+      if (format === 'CSV') functionName = 'exporterCSV';
+      else if (format === 'DXF') functionName = 'exporterDXF';
+      else if (format === 'KML') functionName = 'exporterKML';
+
+      google.script.run
+        .withSuccessHandler(function(data) {
+          hideLoading();
+          if (data) {
+            alert(`✅ Export ${format} généré avec succès`);
+          }
+        })
+        .withFailureHandler(handleError)
+        [functionName](projet);
+    }
+
+    function showLoading() {
+      document.getElementById('loading').style.display = 'block';
+    }
+
+    function hideLoading() {
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    function handleError(error) {
+      hideLoading();
+      console.error('Erreur:', error);
+      alert('❌ Erreur: ' + (error.message || error));
+    }
+
+    setInterval(chargerStats, 30000);
   </script>
 </body>
 </html>

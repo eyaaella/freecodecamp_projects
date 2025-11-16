@@ -3,136 +3,435 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion Équipes v2.0</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
-    .header { background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%); color: white; padding: 20px; text-align: center; }
-    .header h2 { font-size: 18px; margin-bottom: 5px; }
-    .header p { font-size: 11px; opacity: 0.9; }
-    .container { padding: 15px; }
-    .stat-card { background: white; border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #9c27b0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .stat-card h3 { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
-    .stat-card .value { font-size: 22px; font-weight: 700; color: #9c27b0; }
-    .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
-    .btn-primary { background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%); color: white; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4); }
-    .btn-success { background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%); color: white; }
-    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4); }
-    .section-title { font-size: 13px; font-weight: 600; color: #9c27b0; margin: 15px 0 10px; padding-bottom: 5px; border-bottom: 2px solid #9c27b0; }
-    .menu-item { background: white; border-radius: 6px; padding: 10px 12px; margin-bottom: 6px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 8px; transition: all 0.2s; border: 1px solid #e0e0e0; }
-    .menu-item:hover { background: #9c27b0; color: white; transform: translateX(3px); }
-    .filter { margin-bottom: 15px; }
-    .filter select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background: #f8f9fa;
+      color: #333;
+      padding: 15px;
+      max-width: 320px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+      color: white;
+      padding: 20px 15px;
+      margin: -15px -15px 20px -15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .header h2 {
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .stats-card {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      border-left: 4px solid #1a73e8;
+    }
+
+    .stats-card h3 {
+      font-size: 13px;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 6px;
+    }
+
+    .stat-item .label {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+
+    .stat-item .value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a73e8;
+    }
+
+    .filters-card {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .filters-card h3 {
+      font-size: 13px;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    .filter-group {
+      margin-bottom: 12px;
+    }
+
+    .filter-group label {
+      display: block;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    .filter-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 13px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .filter-group select:focus {
+      outline: none;
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+    }
+
+    .actions-card {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .actions-card h3 {
+      font-size: 13px;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 10px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%);
+      color: white;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(52, 168, 83, 0.3);
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #fbbc04 0%, #ea8600 100%);
+      color: #333;
+    }
+
+    .btn-warning:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(251, 188, 4, 0.3);
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #1a73e8;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .footer {
+      text-align: center;
+      padding: 15px 0;
+      font-size: 11px;
+      color: #999;
+      border-top: 1px solid #eee;
+      margin-top: 20px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-left: 5px;
+    }
+
+    .badge-success {
+      background: #34a853;
+      color: white;
+    }
+
+    .badge-warning {
+      background: #fbbc04;
+      color: #333;
+    }
+
+    .badge-info {
+      background: #4285f4;
+      color: white;
+    }
   </style>
 </head>
 <body>
   <div class="header">
     <h2>👥 Gestion Équipes</h2>
-    <p>Équipes Terrain</p>
+    <p>Module v2.0 - TopoGest Pro</p>
   </div>
 
-  <div class="container">
-    <div class="stat-card">
-      <h3>Équipes Totales</h3>
-      <div class="value" id="equipesTotales">-</div>
+  <!-- Statistiques -->
+  <div class="stats-card">
+    <h3>📊 Statistiques</h3>
+    <div class="stat-grid">
+      <div class="stat-item">
+        <div class="label">Total</div>
+        <div class="value" id="statTotal">-</div>
+      </div>
+      <div class="stat-item">
+        <div class="label">Actives</div>
+        <div class="value" id="statActives" style="color: #34a853;">-</div>
+      </div>
+      <div class="stat-item">
+        <div class="label">Disponibles</div>
+        <div class="value" id="statDisponibles" style="color: #4285f4;">-</div>
+      </div>
+      <div class="stat-item">
+        <div class="label">Charge (h)</div>
+        <div class="value" id="statCharge" style="color: #fbbc04; font-size: 16px;">-</div>
+      </div>
     </div>
+  </div>
 
-    <div class="stat-card" style="border-left-color: #34a853;">
-      <h3>Équipes Actives</h3>
-      <div class="value" id="equipesActives" style="color: #34a853;">-</div>
-    </div>
-
-    <div class="stat-card" style="border-left-color: #fbbc04;">
-      <h3>Taux d'Occupation Moyen</h3>
-      <div class="value" id="tauxOccupation" style="color: #fbbc04;">-%</div>
-    </div>
-
-    <div class="section-title">🎯 Actions Rapides</div>
-    <button class="btn btn-success" onclick="nouvelleEquipe()">
-      <span>➕</span>
-      <span>Nouvelle Équipe</span>
-    </button>
-    <button class="btn btn-primary" onclick="ouvrirGestionnaire()">
-      <span>🎛️</span>
-      <span>Gestionnaire</span>
-    </button>
-
-    <div class="section-title">🔍 Filtres</div>
-    <div class="filter">
-      <select id="filtreSpecialite" onchange="appliquerFiltre()">
-        <option value="">Toutes les spécialités</option>
+  <!-- Filtres -->
+  <div class="filters-card">
+    <h3>🔍 Filtres</h3>
+    <div class="filter-group">
+      <label for="filtreType">Type d'équipe</label>
+      <select id="filtreType">
+        <option value="all">Tous les types</option>
         <option value="Topographie">Topographie</option>
-        <option value="Génie civil">Génie civil</option>
-        <option value="Irrigation">Irrigation</option>
+        <option value="Terrassement">Terrassement</option>
+        <option value="Bétonnage">Bétonnage</option>
+        <option value="Finition">Finition</option>
         <option value="Mixte">Mixte</option>
       </select>
     </div>
-    <div class="filter">
-      <select id="filtreStatut" onchange="appliquerFiltre()">
-        <option value="">Tous les statuts</option>
-        <option value="Active">Active</option>
-        <option value="Inactive">Inactive</option>
-        <option value="En mission">En mission</option>
+
+    <div class="filter-group">
+      <label for="filtreProjet">Projet</label>
+      <select id="filtreProjet">
+        <option value="all">Tous les projets</option>
       </select>
     </div>
 
-    <div class="section-title">📊 Navigation</div>
-    <div class="menu-item" onclick="naviguer('toutes')">
-      <span>👥</span>
-      <span>Voir toutes les équipes</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('specialites')">
-      <span>🔧</span>
-      <span>Par spécialité</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('affectations')">
-      <span>📍</span>
-      <span>Affectations</span>
-    </div>
-    <div class="menu-item" onclick="retourMenu()">
-      <span>🏠</span>
-      <span>Menu Principal</span>
+    <div class="filter-group">
+      <label for="filtreStatut">Statut</label>
+      <select id="filtreStatut">
+        <option value="all">Tous les statuts</option>
+        <option value="Active">Active</option>
+        <option value="Disponible">Disponible</option>
+        <option value="Maintenance">Maintenance</option>
+        <option value="Formation">Formation</option>
+      </select>
     </div>
   </div>
 
+  <!-- Actions -->
+  <div class="actions-card">
+    <h3>⚡ Actions Rapides</h3>
+    <button class="btn btn-primary" onclick="nouvelleEquipe()">
+      ➕ Nouvelle Équipe
+    </button>
+    <button class="btn btn-success" onclick="ouvrirGestionnaire()">
+      📋 Gestionnaire Complet
+    </button>
+    <button class="btn btn-warning" onclick="afficherPlanning()">
+      📅 Planning Équipes
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Chargement...</p>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    TopoGest Pro v2.0<br>
+    Module Équipes
+  </div>
+
   <script>
-    function nouvelleEquipe() {
-      ouvrirGestionnaire();
+    // Charger les stats au démarrage
+    window.onload = function() {
+      chargerStatistiques();
+      chargerProjets();
+    };
+
+    // Charger les statistiques
+    function chargerStatistiques() {
+      showLoading();
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            const kpis = result.kpis;
+            document.getElementById('statTotal').textContent = kpis.nombreTotal;
+            document.getElementById('statActives').textContent = kpis.actives;
+            document.getElementById('statDisponibles').textContent = kpis.disponibles;
+            document.getElementById('statCharge').textContent = Math.round(kpis.chargeTotale);
+          }
+          hideLoading();
+        })
+        .withFailureHandler(function(error) {
+          hideLoading();
+          alert('Erreur chargement stats: ' + error);
+        })
+        .obtenirKPIsEquipes();
     }
 
+    // Charger liste projets
+    function chargerProjets() {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            const select = document.getElementById('filtreProjet');
+            result.projets.forEach(function(projet) {
+              const option = document.createElement('option');
+              option.value = projet.id;
+              option.textContent = projet.nom;
+              select.appendChild(option);
+            });
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Erreur chargement projets:', error);
+        })
+        .obtenirTousProjets();
+    }
+
+    // Nouvelle équipe
+    function nouvelleEquipe() {
+      const nom = prompt('Nom de la nouvelle équipe:');
+      if (!nom) return;
+
+      const type = prompt('Type (Topographie/Terrassement/Bétonnage/Finition/Mixte):');
+      if (!type) return;
+
+      showLoading();
+      google.script.run
+        .withSuccessHandler(function(result) {
+          hideLoading();
+          if (result.success) {
+            alert('✅ ' + result.message);
+            chargerStatistiques();
+          } else {
+            alert('❌ ' + result.message);
+          }
+        })
+        .withFailureHandler(function(error) {
+          hideLoading();
+          alert('❌ Erreur: ' + error);
+        })
+        .ajouterEquipe(nom, '', '', type, 0, '', '');
+    }
+
+    // Ouvrir gestionnaire complet
     function ouvrirGestionnaire() {
       google.script.run.afficherModalEquipe();
     }
 
-    function naviguer(dest) {
-      if (dest === 'toutes') google.script.run.naviguerVersEquipes();
-      else if (dest === 'specialites') alert('Navigation vers spécialités');
-      else if (dest === 'affectations') alert('Navigation vers affectations');
+    // Afficher planning
+    function afficherPlanning() {
+      alert('Fonctionnalité Planning en développement');
     }
 
-    function retourMenu() {
-      google.script.run.afficherMenuPrincipal();
+    // Utils
+    function showLoading() {
+      document.getElementById('loading').style.display = 'block';
     }
 
-    function appliquerFiltre() {
-      const specialite = document.getElementById('filtreSpecialite').value;
-      const statut = document.getElementById('filtreStatut').value;
-      alert('Filtres: ' + (specialite || 'Toutes') + ' / ' + (statut || 'Tous'));
+    function hideLoading() {
+      document.getElementById('loading').style.display = 'none';
     }
 
-    function chargerStats() {
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success) {
-          document.getElementById('equipesTotales').textContent = result.stats.total || 0;
-          document.getElementById('equipesActives').textContent = result.stats.actives || 0;
-          document.getElementById('tauxOccupation').textContent = (result.stats.tauxOccupation || 0) + '%';
-        }
-      }).obtenirStatsEquipes();
-    }
+    // Événements filtres
+    document.getElementById('filtreType').addEventListener('change', function() {
+      chargerStatistiques();
+    });
 
-    window.onload = function() {
-      chargerStats();
-    };
+    document.getElementById('filtreStatut').addEventListener('change', function() {
+      chargerStatistiques();
+    });
   </script>
 </body>
 </html>

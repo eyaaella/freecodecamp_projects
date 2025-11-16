@@ -3,154 +3,136 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
+  <title>Contrôleur v2.0 - Sidebar</title>
   <style>
+    :root {
+      --bg-primary: #ffffff; --bg-secondary: #f8f9fa;
+      --accent-primary: #34a853; --accent-danger: #ea4335;
+      --text-primary: #333; --text-secondary: #666;
+      --border-color: #dee2e6; --shadow: rgba(0,0,0,0.1);
+    }
+    [data-theme="dark"] {
+      --bg-primary: #202124; --bg-secondary: #292a2d;
+      --accent-primary: #81c995; --text-primary: #e8eaed;
+      --text-secondary: #9aa0a6; --border-color: #3c4043;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
-    .header { background: linear-gradient(135deg, #137333 0%, #0d5025 100%); color: white; padding: 20px; text-align: center; }
-    .header h2 { font-size: 18px; margin-bottom: 5px; }
-    .header p { font-size: 11px; opacity: 0.9; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg-primary); color: var(--text-primary); }
+    .header { background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%); color: white; padding: 20px; text-align: center; }
+    .header h1 { font-size: 18px; margin-bottom: 5px; }
     .container { padding: 15px; }
-    .stat-card { background: white; border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #137333; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .stat-card h3 { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
-    .stat-card .value { font-size: 22px; font-weight: 700; color: #137333; }
-    .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
-    .btn-primary { background: linear-gradient(135deg, #137333 0%, #0d5025 100%); color: white; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(19, 115, 51, 0.4); }
-    .btn-success { background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%); color: white; }
-    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4); }
-    .btn-info { background: linear-gradient(135deg, #00796b 0%, #004d40 100%); color: white; }
-    .btn-info:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 121, 107, 0.4); }
-    .section-title { font-size: 13px; font-weight: 600; color: #137333; margin: 15px 0 10px; padding-bottom: 5px; border-bottom: 2px solid #137333; }
-    .menu-item { background: white; border-radius: 6px; padding: 10px 12px; margin-bottom: 6px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 8px; transition: all 0.2s; border: 1px solid #e0e0e0; }
-    .menu-item:hover { background: #137333; color: white; transform: translateX(3px); }
-    .filter { margin-bottom: 15px; }
-    .filter label { display: block; font-size: 11px; color: #666; margin-bottom: 5px; font-weight: 600; }
-    .filter select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; background: white; }
+    .stats-card { background: var(--bg-secondary); border-radius: 10px; padding: 15px; margin-bottom: 12px; border-left: 4px solid var(--accent-primary); box-shadow: 0 2px 8px var(--shadow); }
+    .stats-card h3 { font-size: 11px; color: var(--text-secondary); margin-bottom: 5px; text-transform: uppercase; }
+    .stats-card .value { font-size: 28px; font-weight: 700; color: var(--accent-primary); }
+    .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 8px; }
+    .btn-primary { background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%); color: white; }
+    .section-title { font-size: 13px; font-weight: 600; color: var(--accent-primary); margin: 15px 0 10px; border-bottom: 2px solid var(--accent-primary); padding-bottom: 5px; }
+    select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 10px; background: var(--bg-secondary); color: var(--text-primary); }
+    .nc-urgente { background: #fef3f2; border-left: 4px solid #ea4335; padding: 10px; border-radius: 6px; margin-bottom: 8px; }
+    .nc-urgente strong { color: #ea4335; display: block; margin-bottom: 3px; }
+    .nc-urgente small { color: #666; font-size: 11px; }
   </style>
 </head>
 <body>
   <div class="header">
-    <h2>✓ Contrôleurs Externes</h2>
-    <p>Bureau de Contrôle</p>
+    <h1>✓ Contrôleur v2.0</h1>
+    <p>Gestion Contrôles Qualité</p>
   </div>
 
   <div class="container">
-    <div class="stat-card">
-      <h3>Contrôleurs Totaux</h3>
-      <div class="value" id="controleursTotaux">-</div>
+    <div class="section-title">📊 Statistiques</div>
+
+    <div class="stats-card">
+      <h3>Contrôles Total</h3>
+      <div class="value" id="totalControles">-</div>
     </div>
 
-    <div class="stat-card" style="border-left-color: #34a853;">
-      <h3>Actifs</h3>
-      <div class="value" id="controleursActifs" style="color: #34a853;">-</div>
+    <div class="stats-card" style="border-left-color: #1a73e8;">
+      <h3>Cette Semaine</h3>
+      <div class="value" id="cetteSemaine" style="color: #1a73e8;">-</div>
     </div>
 
-    <div class="stat-card" style="border-left-color: #4285f4;">
-      <h3>Contrôles ce Mois</h3>
-      <div class="value" id="controlesMois" style="color: #4285f4;">-</div>
+    <div class="stats-card" style="border-left-color: #34a853;">
+      <h3>Taux Conformité (%)</h3>
+      <div class="value" id="tauxConformite" style="color: #34a853;">-</div>
     </div>
 
-    <div class="section-title">🎯 Actions Rapides</div>
-    <button class="btn btn-success" onclick="nouveauControleur()">
-      <span>➕</span>
-      <span>Nouveau Contrôleur</span>
-    </button>
-    <button class="btn btn-info" onclick="affecterMission()">
-      <span>📋</span>
-      <span>Affecter Mission</span>
-    </button>
-    <button class="btn btn-primary" onclick="ouvrirGestionnaire()">
-      <span>📊</span>
-      <span>Statistiques</span>
-    </button>
+    <div class="stats-card" style="border-left-color: #ea4335;">
+      <h3>NC Ouvertes</h3>
+      <div class="value" id="ncOuvertes" style="color: #ea4335;">-</div>
+    </div>
 
     <div class="section-title">🔍 Filtres</div>
-    <div class="filter">
-      <label>Par Spécialité</label>
-      <select id="filtreSpecialite" onchange="appliquerFiltre()">
-        <option value="">Toutes les spécialités</option>
-        <option value="Génie civil">Génie civil</option>
-        <option value="Topographie">Topographie</option>
-        <option value="Irrigation">Irrigation</option>
-        <option value="Environnement">Environnement</option>
-        <option value="Géotechnique">Géotechnique</option>
-      </select>
-    </div>
 
-    <div class="filter">
-      <label>Par Zone</label>
-      <select id="filtreZone" onchange="appliquerFiltre()">
-        <option value="">Toutes les zones</option>
-        <option value="Nord">Nord</option>
-        <option value="Sud">Sud</option>
-        <option value="Est">Est</option>
-        <option value="Ouest">Ouest</option>
-        <option value="Centre">Centre</option>
-      </select>
-    </div>
+    <select id="filtreType">
+      <option value="">Tous les types</option>
+      <option value="Qualité">Qualité</option>
+      <option value="Sécurité">Sécurité</option>
+      <option value="Environnement">Environnement</option>
+      <option value="Conformité">Conformité</option>
+    </select>
 
-    <div class="section-title">📊 Navigation</div>
-    <div class="menu-item" onclick="naviguer('tous')">
-      <span>✓</span>
-      <span>Voir tous les contrôleurs</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('actifs')">
-      <span>⭐</span>
-      <span>Contrôleurs actifs</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('specialite')">
-      <span>🎓</span>
-      <span>Par spécialité</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('missions')">
-      <span>📋</span>
-      <span>Missions en cours</span>
-    </div>
-    <div class="menu-item" onclick="retourMenu()">
-      <span>🏠</span>
-      <span>Menu Principal</span>
+    <select id="filtreStatut">
+      <option value="">Tous les statuts</option>
+      <option value="En cours">En cours</option>
+      <option value="Clôturé">Clôturé</option>
+    </select>
+
+    <div class="section-title">⚡ Actions Rapides</div>
+
+    <button class="btn btn-primary" onclick="nouveauControle()">➕ Nouveau Contrôle</button>
+    <button class="btn btn-primary" onclick="afficherGrilles()">📋 Grilles</button>
+    <button class="btn btn-primary" onclick="genererRapport()">📄 Rapports</button>
+
+    <div class="section-title">⚠️ NC Urgentes</div>
+
+    <div id="ncUrgentes">
+      <div class="nc-urgente">
+        <strong>Chargement...</strong>
+      </div>
     </div>
   </div>
 
   <script>
-    function nouveauControleur() {
-      ouvrirGestionnaire();
-    }
-
-    function affecterMission() {
-      ouvrirGestionnaire();
-    }
-
-    function ouvrirGestionnaire() {
-      google.script.run.afficherModalControleur();
-    }
-
-    function naviguer(dest) {
-      if (dest === 'tous') google.script.run.naviguerVersControleurs();
-      else if (dest === 'actifs') google.script.run.naviguerVersControleurs('Actif');
-      else if (dest === 'specialite') google.script.run.naviguerVersControleurs('specialite');
-      else if (dest === 'missions') google.script.run.naviguerVersControleurs('missions');
-    }
-
-    function retourMenu() {
-      google.script.run.afficherMenuPrincipal();
-    }
-
-    function appliquerFiltre() {
-      const specialite = document.getElementById('filtreSpecialite').value;
-      const zone = document.getElementById('filtreZone').value;
-      google.script.run.naviguerVersControleurs(specialite, zone);
-    }
-
-    // Charger les statistiques au démarrage
-    window.onload = function() {
+    function chargerStats() {
       google.script.run
         .withSuccessHandler(function(stats) {
-          document.getElementById('controleursTotaux').textContent = stats.total || 0;
-          document.getElementById('controleursActifs').textContent = stats.actifs || 0;
-          document.getElementById('controlesMois').textContent = stats.controlesMois || 0;
+          document.getElementById('totalControles').textContent = stats.total;
+          document.getElementById('cetteSemaine').textContent = stats.cetteSemaine;
+          document.getElementById('tauxConformite').textContent = stats.tauxConformite;
+          document.getElementById('ncOuvertes').textContent = stats.ncOuvertes;
+          chargerNCUrgentes();
         })
-        .obtenirStatistiquesControleurs();
+        .obtenirKPIsControleur();
+    }
+
+    function chargerNCUrgentes() {
+      google.script.run
+        .withSuccessHandler(function(controles) {
+          let html = '';
+          const ncUrgentes = controles.filter(c => c.NonConformites && c.Statut === 'En cours').slice(0, 3);
+          
+          ncUrgentes.forEach(nc => {
+            html += `
+              <div class="nc-urgente">
+                <strong>${nc.TypeControle}</strong>
+                <small>${nc.ProjetID}</small>
+              </div>
+            `;
+          });
+          
+          document.getElementById('ncUrgentes').innerHTML = html || '<div class="nc-urgente"><strong>Aucune NC urgente</strong></div>';
+        })
+        .listerControles();
+    }
+
+    function nouveauControle() { google.script.run.afficherModalControleur(); }
+    function afficherGrilles() { alert('Grilles de contrôle prédéfinies'); }
+    function genererRapport() { alert('Génération de rapport PDF'); }
+
+    window.onload = function() {
+      chargerStats();
+      setInterval(chargerStats, 30000);
     };
   </script>
 </body>

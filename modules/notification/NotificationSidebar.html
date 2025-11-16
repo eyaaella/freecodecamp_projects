@@ -1,722 +1,109 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
-    <base target="_top">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notifications</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Google Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #ea4335 0%, #c5221f 100%);
-            padding: 16px;
-            color: #202124;
-        }
-
-        .sidebar-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #ea4335 0%, #c5221f 100%);
-            color: white;
-            padding: 24px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 24px;
-            font-weight: 500;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .header p {
-            font-size: 14px;
-            opacity: 0.95;
-            font-weight: 400;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e8eaed;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 16px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.12);
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: 600;
-            color: #ea4335;
-            margin-bottom: 4px;
-        }
-
-        .stat-value.critical {
-            color: #c5221f;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-
-        .stat-label {
-            font-size: 12px;
-            color: #5f6368;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: #ea4335;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 600;
-            box-shadow: 0 2px 4px rgba(234, 67, 53, 0.4);
-        }
-
-        .action-buttons {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .btn {
-            padding: 14px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            text-decoration: none;
-            color: white;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #ea4335 0%, #c5221f 100%);
-            box-shadow: 0 2px 8px rgba(234, 67, 53, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(234, 67, 53, 0.4);
-        }
-
-        .btn-secondary {
-            background: white;
-            color: #ea4335;
-            border: 2px solid #ea4335;
-        }
-
-        .btn-secondary:hover {
-            background: #fef7e0;
-            transform: translateY(-2px);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #34a853 0%, #137333 100%);
-            color: white;
-        }
-
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4);
-        }
-
-        .filters-section {
-            padding: 20px;
-            background: #f8f9fa;
-            border-top: 1px solid #e8eaed;
-        }
-
-        .filters-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #5f6368;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .filter-group {
-            margin-bottom: 16px;
-        }
-
-        .filter-label {
-            font-size: 13px;
-            color: #5f6368;
-            margin-bottom: 6px;
-            display: block;
-            font-weight: 500;
-        }
-
-        select, input {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #dadce0;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-            transition: all 0.3s ease;
-            background: white;
-        }
-
-        select:focus, input:focus {
-            outline: none;
-            border-color: #ea4335;
-            box-shadow: 0 0 0 3px rgba(234, 67, 53, 0.1);
-        }
-
-        .menu-section {
-            padding: 20px;
-            border-top: 1px solid #e8eaed;
-        }
-
-        .menu-item {
-            padding: 12px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            color: #202124;
-        }
-
-        .menu-item:hover {
-            background: #f8f9fa;
-            transform: translateX(4px);
-        }
-
-        .menu-item.active {
-            background: #fce8e6;
-            color: #ea4335;
-            font-weight: 500;
-        }
-
-        .badge {
-            background: #ea4335;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .badge.critical {
-            background: #c5221f;
-            animation: pulse 2s infinite;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #5f6368;
-        }
-
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #ea4335;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 12px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error-message {
-            background: #fce8e6;
-            color: #c5221f;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin: 16px 20px;
-            font-size: 14px;
-            display: none;
-        }
-
-        .success-message {
-            background: #e6f4ea;
-            color: #137333;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin: 16px 20px;
-            font-size: 14px;
-            display: none;
-        }
-
-        .recent-notifications {
-            padding: 20px;
-            border-top: 1px solid #e8eaed;
-        }
-
-        .recent-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #5f6368;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .notification-item {
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            border-left: 4px solid #ea4335;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .notification-item:hover {
-            transform: translateX(4px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .notification-item.unread {
-            background: #fef7e0;
-            font-weight: 500;
-        }
-
-        .notification-item.info {
-            border-left-color: #1967d2;
-        }
-
-        .notification-item.alerte {
-            border-left-color: #f9ab00;
-        }
-
-        .notification-item.urgence {
-            border-left-color: #c5221f;
-        }
-
-        .notification-item.succes {
-            border-left-color: #34a853;
-        }
-
-        .notification-item.erreur {
-            border-left-color: #ea4335;
-        }
-
-        .notification-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 4px;
-        }
-
-        .notification-type {
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .notification-type.info {
-            background: #e8f0fe;
-            color: #1967d2;
-        }
-
-        .notification-type.alerte {
-            background: #fef7e0;
-            color: #f9ab00;
-        }
-
-        .notification-type.urgence {
-            background: #fce8e6;
-            color: #c5221f;
-        }
-
-        .notification-type.succes {
-            background: #e6f4ea;
-            color: #34a853;
-        }
-
-        .notification-type.erreur {
-            background: #fce8e6;
-            color: #ea4335;
-        }
-
-        .notification-time {
-            font-size: 11px;
-            color: #5f6368;
-        }
-
-        .notification-message {
-            font-size: 13px;
-            color: #202124;
-        }
-    </style>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <title>Notifications v2.0</title>
+  <style>
+    :root { --bg-primary: #fff; --bg-secondary: #f8f9fa; --text-primary: #333; --text-secondary: #666; --border-color: #dee2e6; --shadow: rgba(0,0,0,0.1); --accent-primary: #1a73e8; --accent-success: #34a853; --accent-warning: #fbbc04; --accent-danger: #ea4335; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg-primary); color: var(--text-primary); padding: 15px; font-size: 13px; }
+    .header { background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%); color: white; padding: 15px; margin: -15px -15px 20px -15px; box-shadow: 0 2px 8px var(--shadow); }
+    .header h2 { font-size: 18px; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
+    .badge-notif { background: var(--accent-danger); color: white; padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .header p { font-size: 11px; opacity: 0.9; }
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+    .stat-card { background: var(--bg-secondary); border-radius: 8px; padding: 12px; box-shadow: 0 2px 6px var(--shadow); border-left: 3px solid var(--accent-primary); transition: all 0.3s; }
+    .stat-card h4 { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 5px; }
+    .stat-card .value { font-size: 24px; font-weight: 700; color: var(--accent-primary); }
+    .section { background: var(--bg-secondary); border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 6px var(--shadow); }
+    .section-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: var(--accent-primary); border-bottom: 2px solid var(--accent-primary); padding-bottom: 5px; }
+    .notif-list { max-height: 400px; overflow-y: auto; }
+    .notif-item { background: var(--bg-primary); border-left: 3px solid var(--accent-primary); padding: 12px; margin-bottom: 10px; border-radius: 6px; cursor: pointer; transition: all 0.3s; }
+    .notif-item:hover { box-shadow: 0 2px 8px var(--shadow); transform: translateX(3px); }
+    .notif-item.unread { background: #e8f4fd; font-weight: 600; }
+    .notif-item.success { border-left-color: var(--accent-success); }
+    .notif-item.warning { border-left-color: var(--accent-warning); }
+    .notif-item.error { border-left-color: var(--accent-danger); }
+    .notif-item strong { display: block; margin-bottom: 5px; font-size: 13px; }
+    .notif-item p { font-size: 12px; color: var(--text-secondary); margin-bottom: 5px; }
+    .notif-item small { font-size: 11px; color: var(--text-secondary); }
+    .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; margin-right: 5px; }
+    .badge-success { background: var(--accent-success); color: white; }
+    .badge-warning { background: var(--accent-warning); color: #333; }
+    .badge-danger { background: var(--accent-danger); color: white; }
+    .badge-info { background: var(--accent-primary); color: white; }
+    .btn { width: 100%; padding: 10px 15px; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-primary { background: linear-gradient(135deg, var(--accent-primary) 0%, #174ea6 100%); color: white; }
+    .btn-success { background: linear-gradient(135deg, var(--accent-success) 0%, #2d8e47 100%); color: white; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 10px var(--shadow); }
+  </style>
 </head>
 <body>
-    <div class="sidebar-container">
-        <div class="header">
-            <h1><span>🔔</span> Notifications</h1>
-            <p>Alertes Système</p>
-        </div>
-
-        <div id="errorMessage" class="error-message"></div>
-        <div id="successMessage" class="success-message"></div>
-
-        <div class="stats-grid" id="statsGrid">
-            <div class="stat-card">
-                <div class="stat-value" id="statNonLues">-</div>
-                <div class="stat-label">Non Lues</div>
-                <div class="notification-badge" id="badgeNonLues" style="display: none;">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value critical" id="statCritiques">-</div>
-                <div class="stat-label">Critiques</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="statAujourdhui">-</div>
-                <div class="stat-label">Aujourd'hui</div>
-            </div>
-        </div>
-
-        <div class="action-buttons">
-            <button class="btn btn-success" onclick="marquerToutLu()">
-                <span>✓</span> Tout marquer comme lu
-            </button>
-            <button class="btn btn-primary" onclick="afficherModalNotification()">
-                <span>📋</span> Voir toutes les notifications
-            </button>
-            <button class="btn btn-secondary" onclick="afficherParametres()">
-                <span>⚙️</span> Paramètres
-            </button>
-            <button class="btn btn-secondary" onclick="nouvelleDiffusion()">
-                <span>📢</span> Nouvelle diffusion
-            </button>
-        </div>
-
-        <div class="filters-section">
-            <div class="filters-title">🔍 Filtres</div>
-
-            <div class="filter-group">
-                <label class="filter-label">Type</label>
-                <select id="filterType" onchange="appliquerFiltres()">
-                    <option value="">Tous les types</option>
-                    <option value="info">Info</option>
-                    <option value="alerte">Alerte</option>
-                    <option value="urgence">Urgence</option>
-                    <option value="succes">Succès</option>
-                    <option value="erreur">Erreur</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label class="filter-label">Priorité</label>
-                <select id="filterPriorite" onchange="appliquerFiltres()">
-                    <option value="">Toutes</option>
-                    <option value="critique">Critique</option>
-                    <option value="haute">Haute</option>
-                    <option value="normale">Normale</option>
-                    <option value="faible">Faible</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label class="filter-label">Statut</label>
-                <select id="filterStatut" onchange="appliquerFiltres()">
-                    <option value="">Toutes</option>
-                    <option value="non_lu">Non lues</option>
-                    <option value="lu">Lues</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="menu-section">
-            <div class="menu-item active" onclick="naviguerVersNotifications('non_lues')">
-                <span>📬 Notifications non lues</span>
-                <span class="badge" id="badgeMenuNonLues">0</span>
-            </div>
-            <div class="menu-item" onclick="naviguerVersNotifications('critiques')">
-                <span>⚠️ Critiques</span>
-                <span class="badge critical" id="badgeMenuCritiques">0</span>
-            </div>
-            <div class="menu-item" onclick="naviguerVersNotifications('toutes')">
-                <span>📋 Toutes les notifications</span>
-            </div>
-            <div class="menu-item" onclick="naviguerVersNotifications('parametres')">
-                <span>⚙️ Paramètres</span>
-            </div>
-        </div>
-
-        <div class="recent-notifications">
-            <div class="recent-title">📬 Récentes</div>
-            <div id="listeNotificationsRecentes">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <div>Chargement...</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let notificationsData = [];
-        let filtresActifs = {};
-        let updateInterval;
-
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            chargerStatistiques();
-            chargerNotificationsRecentes();
-
-            // Actualiser toutes les 30 secondes
-            updateInterval = setInterval(() => {
-                chargerStatistiques();
-                chargerNotificationsRecentes();
-            }, 30000);
-        });
-
-        function chargerStatistiques() {
-            google.script.run
-                .withSuccessHandler(function(stats) {
-                    if (stats && stats.success) {
-                        const nonLues = stats.nonLues || 0;
-                        const critiques = stats.critiques || 0;
-
-                        document.getElementById('statNonLues').textContent = nonLues;
-                        document.getElementById('statCritiques').textContent = critiques;
-                        document.getElementById('statAujourdhui').textContent = stats.aujourdhui || 0;
-
-                        // Badges
-                        const badgeNonLues = document.getElementById('badgeNonLues');
-                        const badgeMenuNonLues = document.getElementById('badgeMenuNonLues');
-                        const badgeMenuCritiques = document.getElementById('badgeMenuCritiques');
-
-                        if (nonLues > 0) {
-                            badgeNonLues.style.display = 'flex';
-                            badgeNonLues.textContent = nonLues;
-                        } else {
-                            badgeNonLues.style.display = 'none';
-                        }
-
-                        badgeMenuNonLues.textContent = nonLues;
-                        badgeMenuCritiques.textContent = critiques;
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    console.error('Erreur chargement stats:', error);
-                })
-                .obtenirStatistiquesNotifications();
-        }
-
-        function chargerNotificationsRecentes() {
-            google.script.run
-                .withSuccessHandler(function(result) {
-                    if (result && result.success) {
-                        afficherNotificationsRecentes(result.data || []);
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    console.error('Erreur chargement notifications:', error);
-                })
-                .obtenirNotificationsRecentes(5);
-        }
-
-        function afficherNotificationsRecentes(data) {
-            const container = document.getElementById('listeNotificationsRecentes');
-
-            if (!data || data.length === 0) {
-                container.innerHTML = '<div style="text-align:center;padding:20px;color:#5f6368;">Aucune notification</div>';
-                return;
-            }
-
-            const html = data.map(notif => `
-                <div class="notification-item ${notif.type} ${notif.lu ? '' : 'unread'}"
-                     onclick="marquerCommeLu(${notif.id})">
-                    <div class="notification-header">
-                        <span class="notification-type ${notif.type}">${notif.type}</span>
-                        <span class="notification-time">${notif.temps || 'maintenant'}</span>
-                    </div>
-                    <div class="notification-message">${notif.message || ''}</div>
-                </div>
-            `).join('');
-
-            container.innerHTML = html;
-        }
-
-        function afficherModalNotification() {
-            google.script.run
-                .withSuccessHandler(function(html) {
-                    if (html) {
-                        const modal = window.open('', '_blank', 'width=1200,height=800');
-                        modal.document.write(html);
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    afficherErreur('Erreur lors de l\'ouverture du modal: ' + error.message);
-                })
-                .afficherModalNotification();
-        }
-
-        function afficherParametres() {
-            afficherModalNotification();
-            // Le modal s'ouvrira sur l'onglet paramètres
-        }
-
-        function nouvelleDiffusion() {
-            afficherModalNotification();
-            // Le modal s'ouvrira sur l'onglet nouvelle notification
-        }
-
-        function marquerToutLu() {
-            google.script.run
-                .withSuccessHandler(function(result) {
-                    if (result && result.success) {
-                        afficherSucces('Toutes les notifications marquées comme lues');
-                        chargerStatistiques();
-                        chargerNotificationsRecentes();
-                    } else {
-                        afficherErreur(result.message || 'Erreur lors de la mise à jour');
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    afficherErreur('Erreur: ' + error.message);
-                })
-                .marquerToutesCommeLues();
-        }
-
-        function marquerCommeLu(id) {
-            google.script.run
-                .withSuccessHandler(function(result) {
-                    if (result && result.success) {
-                        chargerStatistiques();
-                        chargerNotificationsRecentes();
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    console.error('Erreur marquer comme lu:', error);
-                })
-                .marquerCommeLu(id);
-        }
-
-        function naviguerVersNotifications(vue) {
-            // Mettre à jour l'élément actif
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
-
-            // Charger la vue appropriée
-            if (vue === 'parametres') {
-                afficherParametres();
-            } else {
-                google.script.run
-                    .withSuccessHandler(function(result) {
-                        if (result && result.success) {
-                            // Ouvrir le modal avec la vue appropriée
-                            afficherModalNotification();
-                        }
-                    })
-                    .withFailureHandler(function(error) {
-                        afficherErreur('Erreur de navigation: ' + error.message);
-                    })
-                    .naviguerVersVueNotifications(vue);
-            }
-        }
-
-        function appliquerFiltres() {
-            const type = document.getElementById('filterType').value;
-            const priorite = document.getElementById('filterPriorite').value;
-            const statut = document.getElementById('filterStatut').value;
-
-            filtresActifs = {
-                type: type,
-                priorite: priorite,
-                statut: statut
-            };
-
-            google.script.run
-                .withSuccessHandler(function(result) {
-                    if (result && result.success) {
-                        afficherNotificationsRecentes(result.data || []);
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    afficherErreur('Erreur lors de l\'application des filtres: ' + error.message);
-                })
-                .filtrerNotifications(filtresActifs);
-        }
-
-        function afficherErreur(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 5000);
-        }
-
-        function afficherSucces(message) {
-            const successDiv = document.getElementById('successMessage');
-            successDiv.textContent = message;
-            successDiv.style.display = 'block';
-            setTimeout(() => {
-                successDiv.style.display = 'none';
-            }, 3000);
-        }
-
-        // Nettoyer l'intervalle lors de la fermeture
-        window.addEventListener('beforeunload', function() {
-            if (updateInterval) {
-                clearInterval(updateInterval);
-            }
-        });
-    </script>
+  <div class="header">
+    <h2>🔔 Notifications <span class="badge-notif" id="badgeNonLues">0</span></h2>
+    <p>Centre de notifications</p>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><h4>Total</h4><div class="value" id="totalNotif">-</div></div>
+    <div class="stat-card" style="border-left-color: #ea4335;"><h4>Non lues</h4><div class="value" id="nonLues" style="color: #ea4335;">-</div></div>
+    <div class="stat-card" style="border-left-color: #34a853;"><h4>Aujourd'hui</h4><div class="value" id="aujourdhui" style="color: #34a853;">-</div></div>
+    <div class="stat-card" style="border-left-color: #fbbc04;"><h4>Taux lecture</h4><div class="value" id="tauxLecture" style="color: #fbbc04; font-size: 20px;">-</div></div>
+  </div>
+  <div class="section">
+    <div class="section-title">📬 Notifications Récentes</div>
+    <div id="notifList" class="notif-list"><p style="text-align: center; padding: 20px;">Chargement...</p></div>
+  </div>
+  <div class="section">
+    <div class="section-title">⚡ Actions</div>
+    <button class="btn btn-success" onclick="marquerToutLu()">✓ Tout marquer lu</button>
+    <button class="btn btn-primary" onclick="openModal()">📊 Vue complète</button>
+  </div>
+  <script>
+    function loadStats() {
+      google.script.run.withSuccessHandler(function(kpis) {
+        document.getElementById('totalNotif').textContent = kpis.total || 0;
+        document.getElementById('nonLues').textContent = kpis.nonLues || 0;
+        document.getElementById('aujourdhui').textContent = kpis.aujourdhui || 0;
+        document.getElementById('tauxLecture').textContent = (kpis.tauxLecture || 0) + '%';
+        document.getElementById('badgeNonLues').textContent = kpis.nonLues || 0;
+      }).obtenirKPIsNotifications();
+    }
+    function loadNotifications() {
+      const userId = 'USR001'; // TODO: Get current user
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success) displayNotifications(result.notifications);
+      }).obtenirNotificationsUtilisateur(userId, 10);
+    }
+    function displayNotifications(notifs) {
+      const list = document.getElementById('notifList');
+      if (!notifs || notifs.length === 0) { list.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Aucune notification</p>'; return; }
+      let html = '';
+      notifs.forEach(n => {
+        const typeClass = n.type === 'SUCCESS' ? 'success' : n.type === 'WARNING' ? 'warning' : n.type === 'ERROR' || n.type === 'URGENT' ? 'error' : '';
+        const unreadClass = n.statut === 'Non lue' ? 'unread' : '';
+        const badgeClass = n.type === 'SUCCESS' ? 'badge-success' : n.type === 'WARNING' ? 'badge-warning' : n.type === 'ERROR' || n.type === 'URGENT' ? 'badge-danger' : 'badge-info';
+        html += `<div class="notif-item ${typeClass} ${unreadClass}" onclick="markAsRead('${n.id}')"><strong>${n.titre}</strong><p>${n.message}</p><small>${new Date(n.dateEnvoi).toLocaleString()}</small> <span class="badge ${badgeClass}">${n.type}</span></div>`;
+      });
+      list.innerHTML = html;
+    }
+    function markAsRead(notifId) {
+      google.script.run.withSuccessHandler(function() {
+        loadNotifications();
+        loadStats();
+      }).marquerCommeLue(notifId);
+    }
+    function marquerToutLu() {
+      alert('Fonction à implémenter');
+    }
+    function openModal() {
+      google.script.run.afficherModalNotification();
+    }
+    window.onload = function() {
+      loadStats();
+      loadNotifications();
+      setInterval(function() { loadStats(); loadNotifications(); }, 30000);
+    };
+  </script>
 </body>
 </html>

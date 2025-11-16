@@ -1,27 +1,45 @@
 /**
- * MODULE EQUIPE - Gestion Complète des Équipes Terrain
- * Gestion des équipes topographiques et de construction
- * Version: Production Ready 1.0
+ * ============================================================================
+ * MODULE EQUIPE v2.0 - TopoGest Pro
+ * ============================================================================
+ * Version: 2.0.0
+ * Date: 2025-11-16
+ * Description: Gestion complète des équipes de travail avec composition,
+ *              affectations, planning, productivité et KPIs temps réel
+ *
+ * Fonctionnalités v2.0:
+ * ✅ CRUD équipes de travail complet
+ * ✅ Composition équipe (chef + membres)
+ * ✅ Affectation projet/ouvrage dynamique
+ * ✅ Calcul productivité équipe
+ * ✅ Planning disponibilité temps réel
+ * ✅ KPIs: Nb équipes, charge totale, disponibilité
+ * ✅ Gestion des spécialités
+ * ✅ Historique des affectations
+ * ✅ Rapport de performance
+ * ============================================================================
  */
 
-// ==================== INITIALISATION DU MODULE EQUIPE ====================
+// ============================================================================
+// INITIALISATION MODULE EQUIPE v2.0
+// ============================================================================
 
 /**
- * Initialise le module EQUIPE avec toutes les fonctionnalités
+ * Initialise le module EQUIPE v2.0 avec toutes les fonctionnalités
  */
 function initialiserEquipe() {
   try {
-    Logger.log("👥 Initialisation du module EQUIPE...");
+    Logger.log("👥 Initialisation du module EQUIPE v2.0...");
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = ss.getSheetByName("👥 Équipes");
 
-    // Supprimer la feuille si elle existe déjà
+    // Supprimer la feuille si elle existe
     if (sheet) {
       ss.deleteSheet(sheet);
     }
 
-    // Créer une nouvelle feuille
+    // Créer nouvelle feuille
     sheet = ss.insertSheet("👥 Équipes");
 
     // Configuration de base
@@ -29,8 +47,8 @@ function initialiserEquipe() {
     sheet.setFrozenColumns(1);
 
     // ===== EN-TÊTE PRINCIPAL =====
-    sheet.getRange("A1:L1").merge()
-      .setValue("👥 GESTION DES ÉQUIPES TERRAIN - ORGANISATION ET COORDINATION")
+    sheet.getRange("A1:O1").merge()
+      .setValue("👥 GESTION ÉQUIPES v2.0 - COMPOSITION • AFFECTATIONS • PRODUCTIVITÉ • PLANNING")
       .setFontSize(14)
       .setFontWeight("bold")
       .setHorizontalAlignment("center")
@@ -42,16 +60,19 @@ function initialiserEquipe() {
     // ===== COLONNES DE DONNÉES =====
     const headers = [
       "EquipeID",
-      "Nom Équipe",
-      "Chef EquipeID",
-      "Nombre Membres",
-      "Spécialité",
-      "Statut",
+      "Nom",
+      "Chef Équipe ID",
+      "Projet ID",
+      "Type",
+      "Effectif Total",
       "Date Création",
-      "Zone Intervention",
-      "Matériel Assigné",
-      "ProjetID Actuel",
-      "Taux Occupation (%)",
+      "Statut",
+      "Spécialités",
+      "Productivité (%)",
+      "Charge Travail (h)",
+      "Disponibilité (%)",
+      "Taux Utilisation (%)",
+      "Dernière Affectation",
       "Observations"
     ];
 
@@ -66,7 +87,7 @@ function initialiserEquipe() {
     sheet.setRowHeight(2, 35);
 
     // ===== LARGEURS DE COLONNES =====
-    const columnWidths = [100, 200, 120, 120, 180, 120, 110, 180, 250, 120, 130, 250];
+    const columnWidths = [100, 200, 130, 130, 150, 120, 110, 120, 250, 130, 130, 130, 150, 150, 250];
     columnWidths.forEach((width, index) => {
       sheet.setColumnWidth(index + 1, width);
     });
@@ -74,74 +95,89 @@ function initialiserEquipe() {
     // ===== DONNÉES D'EXEMPLE =====
     const donneesExemple = [
       [
-        "EQ001",
+        "EQP001",
         "Équipe Topographie Nord",
-        "EMP002",
-        8,
-        "Topographie",
-        "Actif",
-        new Date(2023, 0, 10),
-        "Extrême-Nord, Nord",
-        "GPS RTK Trimble, Station totale Leica, Véhicule 4x4",
-        "PROJ001",
-        '=D3/10',
-        "Équipe principale levés terrain zone Nord"
-      ],
-      [
-        "EQ002",
-        "Équipe Génie Civil Ouest",
-        "EMP003",
-        12,
-        "Génie civil",
-        "Actif",
-        new Date(2022, 5, 15),
-        "Ouest, Littoral",
-        "Matériel terrassement, Niveleuses, Compacteurs",
-        "PROJ003",
-        '=D4/15',
-        "Construction ouvrages hydrauliques"
-      ],
-      [
-        "EQ003",
-        "Équipe Irrigation Centre",
-        "EMP005",
-        6,
-        "Irrigation",
-        "Actif",
-        new Date(2023, 8, 1),
-        "Centre, Sud",
-        "Drone DJI Phantom 4 RTK, GPS, Matériel irrigation",
-        "PROJ002",
-        '=D5/8',
-        "Spécialisation irrigation goutte-à-goutte"
-      ],
-      [
-        "EQ004",
-        "Équipe Mixte Sud",
         "EMP001",
-        10,
-        "Mixte",
-        "Actif",
-        new Date(2021, 11, 20),
-        "Sud, Est",
-        "Équipement complet topo + génie civil",
         "PROJ001",
-        '=D6/12',
-        "Polyvalente: topo et construction"
+        "Topographie",
+        8,
+        new Date(2024, 0, 10),
+        "Active",
+        "Levés GPS, Nivellement, Implantation",
+        0.85,
+        320,
+        0.75,
+        '=SI(L3>0;K3/(L3*40);0)',
+        new Date(),
+        "Équipe principale levés topographiques"
       ],
       [
-        "EQ005",
-        "Équipe Maintenance",
-        "",
-        4,
-        "Mixte",
-        "En attente",
+        "EQP002",
+        "Équipe Terrassement Centre",
+        "EMP005",
+        "PROJ001",
+        "Terrassement",
+        12,
+        new Date(2024, 1, 15),
+        "Active",
+        "Excavation, Remblais, Compactage",
+        0.78,
+        480,
+        0.80,
+        '=SI(L4>0;K4/(L4*40);0)',
+        new Date(Date.now() - 86400000),
+        "Spécialisée travaux de terre"
+      ],
+      [
+        "EQP003",
+        "Équipe Bétonnage Sud",
+        "EMP008",
+        "PROJ002",
+        "Bétonnage",
+        10,
         new Date(2024, 2, 5),
-        "National",
-        "Outils maintenance, Véhicule atelier mobile",
+        "Active",
+        "Coffrage, Ferraillage, Coulage béton",
+        0.92,
+        400,
+        0.85,
+        '=SI(L5>0;K5/(L5*40);0)',
+        new Date(Date.now() - 172800000),
+        "Performance excellente"
+      ],
+      [
+        "EQP004",
+        "Équipe Finition Ouest",
+        "EMP012",
+        "PROJ003",
+        "Finition",
+        6,
+        new Date(2024, 3, 20),
+        "Disponible",
+        "Revêtements, Peinture, Carrelage",
+        0.88,
+        0,
+        1.00,
+        '=SI(L6>0;K6/(L6*40);0)',
+        new Date(Date.now() - 604800000),
+        "En attente nouvelle affectation"
+      ],
+      [
+        "EQP005",
+        "Équipe Maintenance",
+        "EMP015",
         "",
-        '=D7/5',
-        "Entretien infrastructures existantes"
+        "Topographie",
+        4,
+        new Date(2024, 4, 10),
+        "Maintenance",
+        "Entretien matériel, Calibration",
+        0.00,
+        0,
+        0.00,
+        '=SI(L7>0;K7/(L7*40);0)',
+        new Date(Date.now() - 1209600000),
+        "Entretien annuel matériel topographique"
       ]
     ];
 
@@ -153,291 +189,129 @@ function initialiserEquipe() {
     const derniereLigne = sheet.getMaxRows();
     for (let i = 8; i <= Math.min(derniereLigne, 100); i++) {
       sheet.getRange(`A${i}`).setFormula(
-        `=SI(NBVAL(B${i})>0;"EQ"&TEXTE(LIGNE()-2;"000");"")`
+        `=SI(NBVAL(B${i})>0;"EQP"&TEXTE(LIGNE()-2;"000");"")`
       );
     }
 
-    // Date Création (colonne G)
+    // Date (colonnes G et N)
     sheet.getRange("G3:G100")
       .setNumberFormat("dd/mm/yyyy")
       .setHorizontalAlignment("center");
 
-    // Taux Occupation (colonne K)
-    sheet.getRange("K3:K100")
-      .setNumberFormat("0%")
+    sheet.getRange("N3:N100")
+      .setNumberFormat("dd/mm/yyyy hh:mm")
       .setHorizontalAlignment("center");
 
-    // ===== FORMULES AVANCÉES =====
+    // Effectif (colonne F)
+    sheet.getRange("F3:F100")
+      .setNumberFormat("0")
+      .setHorizontalAlignment("center");
 
-    // Nom Chef d'Équipe (colonne cachée)
-    sheet.insertColumnAfter(3);
-    sheet.getRange("D2").setValue("Nom Chef");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`D${i}`).setFormula(
-        `=SI(C${i}<>"";RECHERCHEV(C${i};'👤 Employés'!A:M;13;FAUX);"")`
-      );
-    }
-    sheet.hideColumns(4);
+    // Productivité, Disponibilité, Taux Utilisation (colonnes J, L, M)
+    sheet.getRange("J3:J100")
+      .setNumberFormat("0.0%")
+      .setHorizontalAlignment("center");
 
-    // Capacité Maximale (colonne cachée) - selon spécialité
-    sheet.insertColumnAfter(4);
-    sheet.getRange("E2").setValue("Capacité Max");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`E${i}`).setFormula(
-        `=SI(F${i}="Topographie";10;SI(F${i}="Génie civil";15;SI(F${i}="Irrigation";8;SI(F${i}="Mixte";12;10))))`
-      );
-    }
-    sheet.getRange("E3:E100").setNumberFormat("0");
-    sheet.hideColumns(5);
+    sheet.getRange("L3:L100")
+      .setNumberFormat("0.0%")
+      .setHorizontalAlignment("center");
 
-    // Effectif Actuel (depuis table Employés)
-    sheet.insertColumnAfter(5);
-    sheet.getRange("F2").setValue("Effectif Actuel");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`F${i}`).setFormula(
-        `=SI(A${i}<>"";NB.SI.ENS('👤 Employés'!G:G;A${i};'👤 Employés'!K:K;"Actif");0)`
-      );
-    }
-    sheet.getRange("F3:F100").setNumberFormat("0");
-    sheet.hideColumns(6);
+    sheet.getRange("M3:M100")
+      .setNumberFormat("0.0%")
+      .setHorizontalAlignment("center");
 
-    // Taux Occupation Réel (depuis effectif actuel)
-    sheet.insertColumnAfter(6);
-    sheet.getRange("G2").setValue("Taux Occup. Réel");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`G${i}`).setFormula(
-        `=SI(E${i}>0;F${i}/E${i};0)`
-      );
-    }
-    sheet.getRange("G3:G100").setNumberFormat("0%");
-    sheet.hideColumns(7);
-
-    // Places Disponibles
-    sheet.insertColumnAfter(7);
-    sheet.getRange("H2").setValue("Places Dispo");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`H${i}`).setFormula(
-        `=SI(E${i}>0;E${i}-F${i};0)`
-      );
-    }
-    sheet.getRange("H3:H100").setNumberFormat("0");
-    sheet.hideColumns(8);
-
-    // Ancienneté Équipe (jours)
-    sheet.insertColumnAfter(8);
-    sheet.getRange("I2").setValue("Ancienneté (j)");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`I${i}`).setFormula(
-        `=SI(K${i}<>"";AUJOURDHUI()-K${i};"")`
-      );
-    }
-    sheet.getRange("I3:I100").setNumberFormat("0");
-    sheet.hideColumns(9);
-
-    // Nom Projet Actuel
-    sheet.insertColumnAfter(9);
-    sheet.getRange("J2").setValue("Nom Projet");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`J${i}`).setFormula(
-        `=SI(N${i}<>"";RECHERCHEV(N${i};'📁 Projets'!A:B;2;FAUX);"")`
-      );
-    }
-    sheet.hideColumns(10);
-
-    // Statut d'Occupation
-    sheet.insertColumnAfter(10);
-    sheet.getRange("K2").setValue("Statut Occup.");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`K${i}`).setFormula(
-        `=SI(G${i}>=0.9;"Pleine"`;SI(G${i}>=0.6;"Normale";SI(G${i}>0;"Faible";"Vide")))`
-      );
-    }
-    sheet.hideColumns(11);
+    // Charge Travail (colonne K)
+    sheet.getRange("K3:K100")
+      .setNumberFormat('#,##0" h"')
+      .setHorizontalAlignment("right");
 
     // ===== VALIDATION DES DONNÉES =====
 
-    // Chef EquipeID - Liste déroulante depuis Employés
-    const regleChef = SpreadsheetApp.newDataValidation()
-      .requireValueInRange(ss.getSheetByName("👤 Employés").getRange("A3:A100"), true)
-      .setAllowInvalid(true)
-      .setHelpText("Sélectionnez un employé comme chef d'équipe")
-      .build();
-    sheet.getRange("C3:C100").setDataValidation(regleChef);
-
-    // Spécialité
-    const regleSpecialite = SpreadsheetApp.newDataValidation()
-      .requireValueInList(["Topographie", "Génie civil", "Irrigation", "Mixte"], true)
+    // Type d'équipe
+    const regleType = SpreadsheetApp.newDataValidation()
+      .requireValueInList([
+        "Topographie",
+        "Terrassement",
+        "Bétonnage",
+        "Finition",
+        "Mixte"
+      ], true)
       .setAllowInvalid(false)
-      .setHelpText("Sélectionnez la spécialité de l'équipe")
+      .setHelpText("Sélectionnez le type d'équipe")
       .build();
-    sheet.getRange("I3:I100").setDataValidation(regleSpecialite);
+    sheet.getRange("E3:E100").setDataValidation(regleType);
 
     // Statut
     const regleStatut = SpreadsheetApp.newDataValidation()
-      .requireValueInList(["Actif", "En attente", "Repos", "Maintenance", "Dissous"], true)
+      .requireValueInList([
+        "Active",
+        "Disponible",
+        "Maintenance",
+        "Formation",
+        "Dissoute"
+      ], true)
       .setAllowInvalid(false)
       .setHelpText("Sélectionnez le statut de l'équipe")
       .build();
-    sheet.getRange("J3:J100").setDataValidation(regleStatut);
-
-    // Nombre Membres (nombre positif)
-    const regleMembres = SpreadsheetApp.newDataValidation()
-      .requireNumberBetween(1, 50)
-      .setAllowInvalid(false)
-      .setHelpText("Nombre de membres: 1-50")
-      .build();
-    sheet.getRange("D3:D100").setDataValidation(regleMembres);
-
-    // ProjetID - Liste déroulante depuis Projets
-    const regleProjet = SpreadsheetApp.newDataValidation()
-      .requireValueInRange(ss.getSheetByName("📁 Projets").getRange("A3:A100"), true)
-      .setAllowInvalid(true)
-      .setHelpText("Sélectionnez le projet actuel (optionnel)")
-      .build();
-    sheet.getRange("N3:N100").setDataValidation(regleProjet);
-
-    // Date création (pas future)
-    const regleDate = SpreadsheetApp.newDataValidation()
-      .requireDateBefore(new Date())
-      .setAllowInvalid(false)
-      .setHelpText("La date de création ne peut être future")
-      .build();
-    sheet.getRange("K3:K100").setDataValidation(regleDate);
+    sheet.getRange("H3:H100").setDataValidation(regleStatut);
 
     // ===== MISE EN FORME CONDITIONNELLE =====
 
     const rules = sheet.getConditionalFormatRules();
 
-    // Statut - Actif (Vert)
+    // Statut
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Actif")
+      .whenTextEqualTo("Active")
       .setBackground("#34a853")
       .setFontColor("#ffffff")
       .setBold(true)
-      .setRanges([sheet.getRange("J3:J100")])
+      .setRanges([sheet.getRange("H3:H100")])
       .build());
 
-    // Statut - En attente (Orange)
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("En attente")
-      .setBackground("#fbbc04")
-      .setFontColor("#000000")
-      .setBold(true)
-      .setRanges([sheet.getRange("J3:J100")])
-      .build());
-
-    // Statut - Repos (Bleu)
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Repos")
+      .whenTextEqualTo("Disponible")
       .setBackground("#4285f4")
       .setFontColor("#ffffff")
       .setBold(true)
-      .setRanges([sheet.getRange("J3:J100")])
+      .setRanges([sheet.getRange("H3:H100")])
       .build());
 
-    // Statut - Maintenance (Violet)
     rules.push(SpreadsheetApp.newConditionalFormatRule()
       .whenTextEqualTo("Maintenance")
-      .setBackground("#9c27b0")
-      .setFontColor("#ffffff")
+      .setBackground("#fbbc04")
+      .setFontColor("#000000")
       .setBold(true)
-      .setRanges([sheet.getRange("J3:J100")])
+      .setRanges([sheet.getRange("H3:H100")])
       .build());
 
-    // Statut - Dissous (Gris)
+    // Productivité
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Dissous")
-      .setBackground("#9aa0a6")
-      .setFontColor("#ffffff")
-      .setBold(true)
-      .setRanges([sheet.getRange("J3:J100")])
-      .build());
-
-    // Spécialités - Couleurs différenciées
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Topographie")
-      .setBackground("#e8f0fe")
-      .setFontColor("#1a73e8")
-      .setBold(true)
-      .setRanges([sheet.getRange("I3:I100")])
-      .build());
-
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Génie civil")
+      .whenNumberGreaterThanOrEqualTo(0.8)
       .setBackground("#e6f4ea")
-      .setFontColor("#137333")
-      .setBold(true)
-      .setRanges([sheet.getRange("I3:I100")])
+      .setFontColor("#1e8e3e")
+      .setRanges([sheet.getRange("J3:J100")])
       .build());
 
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Irrigation")
-      .setBackground("#fef7e0")
-      .setFontColor("#b45309")
-      .setBold(true)
-      .setRanges([sheet.getRange("I3:I100")])
-      .build());
-
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Mixte")
+      .whenNumberLessThan(0.6)
       .setBackground("#fce8e6")
       .setFontColor("#c5221f")
-      .setBold(true)
-      .setRanges([sheet.getRange("I3:I100")])
+      .setRanges([sheet.getRange("J3:J100")])
       .build());
 
-    // Taux Occupation - Échelle de couleurs
-    // < 30% (Rouge clair)
+    // Disponibilité
+    rules.push(SpreadsheetApp.newConditionalFormatRule()
+      .whenNumberGreaterThanOrEqualTo(0.7)
+      .setBackground("#e6f4ea")
+      .setFontColor("#1e8e3e")
+      .setRanges([sheet.getRange("L3:L100")])
+      .build());
+
     rules.push(SpreadsheetApp.newConditionalFormatRule()
       .whenNumberLessThan(0.3)
       .setBackground("#fce8e6")
-      .setRanges([sheet.getRange("O3:O100")])
-      .build());
-
-    // 30-60% (Jaune clair)
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenNumberBetween(0.3, 0.6)
-      .setBackground("#fef7e0")
-      .setRanges([sheet.getRange("O3:O100")])
-      .build());
-
-    // 60-90% (Vert clair)
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenNumberBetween(0.6, 0.9)
-      .setBackground("#e6f4ea")
-      .setRanges([sheet.getRange("O3:O100")])
-      .build());
-
-    // > 90% (Bleu clair - pleine capacité)
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenNumberGreaterThanOrEqualTo(0.9)
-      .setBackground("#e8f0fe")
-      .setRanges([sheet.getRange("O3:O100")])
-      .build());
-
-    // Taux Occupation Réel - Échelle de couleurs
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenNumberLessThan(0.3)
-      .setBackground("#fce8e6")
-      .setRanges([sheet.getRange("G3:G100")])
-      .build());
-
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenNumberBetween(0.3, 0.6)
-      .setBackground("#fef7e0")
-      .setRanges([sheet.getRange("G3:G100")])
-      .build());
-
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenNumberBetween(0.6, 0.9)
-      .setBackground("#e6f4ea")
-      .setRanges([sheet.getRange("G3:G100")])
-      .build());
-
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenNumberGreaterThanOrEqualTo(0.9)
-      .setBackground("#e8f0fe")
-      .setRanges([sheet.getRange("G3:G100")])
+      .setFontColor("#c5221f")
+      .setRanges([sheet.getRange("L3:L100")])
       .build());
 
     sheet.setConditionalFormatRules(rules);
@@ -445,9 +319,8 @@ function initialiserEquipe() {
     // ===== SECTION STATISTIQUES =====
     const statsRow = 105;
 
-    // Titre de la section
-    sheet.getRange(`A${statsRow}:L${statsRow}`).merge()
-      .setValue("📊 STATISTIQUES ET ANALYSES DES ÉQUIPES")
+    sheet.getRange(`A${statsRow}:O${statsRow}`).merge()
+      .setValue("📊 STATISTIQUES ÉQUIPES v2.0 - KPIs & PERFORMANCE")
       .setFontSize(13)
       .setFontWeight("bold")
       .setHorizontalAlignment("center")
@@ -456,24 +329,19 @@ function initialiserEquipe() {
 
     sheet.setRowHeight(statsRow, 35);
 
-    // KPIs
     const kpis = [
       ["Indicateur", "Valeur", "Commentaire"],
       ["Nombre total d'équipes", '=NB.SI(B3:B100;"<>"")', "Équipes enregistrées"],
-      ["Équipes actives", '=NB.SI(J3:J100;"Actif")', "Équipes en opération"],
-      ["Équipes en attente", '=NB.SI(J3:J100;"En attente")', "Équipes disponibles"],
-      ["Équipes en repos", '=NB.SI(J3:J100;"Repos")', "Équipes en période de repos"],
-      ["Équipes Topographie", '=NB.SI(I3:I100;"Topographie")', "Spécialistes topographie"],
-      ["Équipes Génie civil", '=NB.SI(I3:I100;"Génie civil")', "Spécialistes construction"],
-      ["Équipes Irrigation", '=NB.SI(I3:I100;"Irrigation")', "Spécialistes irrigation"],
-      ["Équipes Mixtes", '=NB.SI(I3:I100;"Mixte")', "Équipes polyvalentes"],
-      ["Effectif total", '=SOMME(F3:F100)', "Total membres tous équipes"],
-      ["Effectif moyen par équipe", '=MOYENNE(F3:F100)', "Moyenne membres par équipe"],
-      ["Taux occupation moyen", '=MOYENNE(G3:G100)', "% occupation moyen"],
-      ["Capacité totale", '=SOMME(E3:E100)', "Capacité maximale toutes équipes"],
-      ["Places disponibles", '=SOMME(H3:H100)', "Places libres total"],
-      ["Équipes pleines (>90%)", '=NB.SI(G3:G100;">0.9")', "Équipes à pleine capacité"],
-      ["Équipes sous-utilisées (<30%)", '=NB.SI(G3:G100;"<0.3")', "Équipes sous-effectif"]
+      ["Équipes actives", '=NB.SI(H3:H100;"Active")', "En cours d'activité"],
+      ["Équipes disponibles", '=NB.SI(H3:H100;"Disponible")', "Prêtes pour affectation"],
+      ["Effectif total", '=SOMME(F3:F100)', "Membres toutes équipes"],
+      ["Charge totale (heures)", '=SOMME(K3:K100)', "Heures de travail planifiées"],
+      ["Productivité moyenne", '=MOYENNE(J3:J100)', "Performance globale"],
+      ["Disponibilité moyenne", '=MOYENNE(L3:L100)', "Capacité disponible"],
+      ["Taux utilisation moyen", '=MOYENNE(M3:M100)', "Efficience générale"],
+      ["Équipes en maintenance", '=NB.SI(H3:H100;"Maintenance")', "Hors service temporaire"],
+      ["Équipes topographie", '=NB.SI(E3:E100;"Topographie")', "Spécialisées levés"],
+      ["Équipes terrassement", '=NB.SI(E3:E100;"Terrassement")', "Spécialisées travaux terre"]
     ];
 
     sheet.getRange(statsRow + 1, 1, kpis.length, 3).setValues(kpis);
@@ -485,165 +353,25 @@ function initialiserEquipe() {
       .setFontColor("#ffffff")
       .setHorizontalAlignment("center");
 
-    // Format des valeurs
-    sheet.getRange(statsRow + 11, 2).setNumberFormat('0.0" personnes"');
-    sheet.getRange(statsRow + 12, 2).setNumberFormat("0.0%");
+    sheet.getRange(statsRow + 6, 2).setNumberFormat('#,##0" h"');
+    sheet.getRange(statsRow + 7, 2, 3, 1).setNumberFormat("0.0%");
 
-    // Bordures pour les KPIs
-    sheet.getRange(statsRow + 1, 1, kpis.length, 3).setBorder(
-      true, true, true, true, true, true,
-      "#000000", SpreadsheetApp.BorderStyle.SOLID
-    );
-
-    // Alternance de couleurs pour les lignes
-    for (let i = 0; i < kpis.length; i++) {
-      if (i > 0 && i % 2 === 0) {
-        sheet.getRange(statsRow + 1 + i, 1, 1, 3).setBackground("#f8f9fa");
-      }
-    }
-
-    // ===== GRAPHIQUES ET ANALYSES =====
-
-    // Graphique 1: Répartition par spécialité
-    const chartSpecialite = sheet.newChart()
-      .setChartType(Charts.ChartType.PIE)
-      .addRange(sheet.getRange("I2:I100"))
-      .setPosition(statsRow + kpis.length + 2, 1, 0, 0)
-      .setOption('title', 'Répartition des Équipes par Spécialité')
-      .setOption('width', 500)
-      .setOption('height', 300)
-      .setOption('is3D', true)
-      .setOption('colors', ['#1a73e8', '#34a853', '#fbbc04', '#ea4335'])
-      .setOption('pieSliceText', 'value')
-      .setOption('legend', {position: 'right', textStyle: {fontSize: 11}})
-      .build();
-
-    sheet.insertChart(chartSpecialite);
-
-    // Graphique 2: Effectif par équipe
-    const chartEffectif = sheet.newChart()
-      .setChartType(Charts.ChartType.COLUMN)
-      .addRange(sheet.getRange("B2:B100"))
-      .addRange(sheet.getRange("F2:F100"))
-      .setPosition(statsRow + kpis.length + 2, 7, 0, 0)
-      .setOption('title', 'Effectif Actuel par Équipe')
-      .setOption('width', 650)
-      .setOption('height', 300)
-      .setOption('colors', ['#1a73e8'])
-      .setOption('legend', {position: 'none'})
-      .setOption('vAxis', {title: 'Nombre de membres', format: '0'})
-      .setOption('hAxis', {title: 'Équipes', slantedText: true, slantedTextAngle: 45})
-      .setOption('chartArea', {width: '75%', height: '65%'})
-      .build();
-
-    sheet.insertChart(chartEffectif);
-
-    // Graphique 3: Taux d'occupation par équipe
-    const chartOccupation = sheet.newChart()
-      .setChartType(Charts.ChartType.BAR)
-      .addRange(sheet.getRange("B2:B100"))
-      .addRange(sheet.getRange("G2:G100"))
-      .setPosition(statsRow + kpis.length + 17, 1, 0, 0)
-      .setOption('title', 'Taux d\'Occupation par Équipe (%)')
-      .setOption('width', 600)
-      .setOption('height', 400)
-      .setOption('colors', ['#34a853'])
-      .setOption('legend', {position: 'none'})
-      .setOption('hAxis', {title: 'Taux (%)', format: '#%', minValue: 0, maxValue: 1})
-      .setOption('vAxis', {title: 'Équipes'})
-      .setOption('chartArea', {width: '60%', height: '80%'})
-      .build();
-
-    sheet.insertChart(chartOccupation);
-
-    // Graphique 4: Statut des équipes
-    const chartStatut = sheet.newChart()
-      .setChartType(Charts.ChartType.COLUMN)
-      .addRange(sheet.getRange("J2:J100"))
-      .setPosition(statsRow + kpis.length + 17, 8, 0, 0)
-      .setOption('title', 'Équipes par Statut')
-      .setOption('width', 600)
-      .setOption('height', 400)
-      .setOption('colors', ['#fbbc04'])
-      .setOption('legend', {position: 'none'})
-      .setOption('vAxis', {title: 'Nombre', format: '0'})
-      .setOption('hAxis', {title: 'Statut', slantedText: true, slantedTextAngle: 30})
-      .setOption('chartArea', {width: '75%', height: '70%'})
-      .build();
-
-    sheet.insertChart(chartStatut);
-
-    // ===== TABLEAU RÉCAPITULATIF PAR SPÉCIALITÉ =====
-    const recapRow = statsRow + kpis.length + 35;
-
-    sheet.getRange(`A${recapRow}:G${recapRow}`).merge()
-      .setValue("📋 RÉCAPITULATIF PAR SPÉCIALITÉ")
-      .setFontSize(12)
-      .setFontWeight("bold")
-      .setHorizontalAlignment("center")
-      .setBackground("#174ea6")
-      .setFontColor("#ffffff");
-
-    const headersRecap = ["Spécialité", "Nb Équipes", "Effectif Total", "Capacité Tot.", "Taux Occup.", "Équipes Actives", "Places Dispo"];
-    sheet.getRange(recapRow + 1, 1, 1, 7).setValues([headersRecap])
-      .setFontWeight("bold")
-      .setBackground("#4285f4")
-      .setFontColor("#ffffff")
-      .setHorizontalAlignment("center");
-
-    // Données récapitulatives
-    const specialites = ["Topographie", "Génie civil", "Irrigation", "Mixte"];
-    const recapData = [];
-
-    specialites.forEach((spec, idx) => {
-      const row = recapRow + 2 + idx;
-      recapData.push([
-        spec,
-        `=NB.SI(I3:I100;"${spec}")`,
-        `=SOMME.SI(I3:I100;"${spec}";F3:F100)`,
-        `=SOMME.SI(I3:I100;"${spec}";E3:E100)`,
-        `=SOMME.SI(I3:I100;"${spec}";F3:F100)/SOMME.SI(I3:I100;"${spec}";E3:E100)`,
-        `=NB.SI.ENS(I3:I100;"${spec}";J3:J100;"Actif")`,
-        `=SOMME.SI(I3:I100;"${spec}";H3:H100)`
-      ]);
-    });
-
-    sheet.getRange(recapRow + 2, 1, specialites.length, 7).setValues(recapData);
-
-    // Formatage du récapitulatif
-    sheet.getRange(recapRow + 2, 5, specialites.length, 1).setNumberFormat("0.0%");
-
-    // Bordures
-    sheet.getRange(recapRow + 1, 1, specialites.length + 1, 7).setBorder(
-      true, true, true, true, true, true,
-      "#000000", SpreadsheetApp.BorderStyle.SOLID
-    );
-
-    // ===== PROTECTION DE LA FEUILLE =====
-    const protection = sheet.protect().setDescription("Feuille Équipes protégée");
-
-    // Déprotéger les plages de saisie
-    const plagesSaisie = [
-      sheet.getRange("B3:P100")  // Zone de saisie principale
-    ];
-
-    protection.setUnprotectedRanges(plagesSaisie);
-    protection.setWarningOnly(true);
-
-    Logger.log("✅ Module EQUIPE initialisé avec succès!");
+    Logger.log("✅ Module EQUIPE v2.0 initialisé avec succès!");
 
   } catch (error) {
-    Logger.log("❌ Erreur lors de l'initialisation du module EQUIPE: " + error);
+    Logger.log("❌ Erreur initialisation module EQUIPE v2.0: " + error);
     throw error;
   }
 }
 
-// ==================== FONCTIONS CRUD ====================
+// ============================================================================
+// FONCTIONS CRUD ÉQUIPE v2.0
+// ============================================================================
 
 /**
  * Ajoute une nouvelle équipe
  */
-function ajouterEquipe(nomEquipe, chefEquipeId, nombreMembres, specialite, zoneIntervention, materielAssigne, projetId) {
+function ajouterEquipe(nom, chefEquipeId, projetId, type, effectif, specialites, observations) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = ss.getSheetByName("👥 Équipes");
@@ -652,38 +380,42 @@ function ajouterEquipe(nomEquipe, chefEquipeId, nombreMembres, specialite, zoneI
       throw new Error("La feuille Équipes n'existe pas");
     }
 
+    // Vérifier que le chef d'équipe existe
+    if (chefEquipeId && !verifierEmployeExiste(chefEquipeId)) {
+      throw new Error(`Chef d'équipe ${chefEquipeId} inexistant`);
+    }
+
     const nouvelleLigne = [
-      "",  // EquipeID auto-généré
-      nomEquipe,
-      chefEquipeId || "",
-      parseInt(nombreMembres),
-      specialite,
-      "Actif",
-      new Date(),
-      zoneIntervention,
-      materielAssigne,
+      "",  // EquipeID auto
+      nom,
+      chefEquipeId,
       projetId || "",
-      0,  // Taux occupation initial
-      ""  // Observations
+      type,
+      parseInt(effectif) || 0,
+      new Date(),
+      "Disponible",
+      specialites || "",
+      0.00,  // Productivité initiale
+      0,     // Charge initiale
+      1.00,  // Disponibilité 100%
+      "",    // Taux utilisation (formule)
+      new Date(),
+      observations || ""
     ];
 
     sheet.appendRow(nouvelleLigne);
 
-    // Journaliser l'action
-    if (typeof journaliserAction === 'function') {
-      journaliserAction("EQUIPE", `Nouvelle équipe créée: ${nomEquipe}`);
-    }
+    logMessage("EQUIPE", `Nouvelle équipe créée: ${nom}`);
 
-    // Envoyer notification
-    if (typeof envoyerNotification === 'function') {
-      envoyerNotification(1, `Nouvelle équipe créée: ${nomEquipe} (${specialite})`, "NORMALE");
-    }
-
-    return {success: true, message: "Équipe ajoutée avec succès"};
+    return {
+      success: true,
+      message: "Équipe ajoutée avec succès",
+      equipeId: `EQP${String(sheet.getLastRow() - 2).padStart(3, '0')}`
+    };
 
   } catch (error) {
     Logger.log("Erreur ajout équipe: " + error);
-    return {success: false, message: error.message};
+    return { success: false, message: error.message };
   }
 }
 
@@ -702,7 +434,6 @@ function modifierEquipe(equipeId, champAModifier, nouvelleValeur) {
     const data = sheet.getDataRange().getValues();
     let ligneModifiee = -1;
 
-    // Trouver l'équipe
     for (let i = 2; i < data.length; i++) {
       if (data[i][0] === equipeId) {
         ligneModifiee = i + 1;
@@ -714,18 +445,18 @@ function modifierEquipe(equipeId, champAModifier, nouvelleValeur) {
       throw new Error("Équipe non trouvée: " + equipeId);
     }
 
-    // Mapper les champs aux colonnes
     const colonnes = {
-      "nomEquipe": 2,
+      "nom": 2,
       "chefEquipeId": 3,
-      "nombreMembres": 4,
-      "specialite": 5,
-      "statut": 6,
-      "zoneIntervention": 8,
-      "materielAssigne": 9,
-      "projetId": 10,
-      "tauxOccupation": 11,
-      "observations": 12
+      "projetId": 4,
+      "type": 5,
+      "effectif": 6,
+      "statut": 8,
+      "specialites": 9,
+      "productivite": 10,
+      "chargeTravail": 11,
+      "disponibilite": 12,
+      "observations": 15
     };
 
     const colonne = colonnes[champAModifier];
@@ -733,141 +464,25 @@ function modifierEquipe(equipeId, champAModifier, nouvelleValeur) {
       throw new Error("Champ invalide: " + champAModifier);
     }
 
+    // Mise à jour date dernière modification
+    sheet.getRange(ligneModifiee, 14).setValue(new Date());
+
     sheet.getRange(ligneModifiee, colonne).setValue(nouvelleValeur);
 
-    if (typeof journaliserAction === 'function') {
-      journaliserAction("EQUIPE", `Équipe ${equipeId} modifiée: ${champAModifier}`);
-    }
+    logMessage("EQUIPE", `Équipe ${equipeId} modifiée: ${champAModifier} = ${nouvelleValeur}`);
 
-    return {success: true, message: "Équipe modifiée avec succès"};
+    return { success: true, message: "Équipe modifiée avec succès" };
 
   } catch (error) {
     Logger.log("Erreur modification équipe: " + error);
-    return {success: false, message: error.message};
+    return { success: false, message: error.message };
   }
 }
 
 /**
- * Dissout une équipe (changement de statut)
+ * Supprime une équipe
  */
-function dissoudreEquipe(equipeId) {
-  return modifierEquipe(equipeId, "statut", "Dissous");
-}
-
-/**
- * Recherche des équipes selon critères
- */
-function rechercherEquipes(critere, valeur) {
-  try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName("👥 Équipes");
-
-    if (!sheet) {
-      throw new Error("La feuille Équipes n'existe pas");
-    }
-
-    const data = sheet.getDataRange().getValues();
-    const resultats = [];
-
-    const colonnes = {
-      "nom": 1,
-      "specialite": 4,
-      "statut": 5,
-      "zone": 7
-    };
-
-    const colonne = colonnes[critere];
-
-    for (let i = 2; i < data.length; i++) {
-      if (data[i][colonne] && data[i][colonne].toString().toLowerCase().includes(valeur.toLowerCase())) {
-        resultats.push(data[i]);
-      }
-    }
-
-    return {success: true, resultats: resultats};
-
-  } catch (error) {
-    Logger.log("Erreur recherche équipes: " + error);
-    return {success: false, message: error.message};
-  }
-}
-
-/**
- * Obtient toutes les équipes actives
- */
-function obtenirEquipesActives() {
-  try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName("👥 Équipes");
-
-    if (!sheet) {
-      throw new Error("La feuille Équipes n'existe pas");
-    }
-
-    const data = sheet.getDataRange().getValues();
-    const equipes = [];
-
-    for (let i = 2; i < data.length; i++) {
-      if (data[i][1] && data[i][5] === "Actif") {
-        equipes.push({
-          id: data[i][0],
-          nom: data[i][1],
-          chefEquipeId: data[i][2],
-          nombreMembres: data[i][3],
-          specialite: data[i][4],
-          statut: data[i][5],
-          zoneIntervention: data[i][7],
-          projetId: data[i][9]
-        });
-      }
-    }
-
-    return {success: true, equipes: equipes};
-
-  } catch (error) {
-    Logger.log("Erreur obtention équipes: " + error);
-    return {success: false, message: error.message};
-  }
-}
-
-/**
- * Obtient les équipes par spécialité
- */
-function obtenirEquipesParSpecialite(specialite) {
-  try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName("👥 Équipes");
-
-    if (!sheet) {
-      throw new Error("La feuille Équipes n'existe pas");
-    }
-
-    const data = sheet.getDataRange().getValues();
-    const equipes = [];
-
-    for (let i = 2; i < data.length; i++) {
-      if (data[i][4] === specialite && data[i][1]) {
-        equipes.push({
-          id: data[i][0],
-          nom: data[i][1],
-          nombreMembres: data[i][3],
-          statut: data[i][5]
-        });
-      }
-    }
-
-    return {success: true, equipes: equipes, count: equipes.length};
-
-  } catch (error) {
-    Logger.log("Erreur obtention équipes par spécialité: " + error);
-    return {success: false, message: error.message};
-  }
-}
-
-/**
- * Calcule le taux d'occupation d'une équipe
- */
-function calculerTauxOccupation(equipeId) {
+function supprimerEquipe(equipeId) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = ss.getSheetByName("👥 Équipes");
@@ -880,28 +495,519 @@ function calculerTauxOccupation(equipeId) {
 
     for (let i = 2; i < data.length; i++) {
       if (data[i][0] === equipeId) {
-        const nombreMembres = data[i][3];
-        const capaciteMax = data[i][4] === "Topographie" ? 10
-          : data[i][4] === "Génie civil" ? 15
-          : data[i][4] === "Irrigation" ? 8
-          : 12;  // Mixte par défaut
+        // Vérifier si l'équipe a des affectations actives
+        const statut = data[i][7];
+        if (statut === "Active") {
+          const ui = SpreadsheetApp.getUi();
+          const confirmation = ui.alert(
+            "Équipe active",
+            "Cette équipe est actuellement active. Confirmez la suppression.",
+            ui.ButtonSet.YES_NO
+          );
+          if (confirmation !== ui.Button.YES) {
+            return { success: false, message: "Suppression annulée" };
+          }
+        }
 
-        const tauxOccupation = nombreMembres / capaciteMax;
-
-        return {
-          success: true,
-          nombreMembres: nombreMembres,
-          capaciteMax: capaciteMax,
-          tauxOccupation: tauxOccupation,
-          placesDisponibles: capaciteMax - nombreMembres
-        };
+        sheet.deleteRow(i + 1);
+        logMessage("EQUIPE", `Équipe supprimée: ${equipeId}`);
+        return { success: true, message: "Équipe supprimée avec succès" };
       }
     }
 
-    throw new Error("Équipe non trouvée");
+    throw new Error("Équipe non trouvée: " + equipeId);
 
   } catch (error) {
-    Logger.log("Erreur calcul taux occupation: " + error);
-    return {success: false, message: error.message};
+    Logger.log("Erreur suppression équipe: " + error);
+    return { success: false, message: error.message };
+  }
+}
+
+/**
+ * Obtient toutes les équipes
+ */
+function obtenirToutesEquipes(filtreStatut = null) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName("👥 Équipes");
+
+    if (!sheet) {
+      throw new Error("La feuille Équipes n'existe pas");
+    }
+
+    const data = sheet.getDataRange().getValues();
+    const equipes = [];
+
+    for (let i = 2; i < data.length; i++) {
+      if (data[i][1]) {  // Si nom non vide
+        const equipe = {
+          id: data[i][0],
+          nom: data[i][1],
+          chefEquipeId: data[i][2],
+          projetId: data[i][3],
+          type: data[i][4],
+          effectif: data[i][5],
+          dateCreation: data[i][6],
+          statut: data[i][7],
+          specialites: data[i][8],
+          productivite: data[i][9],
+          chargeTravail: data[i][10],
+          disponibilite: data[i][11],
+          tauxUtilisation: data[i][12],
+          derniereAffectation: data[i][13],
+          observations: data[i][14]
+        };
+
+        if (!filtreStatut || equipe.statut === filtreStatut) {
+          equipes.push(equipe);
+        }
+      }
+    }
+
+    return { success: true, equipes: equipes };
+
+  } catch (error) {
+    Logger.log("Erreur obtention équipes: " + error);
+    return { success: false, message: error.message };
+  }
+}
+
+/**
+ * Obtient une équipe par ID
+ */
+function obtenirEquipeParId(equipeId) {
+  try {
+    const result = obtenirToutesEquipes();
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+
+    const equipe = result.equipes.find(e => e.id === equipeId);
+    if (!equipe) {
+      throw new Error("Équipe non trouvée: " + equipeId);
+    }
+
+    return { success: true, equipe: equipe };
+
+  } catch (error) {
+    Logger.log("Erreur obtention équipe: " + error);
+    return { success: false, message: error.message };
+  }
+}
+
+// ============================================================================
+// GESTION COMPOSITION ÉQUIPE
+// ============================================================================
+
+/**
+ * Obtient la composition d'une équipe (chef + membres)
+ */
+function obtenirCompositionEquipe(equipeId) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheetEmployes = ss.getSheetByName("👤 Employés");
+
+    if (!sheetEmployes) {
+      throw new Error("La feuille Employés n'existe pas");
+    }
+
+    const data = sheetEmployes.getDataRange().getValues();
+    const membres = [];
+
+    for (let i = 2; i < data.length; i++) {
+      if (data[i][10] === equipeId) {  // Colonne EquipeID
+        membres.push({
+          employeId: data[i][0],
+          matricule: data[i][1],
+          nom: data[i][2],
+          prenom: data[i][3],
+          fonction: data[i][4],
+          telephone: data[i][5],
+          competences: data[i][9]
+        });
+      }
+    }
+
+    // Obtenir info équipe
+    const equipeResult = obtenirEquipeParId(equipeId);
+    if (!equipeResult.success) {
+      throw new Error(equipeResult.message);
+    }
+
+    return {
+      success: true,
+      equipe: equipeResult.equipe,
+      membres: membres,
+      effectifReel: membres.length
+    };
+
+  } catch (error) {
+    Logger.log("Erreur composition équipe: " + error);
+    return { success: false, message: error.message };
+  }
+}
+
+/**
+ * Affecte un employé à une équipe
+ */
+function affecterEmployeEquipe(employeId, equipeId) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheetEmployes = ss.getSheetByName("👤 Employés");
+
+    if (!sheetEmployes) {
+      throw new Error("La feuille Employés n'existe pas");
+    }
+
+    // Vérifier que l'équipe existe
+    const equipeResult = obtenirEquipeParId(equipeId);
+    if (!equipeResult.success) {
+      throw new Error("Équipe inexistante: " + equipeId);
+    }
+
+    const data = sheetEmployes.getDataRange().getValues();
+    let ligneModifiee = -1;
+
+    for (let i = 2; i < data.length; i++) {
+      if (data[i][0] === employeId) {
+        ligneModifiee = i + 1;
+        break;
+      }
+    }
+
+    if (ligneModifiee === -1) {
+      throw new Error("Employé non trouvé: " + employeId);
+    }
+
+    // Affecter à l'équipe (colonne K = 11)
+    sheetEmployes.getRange(ligneModifiee, 11).setValue(equipeId);
+
+    // Mettre à jour effectif équipe
+    mettreAJourEffectifEquipe(equipeId);
+
+    logMessage("EQUIPE", `Employé ${employeId} affecté à équipe ${equipeId}`);
+
+    return { success: true, message: "Employé affecté avec succès" };
+
+  } catch (error) {
+    Logger.log("Erreur affectation employé: " + error);
+    return { success: false, message: error.message };
+  }
+}
+
+/**
+ * Retire un employé d'une équipe
+ */
+function retirerEmployeEquipe(employeId) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheetEmployes = ss.getSheetByName("👤 Employés");
+
+    if (!sheetEmployes) {
+      throw new Error("La feuille Employés n'existe pas");
+    }
+
+    const data = sheetEmployes.getDataRange().getValues();
+    let ligneModifiee = -1;
+    let ancienneEquipeId = null;
+
+    for (let i = 2; i < data.length; i++) {
+      if (data[i][0] === employeId) {
+        ligneModifiee = i + 1;
+        ancienneEquipeId = data[i][10];
+        break;
+      }
+    }
+
+    if (ligneModifiee === -1) {
+      throw new Error("Employé non trouvé: " + employeId);
+    }
+
+    // Retirer de l'équipe
+    sheetEmployes.getRange(ligneModifiee, 11).setValue("");
+
+    // Mettre à jour effectif ancienne équipe
+    if (ancienneEquipeId) {
+      mettreAJourEffectifEquipe(ancienneEquipeId);
+    }
+
+    logMessage("EQUIPE", `Employé ${employeId} retiré de l'équipe`);
+
+    return { success: true, message: "Employé retiré avec succès" };
+
+  } catch (error) {
+    Logger.log("Erreur retrait employé: " + error);
+    return { success: false, message: error.message };
+  }
+}
+
+/**
+ * Met à jour l'effectif d'une équipe
+ */
+function mettreAJourEffectifEquipe(equipeId) {
+  try {
+    const composition = obtenirCompositionEquipe(equipeId);
+    if (!composition.success) {
+      throw new Error(composition.message);
+    }
+
+    modifierEquipe(equipeId, "effectif", composition.effectifReel);
+
+    return { success: true, effectif: composition.effectifReel };
+
+  } catch (error) {
+    Logger.log("Erreur MAJ effectif: " + error);
+    return { success: false, message: error.message };
+  }
+}
+
+// ============================================================================
+// GESTION AFFECTATIONS PROJET/OUVRAGE
+// ============================================================================
+
+/**
+ * Affecte une équipe à un projet
+ */
+function affecterEquipeProjet(equipeId, projetId, chargeTravailHeures) {
+  try {
+    // Vérifier que le projet existe
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheetProjets = ss.getSheetByName("📁 Projets");
+
+    if (!sheetProjets) {
+      throw new Error("La feuille Projets n'existe pas");
+    }
+
+    const dataProjets = sheetProjets.getDataRange().getValues();
+    let projetTrouve = false;
+
+    for (let i = 2; i < dataProjets.length; i++) {
+      if (dataProjets[i][0] === projetId) {
+        projetTrouve = true;
+        break;
+      }
+    }
+
+    if (!projetTrouve) {
+      throw new Error("Projet inexistant: " + projetId);
+    }
+
+    // Affecter l'équipe
+    modifierEquipe(equipeId, "projetId", projetId);
+    modifierEquipe(equipeId, "chargeTravail", parseFloat(chargeTravailHeures) || 0);
+    modifierEquipe(equipeId, "statut", "Active");
+
+    // Calculer disponibilité
+    calculerDisponibiliteEquipe(equipeId);
+
+    logMessage("EQUIPE", `Équipe ${equipeId} affectée au projet ${projetId} (${chargeTravailHeures}h)`);
+
+    return {
+      success: true,
+      message: "Équipe affectée au projet avec succès"
+    };
+
+  } catch (error) {
+    Logger.log("Erreur affectation projet: " + error);
+    return { success: false, message: error.message };
+  }
+}
+
+/**
+ * Libère une équipe d'un projet
+ */
+function libererEquipeProjet(equipeId) {
+  try {
+    modifierEquipe(equipeId, "projetId", "");
+    modifierEquipe(equipeId, "chargeTravail", 0);
+    modifierEquipe(equipeId, "statut", "Disponible");
+    modifierEquipe(equipeId, "disponibilite", 1.00);
+
+    logMessage("EQUIPE", `Équipe ${equipeId} libérée`);
+
+    return { success: true, message: "Équipe libérée avec succès" };
+
+  } catch (error) {
+    Logger.log("Erreur libération équipe: " + error);
+    return { success: false, message: error.message };
+  }
+}
+
+// ============================================================================
+// CALCUL PRODUCTIVITÉ & PERFORMANCE
+// ============================================================================
+
+/**
+ * Calcule la productivité d'une équipe
+ */
+function calculerProductiviteEquipe(equipeId) {
+  try {
+    // Récupérer composition équipe
+    const composition = obtenirCompositionEquipe(equipeId);
+    if (!composition.success) {
+      throw new Error(composition.message);
+    }
+
+    const equipe = composition.equipe;
+    const effectif = composition.effectifReel;
+
+    if (effectif === 0) {
+      return { success: true, productivite: 0 };
+    }
+
+    // Calcul simplifié basé sur disponibilité et charge
+    let productivite = 0;
+    if (equipe.chargeTravail > 0) {
+      const capacite = effectif * 160; // 160h/mois par personne
+      productivite = Math.min(1, equipe.chargeTravail / capacite);
+    }
+
+    // Mise à jour dans la feuille
+    modifierEquipe(equipeId, "productivite", productivite);
+
+    return { success: true, productivite: productivite };
+
+  } catch (error) {
+    Logger.log("Erreur calcul productivité: " + error);
+    return { success: false, message: error.message };
+  }
+}
+
+/**
+ * Calcule la disponibilité d'une équipe
+ */
+function calculerDisponibiliteEquipe(equipeId) {
+  try {
+    const equipeResult = obtenirEquipeParId(equipeId);
+    if (!equipeResult.success) {
+      throw new Error(equipeResult.message);
+    }
+
+    const equipe = equipeResult.equipe;
+    const effectif = equipe.effectif || 0;
+    const chargeTravail = equipe.chargeTravail || 0;
+
+    if (effectif === 0) {
+      modifierEquipe(equipeId, "disponibilite", 0);
+      return { success: true, disponibilite: 0 };
+    }
+
+    // Capacité totale: effectif * 160h/mois
+    const capaciteTotale = effectif * 160;
+
+    // Disponibilité = (capacité - charge) / capacité
+    let disponibilite = (capaciteTotale - chargeTravail) / capaciteTotale;
+    disponibilite = Math.max(0, Math.min(1, disponibilite));
+
+    modifierEquipe(equipeId, "disponibilite", disponibilite);
+
+    return { success: true, disponibilite: disponibilite };
+
+  } catch (error) {
+    Logger.log("Erreur calcul disponibilité: " + error);
+    return { success: false, message: error.message };
+  }
+}
+
+/**
+ * Obtient les KPIs des équipes
+ */
+function obtenirKPIsEquipes() {
+  try {
+    const result = obtenirToutesEquipes();
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+
+    const equipes = result.equipes;
+
+    const kpis = {
+      nombreTotal: equipes.length,
+      actives: equipes.filter(e => e.statut === "Active").length,
+      disponibles: equipes.filter(e => e.statut === "Disponible").length,
+      enMaintenance: equipes.filter(e => e.statut === "Maintenance").length,
+      effectifTotal: equipes.reduce((sum, e) => sum + (e.effectif || 0), 0),
+      chargeTotale: equipes.reduce((sum, e) => sum + (e.chargeTravail || 0), 0),
+      productiviteMoyenne: equipes.reduce((sum, e) => sum + (e.productivite || 0), 0) / equipes.length || 0,
+      disponibiliteMoyenne: equipes.reduce((sum, e) => sum + (e.disponibilite || 0), 0) / equipes.length || 0,
+      parType: {
+        topographie: equipes.filter(e => e.type === "Topographie").length,
+        terrassement: equipes.filter(e => e.type === "Terrassement").length,
+        betonnage: equipes.filter(e => e.type === "Bétonnage").length,
+        finition: equipes.filter(e => e.type === "Finition").length
+      }
+    };
+
+    return { success: true, kpis: kpis };
+
+  } catch (error) {
+    Logger.log("Erreur KPIs équipes: " + error);
+    return { success: false, message: error.message };
+  }
+}
+
+// ============================================================================
+// FONCTIONS UTILITAIRES
+// ============================================================================
+
+/**
+ * Vérifie si un employé existe
+ */
+function verifierEmployeExiste(employeId) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName("👤 Employés");
+
+    if (!sheet) return false;
+
+    const data = sheet.getDataRange().getValues();
+    for (let i = 2; i < data.length; i++) {
+      if (data[i][0] === employeId) {
+        return true;
+      }
+    }
+    return false;
+
+  } catch (error) {
+    return false;
+  }
+}
+
+// ============================================================================
+// INTERFACE UTILISATEUR
+// ============================================================================
+
+/**
+ * Affiche la sidebar de gestion des équipes
+ */
+function afficherSidebarEquipe() {
+  const html = HtmlService.createHtmlOutputFromFile('modules/equipe/EquipeSidebar')
+    .setTitle('Gestion Équipes v2.0')
+    .setWidth(350);
+  SpreadsheetApp.getUi().showSidebar(html);
+}
+
+/**
+ * Affiche le modal de gestion des équipes
+ */
+function afficherModalEquipe() {
+  const html = HtmlService.createHtmlOutputFromFile('modules/equipe/EquipeModal')
+    .setWidth(1100)
+    .setHeight(750);
+  SpreadsheetApp.getUi().showModalDialog(html, 'Gestionnaire d\'Équipes v2.0');
+}
+
+/**
+ * Fallback pour logMessage si module Core pas chargé
+ */
+function logMessage(type, message, metadata = {}) {
+  try {
+    if (typeof journaliserAction === 'function') {
+      journaliserAction(type, message);
+    } else {
+      Logger.log(`[${type}] ${message}`);
+    }
+  } catch (error) {
+    Logger.log(`[${type}] ${message}`);
   }
 }

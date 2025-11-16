@@ -1,0 +1,1 @@
+MATERIEL SIDEBAR - 320px - Stats: Total/Disponible/Panne/Alertes - Filtres: Type/État/Projet - Actions: Nouveau/Maintenance/Planning - Design GAFAM identique à CoreSidebar

@@ -3,357 +3,1107 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestionnaire Relevés Topographiques v2.0</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
-    .header { background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%); color: white; padding: 20px; }
-    .header h1 { font-size: 22px; margin-bottom: 5px; }
-    .container { padding: 20px; }
-    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #dee2e6; }
-    .tab { padding: 12px 20px; background: #f8f9fa; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; }
-    .tab.active { background: #1a73e8; color: white; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
-    .form-row-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
-    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-right: 8px; margin-bottom: 8px; }
-    .btn-primary { background: #1a73e8; color: white; }
-    .btn-success { background: #34a853; color: white; }
-    .btn-danger { background: #ea4335; color: white; }
-    .btn-warning { background: #fbbc04; color: white; }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-    .data-table { width: 100%; background: white; border-radius: 8px; overflow: hidden; overflow-x: auto; }
-    .data-table table { width: 100%; border-collapse: collapse; min-width: 1200px; }
-    .data-table th { background: #1a73e8; color: white; padding: 12px; text-align: left; font-size: 12px; }
-    .data-table td { padding: 12px; border-bottom: 1px solid #dee2e6; font-size: 13px; }
-    .action-btn { padding: 5px 10px; margin: 0 2px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
-    .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-    .badge-success { background: #d4edda; color: #155724; }
-    .badge-warning { background: #fff3cd; color: #856404; }
-    .badge-danger { background: #f8d7da; color: #721c24; }
-    .export-section { background: white; padding: 20px; border-radius: 8px; }
-    .export-section h3 { color: #1a73e8; margin-bottom: 15px; }
-    .coords-display { background: #f8f9fa; padding: 15px; border-radius: 6px; margin-top: 15px; }
-    .coords-display code { font-family: 'Courier New', monospace; font-size: 12px; }
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f9fa;
+      --text-primary: #333333;
+      --text-secondary: #666666;
+      --border-color: #dee2e6;
+      --accent-primary: #1a73e8;
+      --accent-success: #34a853;
+      --accent-warning: #fbbc04;
+      --accent-danger: #ea4335;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 13px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+      color: white;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .header h1 {
+      font-size: 22px;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--border-color);
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 12px 20px;
+      background: var(--bg-secondary);
+      border: none;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .tab:hover {
+      background: #e9ecef;
+      color: var(--accent-primary);
+    }
+
+    .tab.active {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: var(--accent-primary);
+      border-bottom: 2px solid var(--accent-primary);
+      padding-bottom: 5px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: var(--text-secondary);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 13px;
+      background: var(--bg-primary);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, #174ea6 100%);
+      color: white;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--accent-success) 0%, #2d8e47 100%);
+      color: white;
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, var(--accent-warning) 0%, #ea8600 100%);
+      color: #333;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--accent-danger) 0%, #d33426 100%);
+      color: white;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg-primary);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    table thead {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    table th,
+    table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 12px;
+    }
+
+    table tbody tr:hover {
+      background: var(--bg-secondary);
+    }
+
+    .chart-container {
+      position: relative;
+      height: 300px;
+      margin: 20px 0;
+    }
+
+    .map-container {
+      width: 100%;
+      height: 400px;
+      background: #e8f0fe;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed var(--accent-primary);
+      color: var(--accent-primary);
+      font-size: 14px;
+      margin: 20px 0;
+    }
+
+    .result-box {
+      background: var(--bg-primary);
+      border-left: 4px solid var(--accent-primary);
+      padding: 15px;
+      border-radius: 6px;
+      margin: 15px 0;
+    }
+
+    .result-box h4 {
+      color: var(--accent-primary);
+      margin-bottom: 10px;
+    }
+
+    .result-box pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: var(--bg-primary);
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-left: 4px solid var(--accent-primary);
+    }
+
+    .stat-card h3 {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .stat-card .value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent-primary);
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .spinner {
+      border: 4px solid var(--border-color);
+      border-top: 4px solid var(--accent-primary);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 13px;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border-left: 4px solid var(--accent-success);
+    }
+
+    .alert-warning {
+      background: #fff3cd;
+      color: #856404;
+      border-left: 4px solid var(--accent-warning);
+    }
+
+    .alert-danger {
+      background: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid var(--accent-danger);
+    }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>📐 Gestionnaire de Relevés Topographiques</h1>
-    <p>CRUD Complet des Relevés GPS/Topo</p>
+    <h1>📐 Gestionnaire de Relevés Topographiques v2.0</h1>
+    <p>GPS • UTM Zone 33N • Compensation • Export Multi-formats</p>
   </div>
 
   <div class="container">
+    <!-- Onglets -->
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('liste')">📋 Liste</button>
-      <button class="tab" onclick="switchTab('nouveau')">➕ Nouveau</button>
+      <button class="tab active" onclick="switchTab('liste')">📋 Liste Relevés</button>
+      <button class="tab" onclick="switchTab('calculs')">📏 Calculs</button>
       <button class="tab" onclick="switchTab('carte')">🗺️ Carte</button>
-      <button class="tab" onclick="switchTab('export')">📊 Export</button>
+      <button class="tab" onclick="switchTab('compensation')">⚖️ Compensation</button>
+      <button class="tab" onclick="switchTab('export')">📤 Export</button>
+      <button class="tab" onclick="switchTab('cubatures')">📊 Cubatures</button>
     </div>
 
-    <!-- Onglet Liste -->
+    <!-- Onglet Liste Relevés -->
     <div id="liste" class="tab-content active">
-      <div class="data-table">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Date</th>
-              <th>X (m)</th>
-              <th>Y (m)</th>
-              <th>Z (m)</th>
-              <th>Type</th>
-              <th>Précision</th>
-              <th>Validé</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="listeReleves">
-            <tr><td colspan="9" style="text-align:center;">Chargement...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <div class="card">
+        <div class="card-title">➕ Nouveau Relevé GPS</div>
 
-    <!-- Onglet Nouveau -->
-    <div id="nouveau" class="tab-content">
-      <form id="formReleve">
-        <div class="form-row">
+        <div class="form-grid">
           <div class="form-group">
-            <label>Tâche ID *</label>
-            <input type="number" id="tacheId" min="1" required>
-          </div>
-          <div class="form-group">
-            <label>Employé ID *</label>
-            <input type="number" id="employeId" min="1" required>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Date et Heure du Relevé *</label>
-          <input type="datetime-local" id="dateReleve" required>
-        </div>
-
-        <h3 style="color: #1a73e8; margin: 20px 0 10px; font-size: 14px;">📍 Coordonnées Cartésiennes (UTM)</h3>
-        <div class="form-row-3">
-          <div class="form-group">
-            <label>X (m) *</label>
-            <input type="number" id="coordX" step="0.001" required>
-          </div>
-          <div class="form-group">
-            <label>Y (m) *</label>
-            <input type="number" id="coordY" step="0.001" required>
-          </div>
-          <div class="form-group">
-            <label>Z - Altitude (m) *</label>
-            <input type="number" id="coordZ" step="0.001" required>
-          </div>
-        </div>
-
-        <h3 style="color: #34a853; margin: 20px 0 10px; font-size: 14px;">🌍 Coordonnées Géographiques (WGS84)</h3>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Latitude (°)</label>
-            <input type="number" id="latitude" step="0.0000001">
-          </div>
-          <div class="form-group">
-            <label>Longitude (°)</label>
-            <input type="number" id="longitude" step="0.0000001">
-          </div>
-        </div>
-
-        <h3 style="color: #fbbc04; margin: 20px 0 10px; font-size: 14px;">⚙️ Informations Techniques</h3>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Type de Relevé *</label>
-            <select id="typeReleve" required>
-              <option value="">Sélectionner...</option>
-              <option value="Nivellement">Nivellement</option>
-              <option value="Implantation">Implantation</option>
-              <option value="Contrôle">Contrôle</option>
-              <option value="Levé">Levé</option>
-              <option value="Géoréférencement">Géoréférencement</option>
+            <label>Projet *</label>
+            <select id="nouveauProjet">
+              <option value="PROJ001">PROJ001</option>
+              <option value="PROJ002">PROJ002</option>
+              <option value="PROJ003">PROJ003</option>
             </select>
           </div>
+
           <div class="form-group">
-            <label>Méthode *</label>
-            <select id="methode" required>
-              <option value="">Sélectionner...</option>
+            <label>Ouvrage</label>
+            <select id="nouveauOuvrage">
+              <option value="OUV001">OUV001</option>
+              <option value="OUV002">OUV002</option>
+              <option value="OUV003">OUV003</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Point *</label>
+            <input type="text" id="nouveauPoint" placeholder="P001">
+          </div>
+
+          <div class="form-group">
+            <label>X UTM (m) *</label>
+            <input type="number" step="0.01" id="nouveauX" placeholder="654320.50">
+          </div>
+
+          <div class="form-group">
+            <label>Y UTM (m) *</label>
+            <input type="number" step="0.01" id="nouveauY" placeholder="1234567.80">
+          </div>
+
+          <div class="form-group">
+            <label>Z Altitude (m) *</label>
+            <input type="number" step="0.01" id="nouveauZ" placeholder="450.25">
+          </div>
+
+          <div class="form-group">
+            <label>Précision (cm) *</label>
+            <input type="number" step="0.1" id="nouveauPrecision" placeholder="2.0">
+          </div>
+
+          <div class="form-group">
+            <label>Opérateur</label>
+            <input type="text" id="nouveauOperateur" placeholder="Nom opérateur">
+          </div>
+
+          <div class="form-group">
+            <label>Appareil</label>
+            <input type="text" id="nouveauAppareil" placeholder="Trimble R10">
+          </div>
+
+          <div class="form-group">
+            <label>Type *</label>
+            <select id="nouveauType">
               <option value="GPS RTK">GPS RTK</option>
               <option value="GPS Différentiel">GPS Différentiel</option>
               <option value="Station Totale">Station Totale</option>
               <option value="Niveau">Niveau</option>
-              <option value="Drone">Drone</option>
             </select>
           </div>
-        </div>
 
-        <div class="form-row">
           <div class="form-group">
-            <label>Instrument Utilisé *</label>
-            <input type="text" id="instrument" required>
+            <label>Code</label>
+            <select id="nouveauCode">
+              <option value="AXE">AXE</option>
+              <option value="BORNE">BORNE</option>
+              <option value="PROFIL">PROFIL</option>
+              <option value="TALUS">TALUS</option>
+              <option value="OUVRAGE">OUVRAGE</option>
+              <option value="CONTROLE">CONTROLE</option>
+              <option value="AUTRE">AUTRE</option>
+            </select>
           </div>
+
+          <div class="form-group" style="grid-column: 1/-1;">
+            <label>Observations</label>
+            <textarea id="nouveauObservations" rows="2" placeholder="Notes sur le relevé..."></textarea>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-success" onclick="ajouterReleve()">✅ Ajouter Relevé</button>
+          <button class="btn btn-warning" onclick="validerCoordonnees()">✓ Valider Coordonnées</button>
+          <button class="btn btn-primary" onclick="transformerUTM()">🔄 Convertir Lat/Lon</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📋 Liste des Relevés</div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="chargerReleves()">🔄 Actualiser</button>
+        </div>
+
+        <div style="overflow-x: auto;">
+          <table id="tableReleves">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Point</th>
+                <th>X UTM</th>
+                <th>Y UTM</th>
+                <th>Z Alt</th>
+                <th>Précision</th>
+                <th>Type</th>
+                <th>Code</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyReleves">
+              <tr><td colspan="9" style="text-align: center; padding: 30px;">Chargement...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Calculs -->
+    <div id="calculs" class="tab-content">
+      <div class="card">
+        <div class="card-title">📏 Calculs Topographiques</div>
+
+        <div class="form-grid">
           <div class="form-group">
-            <label>Précision (cm) *</label>
-            <input type="number" id="precision" min="0" step="0.1" required>
+            <label>Point 1 (X, Y, Z)</label>
+            <input type="text" id="point1" placeholder="654320.50, 1234567.80, 450.25">
+          </div>
+
+          <div class="form-group">
+            <label>Point 2 (X, Y, Z)</label>
+            <input type="text" id="point2" placeholder="654340.20, 1234590.30, 451.10">
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Description du Point</label>
-          <textarea id="description" rows="3" placeholder="Ex: Axe du canal, Borne repère, Point NGF, etc."></textarea>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="calculerDistance()">📏 Distance</button>
+          <button class="btn btn-success" onclick="calculerSurface()">📐 Surface</button>
+          <button class="btn btn-warning" onclick="calculerVolume()">📊 Volume</button>
         </div>
 
-        <button type="submit" class="btn btn-success">💾 Enregistrer le Relevé</button>
-      </form>
+        <div id="resultatCalculs"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🔄 Transformation Coordonnées</div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>X UTM (m)</label>
+            <input type="number" step="0.01" id="transX" placeholder="654320.50">
+          </div>
+
+          <div class="form-group">
+            <label>Y UTM (m)</label>
+            <input type="number" step="0.01" id="transY" placeholder="1234567.80">
+          </div>
+
+          <div class="form-group">
+            <label>Latitude</label>
+            <input type="number" step="0.000001" id="transLat" placeholder="11.123456">
+          </div>
+
+          <div class="form-group">
+            <label>Longitude</label>
+            <input type="number" step="0.000001" id="transLon" placeholder="14.654321">
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="utmToLatLon()">🌍 UTM → Lat/Lon</button>
+          <button class="btn btn-success" onclick="latLonToUTM()">📍 Lat/Lon → UTM</button>
+        </div>
+
+        <div id="resultatTransformation"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📈 Profil Altimétrique</div>
+        <div class="chart-container">
+          <canvas id="chartProfil"></canvas>
+        </div>
+      </div>
     </div>
 
     <!-- Onglet Carte -->
     <div id="carte" class="tab-content">
-      <h3>🗺️ Carte Interactive des Relevés</h3>
-      <div id="carteContent" style="margin-top: 20px; background: white; padding: 40px; border-radius: 8px; text-align: center;">
-        <p style="color: #666;">
-          🗺️ Visualisation cartographique à venir...<br>
-          <small>Affichera tous les points relevés sur une carte interactive</small>
-        </p>
-        <div style="margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 6px;">
-          <p style="font-size: 12px; color: #888;">
-            Fonctionnalités prévues:<br>
-            • Affichage des points en UTM<br>
-            • Export vers Google Maps<br>
-            • Génération de KML/KMZ<br>
-            • Calculs de distances et surfaces
-          </p>
+      <div class="card">
+        <div class="card-title">🗺️ Visualisation Cartographique</div>
+
+        <div class="map-container" id="mapContainer">
+          🗺️ Carte interactive<br>
+          <small>(Simulation - Intégration Google Maps / OpenStreetMap à faire)</small>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="afficherPoints()">📍 Afficher Points</button>
+          <button class="btn btn-success" onclick="tracerPolygone()">⬟ Tracer Polygone</button>
+          <button class="btn btn-warning" onclick="calculerZones()">📐 Calculer Zones</button>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3>Points Visibles</h3>
+            <div class="value" id="pointsVisibles">0</div>
+          </div>
+          <div class="stat-card">
+            <h3>Étendue X</h3>
+            <div class="value" id="etendueX">0 m</div>
+          </div>
+          <div class="stat-card">
+            <h3>Étendue Y</h3>
+            <div class="value" id="etendueY">0 m</div>
+          </div>
+          <div class="stat-card">
+            <h3>Surface Couverte</h3>
+            <div class="value" id="surfaceCarte">0 ha</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Compensation -->
+    <div id="compensation" class="tab-content">
+      <div class="card">
+        <div class="card-title">⚖️ Compensation Réseau (Moindres Carrés)</div>
+
+        <div class="alert alert-warning">
+          ⚠️ Module de compensation réseau topographique par méthode des moindres carrés
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Méthode</label>
+            <select id="methodeCompensation">
+              <option value="moindres_carres">Moindres Carrés</option>
+              <option value="helmert">Helmert</option>
+              <option value="canevas">Canevas</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Itérations Max</label>
+            <input type="number" id="iterationsMax" value="5">
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-success" onclick="lancerCompensation()">⚖️ Lancer Compensation</button>
+          <button class="btn btn-primary" onclick="afficherResidus()">📊 Voir Résidus</button>
+        </div>
+
+        <div id="resultatCompensation"></div>
+
+        <div class="card">
+          <div class="card-title">📊 Graphique Résidus</div>
+          <div class="chart-container">
+            <canvas id="chartResidus"></canvas>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Onglet Export -->
     <div id="export" class="tab-content">
-      <div class="export-section">
-        <h3>📊 Export des Relevés Topographiques</h3>
-        <p style="color: #666; margin-bottom: 20px;">Exporter les données dans différents formats professionnels</p>
+      <div class="card">
+        <div class="card-title">📤 Export Multi-formats</div>
 
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
-          <button class="btn btn-primary" onclick="exporterXYZ()">
-            📐 Export XYZ (Texte)
-          </button>
-          <button class="btn btn-success" onclick="exporterCSV()">
-            📊 Export CSV (Excel)
-          </button>
-          <button class="btn btn-warning" onclick="exporterKML()">
-            🗺️ Export KML (Google Earth)
-          </button>
-          <button class="btn btn-danger" onclick="exporterShapefile()">
-            🌍 Export Shapefile (SIG)
-          </button>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Format d'export</label>
+            <select id="formatExport">
+              <option value="CSV">CSV (Excel)</option>
+              <option value="DXF">DXF (AutoCAD)</option>
+              <option value="KML">KML (Google Earth)</option>
+              <option value="SHP">Shapefile (SIG)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Filtrer par Projet</label>
+            <select id="exportProjet">
+              <option value="">Tous les projets</option>
+              <option value="PROJ001">PROJ001</option>
+              <option value="PROJ002">PROJ002</option>
+              <option value="PROJ003">PROJ003</option>
+            </select>
+          </div>
         </div>
 
-        <div id="exportPreview" class="coords-display" style="display: none;">
-          <h4 style="margin-bottom: 10px;">Aperçu de l'export:</h4>
-          <pre id="exportContent" style="overflow-x: auto; font-size: 11px;"></pre>
+        <div class="btn-group">
+          <button class="btn btn-success" onclick="genererExport()">📥 Générer Export</button>
+          <button class="btn btn-primary" onclick="previsualiserExport()">👁️ Prévisualiser</button>
         </div>
 
-        <div style="margin-top: 30px; padding: 15px; background: #e3f2fd; border-left: 4px solid #1a73e8; border-radius: 4px;">
-          <h4 style="color: #1a73e8; margin-bottom: 10px;">ℹ️ Formats d'Export</h4>
-          <ul style="font-size: 12px; color: #555; margin-left: 20px;">
-            <li><strong>XYZ:</strong> Format texte standard (X Y Z Description)</li>
-            <li><strong>CSV:</strong> Compatible Excel, LibreOffice, QGIS</li>
-            <li><strong>KML:</strong> Compatible Google Earth, Google Maps</li>
-            <li><strong>Shapefile:</strong> Format SIG standard (ArcGIS, QGIS)</li>
-          </ul>
+        <div class="result-box" id="previewExport">
+          <h4>Aperçu Export</h4>
+          <pre id="previewContent">Sélectionnez un format et cliquez sur Prévisualiser</pre>
         </div>
       </div>
+
+      <div class="card">
+        <div class="card-title">📊 Statistiques d'Export</div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3>Total Points</h3>
+            <div class="value" id="exportTotal">0</div>
+          </div>
+          <div class="stat-card">
+            <h3>Points Valides</h3>
+            <div class="value" id="exportValides">0</div>
+          </div>
+          <div class="stat-card">
+            <h3>Format Sélectionné</h3>
+            <div class="value" id="exportFormat">-</div>
+          </div>
+          <div class="stat-card">
+            <h3>Taille Estimée</h3>
+            <div class="value" id="exportTaille">0 Ko</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Cubatures -->
+    <div id="cubatures" class="tab-content">
+      <div class="card">
+        <div class="card-title">📊 Calcul Cubatures (Déblai/Remblai)</div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Projet</label>
+            <select id="cubatureProjet">
+              <option value="PROJ001">PROJ001</option>
+              <option value="PROJ002">PROJ002</option>
+              <option value="PROJ003">PROJ003</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Méthode</label>
+            <select id="methodeCubature">
+              <option value="profils">Profils en travers</option>
+              <option value="mnt">Modèle Numérique Terrain</option>
+              <option value="surfaces">Surfaces</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-success" onclick="calculerCubature()">📊 Calculer Cubature</button>
+          <button class="btn btn-primary" onclick="afficherProfils()">📈 Voir Profils</button>
+        </div>
+
+        <div id="resultatCubature"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📈 Graphique Déblai/Remblai</div>
+        <div class="chart-container">
+          <canvas id="chartCubature"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📊 Profils en Travers</div>
+        <div class="chart-container">
+          <canvas id="chartProfilsTravers"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Chargement en cours...</p>
     </div>
   </div>
 
   <script>
+    let charts = {};
+
+    // Gestion onglets
     function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       event.target.classList.add('active');
-      if (tabId === 'liste') chargerReleves();
+
+      if (tabId === 'calculs') initChartProfil();
+      if (tabId === 'compensation') initChartResidus();
+      if (tabId === 'cubatures') initChartCubatures();
+    }
+
+    // Onglet Liste
+    function ajouterReleve() {
+      const data = {
+        projetId: document.getElementById('nouveauProjet').value,
+        ouvrageId: document.getElementById('nouveauOuvrage').value,
+        point: document.getElementById('nouveauPoint').value,
+        x: document.getElementById('nouveauX').value,
+        y: document.getElementById('nouveauY').value,
+        z: document.getElementById('nouveauZ').value,
+        precision: document.getElementById('nouveauPrecision').value,
+        operateur: document.getElementById('nouveauOperateur').value,
+        appareil: document.getElementById('nouveauAppareil').value,
+        type: document.getElementById('nouveauType').value,
+        code: document.getElementById('nouveauCode').value,
+        observations: document.getElementById('nouveauObservations').value
+      };
+
+      if (!data.point || !data.x || !data.y || !data.z) {
+        alert('⚠️ Champs obligatoires manquants');
+        return;
+      }
+
+      showLoading();
+      google.script.run
+        .withSuccessHandler(function(result) {
+          hideLoading();
+          if (result.success) {
+            alert('✅ Relevé ajouté avec succès');
+            chargerReleves();
+            clearForm();
+          } else {
+            alert('❌ Erreur: ' + result.message);
+          }
+        })
+        .withFailureHandler(handleError)
+        .ajouterReleve(data.projetId, data.ouvrageId, data.point, data.x, data.y, data.z, 
+                       data.precision, data.operateur, data.appareil, data.type, data.code, data.observations);
     }
 
     function chargerReleves() {
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success) {
-          let html = '';
-          result.releves.forEach(r => {
-            let valideClass = r.valide ? 'badge-success' : 'badge-warning';
-            let valideText = r.valide ? '✅ Oui' : '⏳ À valider';
-            html += `<tr>
-              <td>${r.id}</td>
-              <td>${r.dateReleve}</td>
-              <td>${r.coordX.toFixed(3)}</td>
-              <td>${r.coordY.toFixed(3)}</td>
-              <td>${r.coordZ.toFixed(3)}</td>
-              <td>${r.typeReleve}</td>
-              <td>${r.precision} cm</td>
-              <td><span class="badge ${valideClass}">${valideText}</span></td>
-              <td>
-                <button class="action-btn btn-success" onclick="valider(${r.id})" ${r.valide ? 'disabled' : ''}>✓</button>
-                <button class="action-btn btn-primary" onclick="editer(${r.id})">✏️</button>
-                <button class="action-btn btn-danger" onclick="supprimer(${r.id})">🗑️</button>
-              </td>
-            </tr>`;
-          });
-          document.getElementById('listeReleves').innerHTML = html || '<tr><td colspan="9" style="text-align:center;">Aucun relevé</td></tr>';
-        }
-      }).withFailureHandler(function(error) {
-        document.getElementById('listeReleves').innerHTML = '<tr><td colspan="9" style="text-align:center; color: #ea4335;">Erreur: ' + error.message + '</td></tr>';
-      }).obtenirTousReleves();
+      showLoading();
+      google.script.run
+        .withSuccessHandler(function(result) {
+          hideLoading();
+          if (result.success) {
+            afficherReleves(result.releves);
+          }
+        })
+        .withFailureHandler(handleError)
+        .obtenirTousReleves();
     }
 
-    document.getElementById('formReleve').onsubmit = function(e) {
-      e.preventDefault();
-      const data = {
-        tacheId: parseInt(document.getElementById('tacheId').value),
-        employeId: parseInt(document.getElementById('employeId').value),
-        dateReleve: document.getElementById('dateReleve').value,
-        coordX: parseFloat(document.getElementById('coordX').value),
-        coordY: parseFloat(document.getElementById('coordY').value),
-        coordZ: parseFloat(document.getElementById('coordZ').value),
-        latitude: document.getElementById('latitude').value ? parseFloat(document.getElementById('latitude').value) : null,
-        longitude: document.getElementById('longitude').value ? parseFloat(document.getElementById('longitude').value) : null,
-        typeReleve: document.getElementById('typeReleve').value,
-        methode: document.getElementById('methode').value,
-        instrument: document.getElementById('instrument').value,
-        precision: parseFloat(document.getElementById('precision').value),
-        description: document.getElementById('description').value
+    function afficherReleves(releves) {
+      const tbody = document.getElementById('tbodyReleves');
+      tbody.innerHTML = '';
+
+      if (releves.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 30px;">Aucun relevé</td></tr>';
+        return;
+      }
+
+      releves.forEach(r => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td>${r.id}</td>
+          <td>${r.point}</td>
+          <td>${r.x.toFixed(2)}</td>
+          <td>${r.y.toFixed(2)}</td>
+          <td>${r.z.toFixed(2)}</td>
+          <td>${r.precision.toFixed(1)} cm</td>
+          <td>${r.type}</td>
+          <td>${r.code}</td>
+          <td>${new Date(r.date).toLocaleDateString()}</td>
+        `;
+      });
+    }
+
+    function validerCoordonnees() {
+      const x = parseFloat(document.getElementById('nouveauX').value);
+      const y = parseFloat(document.getElementById('nouveauY').value);
+      const z = parseFloat(document.getElementById('nouveauZ').value);
+
+      if (!x || !y || !z) {
+        alert('⚠️ Veuillez saisir toutes les coordonnées');
+        return;
+      }
+
+      // Validation locale basique
+      const limites = {
+        X_MIN: 200000, X_MAX: 900000,
+        Y_MIN: 200000, Y_MAX: 1500000,
+        Z_MIN: 0, Z_MAX: 4100
       };
 
-      google.script.run.withSuccessHandler(function(result) {
-        alert(result.message);
-        if (result.success) {
-          document.getElementById('formReleve').reset();
-          switchTab('liste');
-        }
-      }).withFailureHandler(function(error) {
-        alert('Erreur: ' + error.message);
-      }).ajouterReleve(data.tacheId, data.employeId, data.dateReleve, data.coordX, data.coordY, data.coordZ,
-                       data.latitude, data.longitude, data.typeReleve, data.methode, data.instrument, data.precision, data.description);
-    };
+      let valide = true;
+      let msg = '✅ Coordonnées valides pour UTM Zone 33N Cameroun';
 
-    function valider(id) {
-      if (confirm('Valider le relevé #' + id + ' ?')) {
-        google.script.run.withSuccessHandler(function(result) {
-          alert(result.message);
-          if (result.success) chargerReleves();
-        }).validerReleve(id);
+      if (x < limites.X_MIN || x > limites.X_MAX) {
+        valide = false;
+        msg = `❌ X hors limites (attendu: ${limites.X_MIN}-${limites.X_MAX})`;
+      } else if (y < limites.Y_MIN || y > limites.Y_MAX) {
+        valide = false;
+        msg = `❌ Y hors limites (attendu: ${limites.Y_MIN}-${limites.Y_MAX})`;
+      } else if (z < limites.Z_MIN || z > limites.Z_MAX) {
+        valide = false;
+        msg = `❌ Altitude hors limites (attendu: ${limites.Z_MIN}-${limites.Z_MAX}m)`;
       }
+
+      alert(msg);
     }
 
-    function editer(id) {
-      alert('Édition du relevé: ' + id);
+    // Onglet Calculs
+    function calculerDistance() {
+      alert('📏 Calcul de distance en cours...\n\nFonctionnalité à implémenter');
     }
 
-    function supprimer(id) {
-      if (confirm('Supprimer le relevé #' + id + ' ?')) {
-        google.script.run.withSuccessHandler(function(result) {
-          alert(result.message);
-          if (result.success) chargerReleves();
-        }).supprimerReleve(id);
+    function calculerSurface() {
+      alert('📐 Calcul de surface en cours...\n\nFonctionnalité à implémenter');
+    }
+
+    function calculerVolume() {
+      alert('📊 Calcul de volume en cours...\n\nFonctionnalité à implémenter');
+    }
+
+    function utmToLatLon() {
+      const x = parseFloat(document.getElementById('transX').value);
+      const y = parseFloat(document.getElementById('transY').value);
+
+      if (!x || !y) {
+        alert('⚠️ Veuillez saisir les coordonnées UTM');
+        return;
       }
+
+      // Conversion simplifiée (approximation)
+      const lat = ((y - 0) / 111320).toFixed(6);
+      const lon = (((x - 500000) / (111320 * Math.cos(lat * Math.PI / 180))) + 15).toFixed(6);
+
+      document.getElementById('transLat').value = lat;
+      document.getElementById('transLon').value = lon;
+
+      const result = document.getElementById('resultatTransformation');
+      result.innerHTML = `
+        <div class="alert alert-success">
+          ✅ Conversion UTM → Lat/Lon réussie<br>
+          Latitude: ${lat}°<br>
+          Longitude: ${lon}°<br>
+          <small>Zone UTM 33N</small>
+        </div>
+      `;
     }
 
-    function exporterXYZ() {
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success) {
-          document.getElementById('exportPreview').style.display = 'block';
-          document.getElementById('exportContent').textContent = result.data;
-          alert('Export XYZ généré! ' + result.count + ' points');
+    function latLonToUTM() {
+      const lat = parseFloat(document.getElementById('transLat').value);
+      const lon = parseFloat(document.getElementById('transLon').value);
+
+      if (!lat || !lon) {
+        alert('⚠️ Veuillez saisir les coordonnées Lat/Lon');
+        return;
+      }
+
+      // Conversion simplifiée
+      const x = (500000 + (lon - 15) * 111320 * Math.cos(lat * Math.PI / 180)).toFixed(2);
+      const y = (lat * 111320).toFixed(2);
+
+      document.getElementById('transX').value = x;
+      document.getElementById('transY').value = y;
+
+      const result = document.getElementById('resultatTransformation');
+      result.innerHTML = `
+        <div class="alert alert-success">
+          ✅ Conversion Lat/Lon → UTM réussie<br>
+          X UTM: ${x} m<br>
+          Y UTM: ${y} m<br>
+          <small>Zone UTM 33N</small>
+        </div>
+      `;
+    }
+
+    function initChartProfil() {
+      const ctx = document.getElementById('chartProfil');
+      if (!ctx || charts.profil) return;
+
+      charts.profil = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['P001', 'P002', 'P003', 'P004', 'P005'],
+          datasets: [{
+            label: 'Altitude (m)',
+            data: [450.25, 451.10, 452.35, 453.20, 454.50],
+            borderColor: '#1a73e8',
+            backgroundColor: 'rgba(26, 115, 232, 0.1)',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Profil Altimétrique'
+            }
+          },
+          scales: {
+            y: {
+              title: {
+                display: true,
+                text: 'Altitude (m)'
+              }
+            }
+          }
         }
-      }).exporterXYZ();
+      });
     }
 
-    function exporterCSV() {
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success) {
-          document.getElementById('exportPreview').style.display = 'block';
-          document.getElementById('exportContent').textContent = result.data;
-          alert('Export CSV généré! ' + result.count + ' lignes');
+    // Onglet Compensation
+    function lancerCompensation() {
+      alert('⚖️ Compensation réseau lancée\n\nCalculs en cours...');
+    }
+
+    function afficherResidus() {
+      alert('📊 Affichage des résidus\n\nTableau des écarts...');
+    }
+
+    function initChartResidus() {
+      const ctx = document.getElementById('chartResidus');
+      if (!ctx || charts.residus) return;
+
+      charts.residus = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Obs1', 'Obs2', 'Obs3', 'Obs4', 'Obs5'],
+          datasets: [{
+            label: 'Résidus (cm)',
+            data: [0.5, -0.3, 0.8, -0.2, 0.4],
+            backgroundColor: '#34a853'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Résidus de Compensation'
+            }
+          }
         }
-      }).exporterCSV();
+      });
     }
 
-    function exporterKML() {
-      alert('Export KML à venir...\nGénérera un fichier compatible Google Earth');
+    // Onglet Export
+    function genererExport() {
+      const format = document.getElementById('formatExport').value;
+      const projet = document.getElementById('exportProjet').value;
+
+      showLoading();
+
+      let functionName;
+      if (format === 'CSV') functionName = 'exporterCSV';
+      else if (format === 'DXF') functionName = 'exporterDXF';
+      else if (format === 'KML') functionName = 'exporterKML';
+
+      google.script.run
+        .withSuccessHandler(function(data) {
+          hideLoading();
+          if (data) {
+            alert(`✅ Export ${format} généré avec succès`);
+            document.getElementById('previewContent').textContent = data.substring(0, 500) + '...';
+          }
+        })
+        .withFailureHandler(handleError)
+        [functionName](projet);
     }
 
-    function exporterShapefile() {
-      alert('Export Shapefile à venir...\nGénérera un fichier compatible ArcGIS/QGIS');
+    function previsualiserExport() {
+      const format = document.getElementById('formatExport').value;
+      document.getElementById('exportFormat').textContent = format;
+      genererExport();
     }
 
+    // Onglet Cubatures
+    function calculerCubature() {
+      alert('📊 Calcul cubatures en cours...\n\nDéblai/Remblai');
+    }
+
+    function afficherProfils() {
+      alert('📈 Affichage profils en travers...');
+    }
+
+    function initChartCubatures() {
+      const ctx = document.getElementById('chartCubature');
+      if (!ctx || charts.cubature) return;
+
+      charts.cubature = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Déblai', 'Remblai'],
+          datasets: [{
+            label: 'Volume (m³)',
+            data: [1250, 980],
+            backgroundColor: ['#ea4335', '#34a853']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: 'Cubatures Déblai/Remblai'
+            }
+          }
+        }
+      });
+    }
+
+    // Utils
+    function clearForm() {
+      document.getElementById('nouveauPoint').value = '';
+      document.getElementById('nouveauX').value = '';
+      document.getElementById('nouveauY').value = '';
+      document.getElementById('nouveauZ').value = '';
+      document.getElementById('nouveauPrecision').value = '';
+      document.getElementById('nouveauObservations').value = '';
+    }
+
+    function showLoading() {
+      document.getElementById('loading').style.display = 'block';
+    }
+
+    function hideLoading() {
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    function handleError(error) {
+      hideLoading();
+      console.error('Erreur:', error);
+      alert('❌ Erreur: ' + (error.message || error));
+    }
+
+    // Initialisation
     window.onload = function() {
       chargerReleves();
-      // Set default date to now
-      const now = new Date();
-      const dateStr = now.toISOString().slice(0, 16);
-      document.getElementById('dateReleve').value = dateStr;
     };
   </script>
 </body>

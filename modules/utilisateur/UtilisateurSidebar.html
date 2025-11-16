@@ -1,465 +1,443 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
-    <base target="_top">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion Utilisateurs</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Utilisateurs v2.0 - Sidebar</title>
+  <style>
+    /* Variables CSS */
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f9fa;
+      --text-primary: #333333;
+      --text-secondary: #666666;
+      --border-color: #dee2e6;
+      --shadow: rgba(0,0,0,0.1);
+      --accent-primary: #1a73e8;
+      --accent-success: #34a853;
+      --accent-warning: #fbbc04;
+      --accent-danger: #ea4335;
+    }
 
-        body {
-            font-family: 'Google Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #174ea6 0%, #1967d2 100%);
-            padding: 16px;
-            color: #202124;
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        .sidebar-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
-            overflow: hidden;
-        }
+    body {
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 15px;
+      font-size: 13px;
+    }
 
-        .header {
-            background: linear-gradient(135deg, #174ea6 0%, #1967d2 100%);
-            color: white;
-            padding: 24px;
-            text-align: center;
-        }
+    .header {
+      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+      color: white;
+      padding: 15px;
+      margin: -15px -15px 20px -15px;
+      border-radius: 0;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
 
-        .header h1 {
-            font-size: 24px;
-            font-weight: 500;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
+    .header h2 {
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
 
-        .header p {
-            font-size: 14px;
-            opacity: 0.95;
-            font-weight: 400;
-        }
+    .header p {
+      font-size: 11px;
+      opacity: 0.9;
+    }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e8eaed;
-        }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
 
-        .stat-card {
-            background: white;
-            padding: 16px;
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-        }
+    .stat-card {
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 2px 6px var(--shadow);
+      border-left: 3px solid var(--accent-primary);
+      transition: all 0.3s ease;
+    }
 
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.12);
-        }
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px var(--shadow);
+    }
 
-        .stat-value {
-            font-size: 28px;
-            font-weight: 600;
-            color: #174ea6;
-            margin-bottom: 4px;
-        }
+    .stat-card h4 {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
 
-        .stat-label {
-            font-size: 12px;
-            color: #5f6368;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+    .stat-card .value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent-primary);
+    }
 
-        .action-buttons {
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+    .section {
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 6px var(--shadow);
+    }
 
-        .btn {
-            padding: 14px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            text-decoration: none;
-            color: white;
-        }
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--accent-primary);
+      border-bottom: 2px solid var(--accent-primary);
+      padding-bottom: 5px;
+    }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #174ea6 0%, #1967d2 100%);
-            box-shadow: 0 2px 8px rgba(23, 78, 166, 0.3);
-        }
+    .filter-group {
+      margin-bottom: 12px;
+    }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(23, 78, 166, 0.4);
-        }
+    .filter-group label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
 
-        .btn-secondary {
-            background: white;
-            color: #174ea6;
-            border: 2px solid #174ea6;
-        }
+    .filter-group select,
+    .filter-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 12px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+    }
 
-        .btn-secondary:hover {
-            background: #f8f9fa;
-            transform: translateY(-2px);
-        }
+    .filter-group select:focus,
+    .filter-group input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+    }
 
-        .filters-section {
-            padding: 20px;
-            background: #f8f9fa;
-            border-top: 1px solid #e8eaed;
-        }
+    .btn {
+      width: 100%;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
 
-        .filters-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: #5f6368;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, #174ea6 100%);
+      color: white;
+    }
 
-        .filter-group {
-            margin-bottom: 16px;
-        }
+    .btn-success {
+      background: linear-gradient(135deg, var(--accent-success) 0%, #2d8e47 100%);
+      color: white;
+    }
 
-        .filter-label {
-            font-size: 13px;
-            color: #5f6368;
-            margin-bottom: 6px;
-            display: block;
-            font-weight: 500;
-        }
+    .btn-warning {
+      background: linear-gradient(135deg, var(--accent-warning) 0%, #ea8600 100%);
+      color: #333;
+    }
 
-        select, input {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #dadce0;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-            transition: all 0.3s ease;
-            background: white;
-        }
+    .btn-danger {
+      background: linear-gradient(135deg, var(--accent-danger) 0%, #d33426 100%);
+      color: white;
+    }
 
-        select:focus, input:focus {
-            outline: none;
-            border-color: #174ea6;
-            box-shadow: 0 0 0 3px rgba(23, 78, 166, 0.1);
-        }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px var(--shadow);
+    }
 
-        .menu-section {
-            padding: 20px;
-            border-top: 1px solid #e8eaed;
-        }
+    .user-list {
+      max-height: 300px;
+      overflow-y: auto;
+    }
 
-        .menu-item {
-            padding: 12px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            color: #202124;
-        }
+    .user-item {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
 
-        .menu-item:hover {
-            background: #f8f9fa;
-            transform: translateX(4px);
-        }
+    .user-item:hover {
+      box-shadow: 0 2px 8px var(--shadow);
+      border-color: var(--accent-primary);
+    }
 
-        .menu-item.active {
-            background: #e8f0fe;
-            color: #174ea6;
-            font-weight: 500;
-        }
+    .user-item strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
 
-        .badge {
-            background: #174ea6;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
-        }
+    .user-item small {
+      font-size: 11px;
+      color: var(--text-secondary);
+      display: block;
+    }
 
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #5f6368;
-        }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
 
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #174ea6;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 12px;
-        }
+    .badge-success { background: var(--accent-success); color: white; }
+    .badge-warning { background: var(--accent-warning); color: #333; }
+    .badge-danger { background: var(--accent-danger); color: white; }
+    .badge-info { background: var(--accent-primary); color: white; }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-secondary);
+    }
 
-        .error-message {
-            background: #fce8e6;
-            color: #c5221f;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin: 16px 20px;
-            font-size: 14px;
-            display: none;
-        }
+    .spinner {
+      border: 3px solid var(--border-color);
+      border-top: 3px solid var(--accent-primary);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
 
-        .success-message {
-            background: #e6f4ea;
-            color: #137333;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin: 16px 20px;
-            font-size: 14px;
-            display: none;
-        }
-    </style>
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--accent-primary);
+      border-radius: 3px;
+    }
+  </style>
 </head>
 <body>
-    <div class="sidebar-container">
-        <div class="header">
-            <h1><span>🔐</span> Gestion Utilisateurs</h1>
-            <p>Comptes et Permissions</p>
-        </div>
+  <div class="header">
+    <h2>🔐 Utilisateurs v2.0</h2>
+    <p>Gestion & Authentification</p>
+  </div>
 
-        <div id="errorMessage" class="error-message"></div>
-        <div id="successMessage" class="success-message"></div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <h4>Total Users</h4>
+      <div class="value" id="totalUsers">-</div>
+    </div>
+    <div class="stat-card" style="border-left-color: #34a853;">
+      <h4>Actifs</h4>
+      <div class="value" id="actifs" style="color: #34a853;">-</div>
+    </div>
+    <div class="stat-card" style="border-left-color: #fbbc04;">
+      <h4>Dernière 24h</h4>
+      <div class="value" id="connexions24h" style="color: #fbbc04;">-</div>
+    </div>
+    <div class="stat-card" style="border-left-color: #ea4335;">
+      <h4>Verrouillés</h4>
+      <div class="value" id="verouilles" style="color: #ea4335;">-</div>
+    </div>
+  </div>
 
-        <div class="stats-grid" id="statsGrid">
-            <div class="stat-card">
-                <div class="stat-value" id="statTotal">-</div>
-                <div class="stat-label">Total Utilisateurs</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="statActifs">-</div>
-                <div class="stat-label">Actifs</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="statAdmins">-</div>
-                <div class="stat-label">Admins</div>
-            </div>
-        </div>
-
-        <div class="action-buttons">
-            <button class="btn btn-primary" onclick="afficherModalUtilisateur()">
-                <span>➕</span> Nouvel Utilisateur
-            </button>
-            <button class="btn btn-secondary" onclick="afficherPermissions()">
-                <span>🔑</span> Gérer Permissions
-            </button>
-        </div>
-
-        <div class="filters-section">
-            <div class="filters-title">🔍 Filtres</div>
-
-            <div class="filter-group">
-                <label class="filter-label">Niveau d'Accès</label>
-                <select id="filterNiveau" onchange="appliquerFiltres()">
-                    <option value="">Tous les niveaux</option>
-                    <option value="Admin">Administrateur</option>
-                    <option value="Chef Projet">Chef de Projet</option>
-                    <option value="Topographe">Topographe</option>
-                    <option value="Lecture">Lecture seule</option>
-                </select>
-            </div>
-
-            <div class="filter-group">
-                <label class="filter-label">Statut</label>
-                <select id="filterStatut" onchange="appliquerFiltres()">
-                    <option value="">Tous</option>
-                    <option value="actif">Actifs</option>
-                    <option value="inactif">Inactifs</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="menu-section">
-            <div class="menu-item active" onclick="naviguerVersUtilisateurs('tous')">
-                <span>👥 Voir tous les utilisateurs</span>
-            </div>
-            <div class="menu-item" onclick="naviguerVersUtilisateurs('connexions')">
-                <span>🔄 Historique des connexions</span>
-            </div>
-            <div class="menu-item" onclick="naviguerVersUtilisateurs('audit')">
-                <span>📋 Journal d'audit</span>
-            </div>
-        </div>
+  <div class="section">
+    <div class="section-title">⚙️ Filtres</div>
+    
+    <div class="filter-group">
+      <label>Rôle</label>
+      <select id="filterRole">
+        <option value="">Tous les rôles</option>
+        <option value="Admin">Admin</option>
+        <option value="Manager">Manager</option>
+        <option value="User">User</option>
+        <option value="Guest">Guest</option>
+      </select>
     </div>
 
-    <script>
-        let utilisateursData = [];
-        let filtresActifs = {};
+    <div class="filter-group">
+      <label>Statut</label>
+      <select id="filterStatut">
+        <option value="">Tous les statuts</option>
+        <option value="Actif">Actif</option>
+        <option value="Inactif">Inactif</option>
+        <option value="Suspendu">Suspendu</option>
+        <option value="Verrouillé">Verrouillé</option>
+      </select>
+    </div>
 
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            chargerStatistiques();
-        });
+    <div class="filter-group">
+      <label>Recherche</label>
+      <input type="text" id="searchUser" placeholder="Nom, email...">
+    </div>
 
-        function chargerStatistiques() {
-            afficherLoading();
+    <button class="btn btn-primary" onclick="applyFilters()">🔍 Appliquer</button>
+  </div>
 
-            google.script.run
-                .withSuccessHandler(function(stats) {
-                    cacherLoading();
-                    if (stats && stats.success) {
-                        document.getElementById('statTotal').textContent = stats.total || 0;
-                        document.getElementById('statActifs').textContent = stats.actifs || 0;
-                        document.getElementById('statAdmins').textContent = stats.admins || 0;
-                    } else {
-                        afficherErreur(stats.message || 'Erreur lors du chargement des statistiques');
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    cacherLoading();
-                    afficherErreur('Erreur: ' + error.message);
-                })
-                .obtenirStatistiquesUtilisateurs();
-        }
+  <div class="section">
+    <div class="section-title">👥 Utilisateurs Récents</div>
+    <div id="userList" class="user-list">
+      <div class="loading">
+        <div class="spinner"></div>
+        <p>Chargement...</p>
+      </div>
+    </div>
+  </div>
 
-        function afficherModalUtilisateur() {
-            google.script.run
-                .withSuccessHandler(function(html) {
-                    if (html) {
-                        const modal = window.open('', '_blank', 'width=1000,height=700');
-                        modal.document.write(html);
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    afficherErreur('Erreur lors de l\'ouverture du modal: ' + error.message);
-                })
-                .afficherModalUtilisateur();
-        }
+  <div class="section">
+    <div class="section-title">⚡ Actions Rapides</div>
+    <button class="btn btn-success" onclick="openModal()">➕ Nouvel Utilisateur</button>
+    <button class="btn btn-primary" onclick="viewPermissions()">🔑 Gérer Permissions</button>
+    <button class="btn btn-warning" onclick="viewLogs()">📝 Logs Activité</button>
+    <button class="btn btn-danger" onclick="viewSecurity()">🔒 Sécurité</button>
+  </div>
 
-        function afficherPermissions() {
-            google.script.run
-                .withSuccessHandler(function(html) {
-                    if (html) {
-                        const modal = window.open('', '_blank', 'width=900,height=600');
-                        modal.document.write(html);
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    afficherErreur('Erreur lors de l\'ouverture des permissions: ' + error.message);
-                })
-                .afficherModalPermissions();
-        }
+  <script>
+    // Charger les stats
+    function loadStats() {
+      google.script.run
+        .withSuccessHandler(function(kpis) {
+          document.getElementById('totalUsers').textContent = kpis.total || 0;
+          document.getElementById('actifs').textContent = kpis.actifs || 0;
+          document.getElementById('connexions24h').textContent = kpis.connexions24h || 0;
+          document.getElementById('verouilles').textContent = kpis.verouilles || 0;
+        })
+        .withFailureHandler(handleError)
+        .obtenirKPIsUtilisateurs();
+    }
 
-        function naviguerVersUtilisateurs(vue) {
-            // Mettre à jour l'élément actif
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            event.currentTarget.classList.add('active');
+    // Charger la liste des utilisateurs
+    function loadUsers() {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            displayUsers(result.utilisateurs);
+          } else {
+            document.getElementById('userList').innerHTML = 
+              '<p style="text-align: center; color: var(--accent-danger);">Erreur: ' + result.message + '</p>';
+          }
+        })
+        .withFailureHandler(handleError)
+        .obtenirTousUtilisateurs();
+    }
 
-            // Charger la vue appropriée
-            google.script.run
-                .withSuccessHandler(function(result) {
-                    if (result && result.success) {
-                        afficherSucces('Vue chargée: ' + vue);
-                        // Rafraîchir les statistiques
-                        chargerStatistiques();
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    afficherErreur('Erreur de navigation: ' + error.message);
-                })
-                .naviguerVersVueUtilisateurs(vue);
-        }
+    // Afficher les utilisateurs
+    function displayUsers(users) {
+      const userList = document.getElementById('userList');
+      
+      if (!users || users.length === 0) {
+        userList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">Aucun utilisateur trouvé</p>';
+        return;
+      }
 
-        function appliquerFiltres() {
-            const niveau = document.getElementById('filterNiveau').value;
-            const statut = document.getElementById('filterStatut').value;
+      let html = '';
+      users.slice(0, 10).forEach(user => {
+        const badgeClass = user.statut === 'Actif' ? 'badge-success' : 
+                          user.statut === 'Inactif' ? 'badge-warning' : 'badge-danger';
+        
+        html += `
+          <div class="user-item" onclick="selectUser('${user.id}')">
+            <strong>${user.nom} ${user.prenom}</strong>
+            <small>${user.email}</small>
+            <small>Rôle: ${user.role}</small>
+            <span class="badge ${badgeClass}">${user.statut}</span>
+          </div>
+        `;
+      });
 
-            filtresActifs = {
-                niveau: niveau,
-                statut: statut
-            };
+      userList.innerHTML = html;
+    }
 
-            google.script.run
-                .withSuccessHandler(function(stats) {
-                    if (stats && stats.success) {
-                        document.getElementById('statTotal').textContent = stats.total || 0;
-                        document.getElementById('statActifs').textContent = stats.actifs || 0;
-                        document.getElementById('statAdmins').textContent = stats.admins || 0;
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    afficherErreur('Erreur lors de l\'application des filtres: ' + error.message);
-                })
-                .filtrerUtilisateurs(filtresActifs);
-        }
+    // Sélectionner un utilisateur
+    function selectUser(userId) {
+      console.log('User selected:', userId);
+      // TODO: Ouvrir modal avec détails utilisateur
+    }
 
-        function afficherLoading() {
-            const statsGrid = document.getElementById('statsGrid');
-            statsGrid.innerHTML = `
-                <div style="grid-column: 1 / -1;">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <div>Chargement des statistiques...</div>
-                    </div>
-                </div>
-            `;
-        }
+    // Appliquer les filtres
+    function applyFilters() {
+      const role = document.getElementById('filterRole').value;
+      const statut = document.getElementById('filterStatut').value;
+      const search = document.getElementById('searchUser').value;
 
-        function cacherLoading() {
-            // Le contenu sera remplacé par les stats
-        }
+      console.log('Filters:', {role, statut, search});
+      // TODO: Implémenter filtrage
+      loadUsers();
+    }
 
-        function afficherErreur(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 5000);
-        }
+    // Ouvrir modal
+    function openModal() {
+      google.script.run.afficherModalUtilisateur();
+    }
 
-        function afficherSucces(message) {
-            const successDiv = document.getElementById('successMessage');
-            successDiv.textContent = message;
-            successDiv.style.display = 'block';
-            setTimeout(() => {
-                successDiv.style.display = 'none';
-            }, 3000);
-        }
-    </script>
+    // Voir permissions
+    function viewPermissions() {
+      alert('Fonctionnalité permissions - À implémenter');
+    }
+
+    // Voir logs
+    function viewLogs() {
+      alert('Fonctionnalité logs - À implémenter');
+    }
+
+    // Voir sécurité
+    function viewSecurity() {
+      alert('Fonctionnalité sécurité - À implémenter');
+    }
+
+    // Gestion erreurs
+    function handleError(error) {
+      console.error('Erreur:', error);
+      alert('Erreur: ' + (error.message || error));
+    }
+
+    // Initialisation
+    window.onload = function() {
+      loadStats();
+      loadUsers();
+      
+      // Auto-refresh toutes les 30s
+      setInterval(loadStats, 30000);
+    };
+  </script>
 </body>
 </html>

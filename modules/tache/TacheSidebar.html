@@ -3,140 +3,487 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion Tâches v2.0</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
-    .header { background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%); color: white; padding: 20px; text-align: center; }
-    .header h2 { font-size: 18px; margin-bottom: 5px; }
-    .header p { font-size: 11px; opacity: 0.9; }
-    .container { padding: 15px; }
-    .stat-card { background: white; border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #34a853; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .stat-card h3 { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
-    .stat-card .value { font-size: 22px; font-weight: 700; color: #34a853; }
-    .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
-    .btn-primary { background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%); color: white; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4); }
-    .btn-success { background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%); color: white; }
-    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4); }
-    .section-title { font-size: 13px; font-weight: 600; color: #34a853; margin: 15px 0 10px; padding-bottom: 5px; border-bottom: 2px solid #34a853; }
-    .menu-item { background: white; border-radius: 6px; padding: 10px 12px; margin-bottom: 6px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 8px; transition: all 0.2s; border: 1px solid #e0e0e0; }
-    .menu-item:hover { background: #34a853; color: white; transform: translateX(3px); }
-    .filter { margin-bottom: 15px; }
-    .filter select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 13px;
+      padding: 15px;
+      background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%);
+      color: #333;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    h2 {
+      color: #34a853;
+      margin-bottom: 15px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      background: #34a853;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    .section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #34a853;
+    }
+
+    .section-title {
+      font-weight: bold;
+      color: #34a853;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #34a853;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    .stat-card.critical {
+      border-left: 3px solid #ea4335;
+    }
+
+    .stat-card.critical .stat-value {
+      color: #ea4335;
+    }
+
+    .stat-card.warning {
+      border-left: 3px solid #fbbc04;
+    }
+
+    .stat-card.warning .stat-value {
+      color: #fbbc04;
+    }
+
+    .gantt-mini {
+      display: grid;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .gantt-item {
+      background: white;
+      padding: 8px;
+      border-radius: 6px;
+      border-left: 3px solid #34a853;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+      font-size: 11px;
+    }
+
+    .gantt-item:hover {
+      transform: translateX(3px);
+    }
+
+    .gantt-item.critique {
+      border-left-color: #ea4335;
+      background: #fff5f5;
+    }
+
+    .gantt-item.en-cours {
+      border-left-color: #fbbc04;
+      background: #fffef5;
+    }
+
+    .gantt-title {
+      font-weight: bold;
+      font-size: 11px;
+      margin-bottom: 3px;
+    }
+
+    .gantt-meta {
+      font-size: 9px;
+      color: #666;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      margin-top: 4px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #34a853 0%, #2d8e47 100%);
+      transition: width 0.3s;
+    }
+
+    .filter-group {
+      margin-bottom: 10px;
+    }
+
+    .filter-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #666;
+    }
+
+    .filter-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 12px;
+      background: white;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4);
+    }
+
+    .btn-warning {
+      background: #fbbc04;
+      color: #000;
+    }
+
+    .btn-danger {
+      background: #ea4335;
+      color: white;
+    }
+
+    .alert-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: bold;
+      margin-left: 5px;
+    }
+
+    .alert-badge.critical {
+      background: #ea4335;
+      color: white;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0,0,0,0.1);
+      border-left-color: #34a853;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h2>✅ Gestion Tâches</h2>
-    <p>Organisation Terrain</p>
-  </div>
-
   <div class="container">
-    <div class="stat-card">
-      <h3>Tâches Totales</h3>
-      <div class="value" id="tachesTotal">-</div>
+    <h2>
+      ✅ Tâches v2.0
+      <span class="badge">CPM</span>
+      <span class="badge">Gantt</span>
+    </h2>
+
+    <!-- Section Stats -->
+    <div class="section">
+      <div class="section-title">📊 Statistiques Rapides</div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="totalTaches">-</div>
+          <div class="stat-label">Total Tâches</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="enCours">-</div>
+          <div class="stat-label">En Cours</div>
+        </div>
+        <div class="stat-card critical">
+          <div class="stat-value" id="enRetard">-</div>
+          <div class="stat-label">En Retard</div>
+        </div>
+        <div class="stat-card warning">
+          <div class="stat-value" id="critiques">-</div>
+          <div class="stat-label">Critiques</div>
+        </div>
+      </div>
     </div>
 
-    <div class="stat-card" style="border-left-color: #1a73e8;">
-      <h3>En Cours</h3>
-      <div class="value" style="color: #1a73e8;" id="tachesEnCours">-</div>
+    <!-- Mini Gantt -->
+    <div class="section">
+      <div class="section-title">📅 Tâches Critiques</div>
+      <div class="gantt-mini" id="gantt-container">
+        <div class="gantt-item critique">
+          <div class="gantt-title">Coffrage canal</div>
+          <div class="gantt-meta">TACH002 • Marge: 0j</div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 40%;"></div>
+          </div>
+        </div>
+        <div class="gantt-item critique">
+          <div class="gantt-title">Bétonnage canal</div>
+          <div class="gantt-meta">TACH003 • Marge: 0j</div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="stat-card" style="border-left-color: #ea4335;">
-      <h3>En Retard</h3>
-      <div class="value" style="color: #ea4335;" id="tachesEnRetard">-</div>
+    <!-- Filtres -->
+    <div class="section">
+      <div class="section-title">🔍 Filtres</div>
+      <div class="filter-group">
+        <label>Projet</label>
+        <select id="filtreProjet" onchange="appliquerFiltres()">
+          <option value="">Tous les projets</option>
+          <option value="PROJ001">PROJ001 - Logone et Chari</option>
+          <option value="PROJ002">PROJ002 - Yaoundé</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Ouvrage</label>
+        <select id="filtreOuvrage" onchange="appliquerFiltres()">
+          <option value="">Tous les ouvrages</option>
+          <option value="OUV001">OUV001</option>
+          <option value="OUV002">OUV002</option>
+          <option value="OUV003">OUV003</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Statut</label>
+        <select id="filtreStatut" onchange="appliquerFiltres()">
+          <option value="">Tous les statuts</option>
+          <option value="Planifié">Planifié</option>
+          <option value="En cours">En cours</option>
+          <option value="Terminé">Terminé</option>
+          <option value="Bloqué">Bloqué</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Type</label>
+        <select id="filtreType" onchange="appliquerFiltres()">
+          <option value="">Tous les types</option>
+          <option value="Excavation">Excavation</option>
+          <option value="Coffrage">Coffrage</option>
+          <option value="Bétonnage">Bétonnage</option>
+          <option value="Remblai">Remblai</option>
+          <option value="Installation">Installation</option>
+          <option value="Contrôle">Contrôle</option>
+        </select>
+      </div>
     </div>
 
-    <div class="section-title">🎯 Actions Rapides</div>
-    <button class="btn btn-success" onclick="nouvelleTache()">
-      <span>➕</span>
-      <span>Nouvelle Tâche</span>
+    <!-- Boutons d'action -->
+    <button class="btn btn-primary" onclick="nouvelleTache()">
+      ➕ Nouvelle Tâche
     </button>
-    <button class="btn btn-primary" onclick="ouvrirGestionnaire()">
-      <span>📋</span>
-      <span>Planning Gantt</span>
+
+    <button class="btn btn-secondary" onclick="ouvrirGestionnaire()">
+      📋 Ouvrir Gestionnaire
     </button>
 
-    <div class="section-title">🔍 Filtres</div>
-    <div class="filter">
-      <select id="filtreStatut" onchange="appliquerFiltre()">
-        <option value="">Tous les statuts</option>
-        <option value="Non commencée">Non commencée</option>
-        <option value="En cours">En cours</option>
-        <option value="En attente">En attente</option>
-        <option value="Terminée">Terminée</option>
-      </select>
-    </div>
-    <div class="filter">
-      <select id="filtrePriorite" onchange="appliquerFiltre()">
-        <option value="">Toutes priorités</option>
-        <option value="Haute">Haute</option>
-        <option value="Moyenne">Moyenne</option>
-        <option value="Basse">Basse</option>
-      </select>
-    </div>
+    <button class="btn btn-warning" onclick="calculerCPM()">
+      🎯 Chemin Critique
+    </button>
 
-    <div class="section-title">📊 Navigation</div>
-    <div class="menu-item" onclick="naviguer('taches')">
-      <span>✅</span>
-      <span>Voir toutes les tâches</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('retards')">
-      <span>⚠️</span>
-      <span>Tâches en retard</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('calendar')">
-      <span>📅</span>
-      <span>Vue Calendrier</span>
-    </div>
-    <div class="menu-item" onclick="retourMenu()">
-      <span>🏠</span>
-      <span>Menu Principal</span>
-    </div>
+    <button class="btn btn-danger" onclick="afficherGantt()">
+      📊 Vue Gantt
+    </button>
   </div>
 
   <script>
-    function nouvelleTache() {
-      ouvrirGestionnaire();
-    }
-
+    // Fonction pour ouvrir le modal complet
     function ouvrirGestionnaire() {
       google.script.run.afficherModalTache();
     }
 
-    function naviguer(dest) {
-      if (dest === 'taches') google.script.run.naviguerVersTaches();
-      else if (dest === 'retards') google.script.run.naviguerVersTachesEnRetard();
-      else if (dest === 'calendar') google.script.run.naviguerVersCalendrierTaches();
+    // Fonction pour créer une nouvelle tâche
+    function nouvelleTache() {
+      ouvrirGestionnaire();
     }
 
-    function retourMenu() {
-      google.script.run.afficherMenuPrincipal();
+    // Fonction pour calculer le CPM
+    function calculerCPM() {
+      const projetId = document.getElementById('filtreProjet').value || 'PROJ001';
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            alert(`✅ Chemin Critique Calculé\n\nDurée totale: ${result.dureeTotale} jours\nTâches critiques: ${result.nombreCritiques}/${result.nombreTaches}`);
+          } else {
+            alert('❌ Erreur: ' + result.message);
+          }
+        })
+        .withFailureHandler(function(error) {
+          alert('❌ Erreur: ' + error.message);
+        })
+        .calculerCheminCritiqueCPM(projetId);
     }
 
-    function appliquerFiltre() {
+    // Fonction pour afficher le Gantt
+    function afficherGantt() {
+      ouvrirGestionnaire();
+    }
+
+    // Fonction pour appliquer les filtres
+    function appliquerFiltres() {
+      const projet = document.getElementById('filtreProjet').value;
+      const ouvrage = document.getElementById('filtreOuvrage').value;
       const statut = document.getElementById('filtreStatut').value;
-      const priorite = document.getElementById('filtrePriorite').value;
-      // TODO: Implémenter le filtrage
-      let msg = 'Filtres: ';
-      if (statut) msg += 'Statut=' + statut + ' ';
-      if (priorite) msg += 'Priorité=' + priorite;
-      if (!statut && !priorite) msg += 'Tous';
-      alert(msg);
+      const type = document.getElementById('filtreType').value;
+
+      console.log('Filtres:', {projet, ouvrage, statut, type});
+      chargerStatistiques();
     }
 
-    function chargerStats() {
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success) {
-          document.getElementById('tachesTotal').textContent = result.stats.total || 0;
-          document.getElementById('tachesEnCours').textContent = result.stats.enCours || 0;
-          document.getElementById('tachesEnRetard').textContent = result.stats.enRetard || 0;
-        }
-      }).obtenirStatsTaches();
+    // Charger les statistiques
+    function chargerStatistiques() {
+      google.script.run
+        .withSuccessHandler(function(data) {
+          if (data.success) {
+            const taches = data.taches;
+
+            // Total tâches
+            document.getElementById('totalTaches').textContent = taches.length;
+
+            // En cours
+            const enCours = taches.filter(t => t.statut === 'En cours').length;
+            document.getElementById('enCours').textContent = enCours;
+
+            // En retard (tâches où dateFin < aujourd'hui et statut != Terminé)
+            const aujourdhui = new Date();
+            const enRetard = taches.filter(t => {
+              const dateFin = new Date(t.dateFin);
+              return dateFin < aujourdhui && t.statut !== 'Terminé';
+            }).length;
+            document.getElementById('enRetard').textContent = enRetard;
+
+            // Critiques
+            const critiques = taches.filter(t => t.critique === true).length;
+            document.getElementById('critiques').textContent = critiques;
+
+            // Mettre à jour le mini Gantt
+            chargerGanttMini(taches);
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Erreur chargement stats:', error);
+        })
+        .obtenirToutesTaches();
     }
 
+    // Charger le mini Gantt
+    function chargerGanttMini(taches) {
+      const container = document.getElementById('gantt-container');
+      container.innerHTML = '';
+
+      // Filtrer les tâches critiques
+      const tachesCritiques = taches.filter(t => t.critique === true).slice(0, 5);
+
+      if (tachesCritiques.length === 0) {
+        container.innerHTML = '<p style="text-align: center; padding: 20px; color: #666; font-size: 11px;">Aucune tâche critique</p>';
+        return;
+      }
+
+      tachesCritiques.forEach(function(tache) {
+        const item = document.createElement('div');
+        item.className = 'gantt-item critique';
+
+        const progression = (tache.progression || 0) * 100;
+
+        item.innerHTML = `
+          <div class="gantt-title">${tache.nom.substring(0, 30)}...</div>
+          <div class="gantt-meta">${tache.id} • Marge: ${tache.marge}j</div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${progression}%;"></div>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    // Initialisation au chargement
     window.onload = function() {
-      chargerStats();
+      chargerStatistiques();
     };
   </script>
 </body>

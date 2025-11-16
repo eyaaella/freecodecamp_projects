@@ -1,1028 +1,142 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
-    <base target="_top">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestionnaire de Notifications</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Google Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #ea4335 0%, #c5221f 100%);
-            padding: 20px;
-            color: #202124;
-        }
-
-        .modal-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
-            max-width: 1200px;
-            margin: 0 auto;
-            overflow: hidden;
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, #ea4335 0%, #c5221f 100%);
-            color: white;
-            padding: 28px 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h1 {
-            font-size: 28px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .close-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            font-size: 24px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .close-btn:hover {
-            background: rgba(255,255,255,0.3);
-            transform: rotate(90deg);
-        }
-
-        .tabs {
-            display: flex;
-            background: #f8f9fa;
-            border-bottom: 2px solid #e8eaed;
-            padding: 0 32px;
-        }
-
-        .tab {
-            padding: 16px 24px;
-            cursor: pointer;
-            border: none;
-            background: none;
-            font-size: 15px;
-            font-weight: 500;
-            color: #5f6368;
-            border-bottom: 3px solid transparent;
-            transition: all 0.3s ease;
-            margin-bottom: -2px;
-        }
-
-        .tab:hover {
-            color: #ea4335;
-            background: rgba(234, 67, 53, 0.05);
-        }
-
-        .tab.active {
-            color: #ea4335;
-            border-bottom-color: #ea4335;
-            background: white;
-        }
-
-        .tab-content {
-            display: none;
-            padding: 32px;
-            max-height: 700px;
-            overflow-y: auto;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-bottom: 24px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group.full-width {
-            grid-column: 1 / -1;
-        }
-
-        .form-label {
-            font-size: 14px;
-            font-weight: 500;
-            color: #5f6368;
-            margin-bottom: 8px;
-        }
-
-        .form-label.required::after {
-            content: ' *';
-            color: #ea4335;
-        }
-
-        input, select, textarea {
-            padding: 12px 16px;
-            border: 1px solid #dadce0;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-            transition: all 0.3s ease;
-        }
-
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #ea4335;
-            box-shadow: 0 0 0 3px rgba(234, 67, 53, 0.1);
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .checkbox-group input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #ea4335 0%, #c5221f 100%);
-            color: white;
-            box-shadow: 0 2px 8px rgba(234, 67, 53, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(234, 67, 53, 0.4);
-        }
-
-        .btn-secondary {
-            background: #f8f9fa;
-            color: #5f6368;
-            border: 1px solid #dadce0;
-        }
-
-        .btn-secondary:hover {
-            background: #e8eaed;
-        }
-
-        .btn-danger {
-            background: #c5221f;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #a50e0e;
-            transform: translateY(-2px);
-        }
-
-        .btn-success {
-            background: #34a853;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #137333;
-        }
-
-        .notifications-grid {
-            display: grid;
-            gap: 16px;
-        }
-
-        .notification-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            border-left: 6px solid transparent;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .notification-card:hover {
-            transform: translateX(4px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-        }
-
-        .notification-card.info {
-            border-left-color: #1967d2;
-            background: linear-gradient(to right, #e8f0fe 0%, white 20%);
-        }
-
-        .notification-card.alerte {
-            border-left-color: #f9ab00;
-            background: linear-gradient(to right, #fef7e0 0%, white 20%);
-        }
-
-        .notification-card.urgence {
-            border-left-color: #c5221f;
-            background: linear-gradient(to right, #fce8e6 0%, white 20%);
-        }
-
-        .notification-card.succes {
-            border-left-color: #34a853;
-            background: linear-gradient(to right, #e6f4ea 0%, white 20%);
-        }
-
-        .notification-card.erreur {
-            border-left-color: #ea4335;
-            background: linear-gradient(to right, #fce8e6 0%, white 20%);
-        }
-
-        .notification-card.unread {
-            font-weight: 500;
-            box-shadow: 0 4px 12px rgba(234, 67, 53, 0.15);
-        }
-
-        .notification-card.unread::before {
-            content: '';
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 12px;
-            height: 12px;
-            background: #ea4335;
-            border-radius: 50%;
-        }
-
-        .notification-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .notification-meta {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .notification-type {
-            font-size: 12px;
-            padding: 4px 12px;
-            border-radius: 12px;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .notification-type.info {
-            background: #e8f0fe;
-            color: #1967d2;
-        }
-
-        .notification-type.alerte {
-            background: #fef7e0;
-            color: #f9ab00;
-        }
-
-        .notification-type.urgence {
-            background: #fce8e6;
-            color: #c5221f;
-        }
-
-        .notification-type.succes {
-            background: #e6f4ea;
-            color: #34a853;
-        }
-
-        .notification-type.erreur {
-            background: #fce8e6;
-            color: #ea4335;
-        }
-
-        .notification-priority {
-            font-size: 11px;
-            color: #5f6368;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .notification-date {
-            font-size: 13px;
-            color: #5f6368;
-        }
-
-        .notification-message {
-            font-size: 15px;
-            color: #202124;
-            margin-bottom: 12px;
-            line-height: 1.5;
-        }
-
-        .notification-actions {
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-        }
-
-        .notification-actions button {
-            padding: 8px 16px;
-            font-size: 13px;
-        }
-
-        .settings-section {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-
-        .settings-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #202124;
-            margin-bottom: 16px;
-        }
-
-        .settings-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            background: white;
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-
-        .settings-label {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .settings-label-main {
-            font-size: 14px;
-            font-weight: 500;
-            color: #202124;
-        }
-
-        .settings-label-sub {
-            font-size: 12px;
-            color: #5f6368;
-        }
-
-        .toggle-switch {
-            position: relative;
-            width: 48px;
-            height: 24px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #dadce0;
-            border-radius: 24px;
-            transition: .3s;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            border-radius: 50%;
-            transition: .3s;
-        }
-
-        input:checked + .toggle-slider {
-            background-color: #34a853;
-        }
-
-        input:checked + .toggle-slider:before {
-            transform: translateX(24px);
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #5f6368;
-        }
-
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #ea4335;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error-message {
-            background: #fce8e6;
-            color: #c5221f;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            display: none;
-        }
-
-        .success-message {
-            background: #e6f4ea;
-            color: #137333;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            display: none;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-            margin-top: 24px;
-            padding-top: 24px;
-            border-top: 1px solid #e8eaed;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #5f6368;
-        }
-
-        .empty-state-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
-        }
-
-        .empty-state-message {
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-
-        .empty-state-sub {
-            font-size: 14px;
-        }
-    </style>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <title>Notifications v2.0</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root { --bg-primary: #fff; --bg-secondary: #f8f9fa; --text-primary: #333; --text-secondary: #666; --border-color: #dee2e6; --shadow: rgba(0,0,0,0.1); --accent-primary: #1a73e8; --accent-success: #34a853; --accent-warning: #fbbc04; --accent-danger: #ea4335; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg-primary); color: var(--text-primary); }
+    .header { background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%); color: white; padding: 20px; box-shadow: 0 2px 10px var(--shadow); }
+    .header h1 { font-size: 22px; margin-bottom: 5px; }
+    .header p { font-size: 13px; opacity: 0.9; }
+    .container { padding: 20px; }
+    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); }
+    .tab { padding: 12px 20px; background: var(--bg-secondary); border: none; border-top-left-radius: 8px; border-top-right-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; color: var(--text-secondary); }
+    .tab:hover { background: #e9ecef; color: var(--accent-primary); }
+    .tab.active { background: var(--accent-primary); color: white; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group label { font-size: 12px; font-weight: 600; margin-bottom: 5px; color: var(--text-secondary); }
+    .form-group input, .form-group select, .form-group textarea { padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; font-family: inherit; }
+    .btn { padding: 10px 20px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-success { background: linear-gradient(135deg, var(--accent-success) 0%, #2d8e47 100%); color: white; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px var(--shadow); }
+    .table { width: 100%; border-collapse: collapse; margin: 20px 0; box-shadow: 0 2px 8px var(--shadow); border-radius: 8px; overflow: hidden; }
+    .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+    .table th { background: var(--accent-primary); color: white; font-weight: 600; font-size: 12px; text-transform: uppercase; }
+    .table tr:hover { background: var(--bg-secondary); }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .badge-success { background: var(--accent-success); color: white; }
+    .badge-warning { background: var(--accent-warning); color: #333; }
+    .badge-danger { background: var(--accent-danger); color: white; }
+    .badge-info { background: var(--accent-primary); color: white; }
+    .chart-container { position: relative; height: 300px; margin: 20px 0; }
+  </style>
 </head>
 <body>
-    <div class="modal-container">
-        <div class="modal-header">
-            <h1><span>🔔</span> Gestionnaire de Notifications</h1>
-            <button class="close-btn" onclick="window.close()">×</button>
-        </div>
-
-        <div class="tabs">
-            <button class="tab active" onclick="changerOnglet('nonlues')">📬 Non Lues</button>
-            <button class="tab" onclick="changerOnglet('toutes')">📋 Toutes</button>
-            <button class="tab" onclick="changerOnglet('nouvelle')">➕ Nouvelle</button>
-            <button class="tab" onclick="changerOnglet('parametres')">⚙️ Paramètres</button>
-        </div>
-
-        <div id="errorMessage" class="error-message"></div>
-        <div id="successMessage" class="success-message"></div>
-
-        <!-- Onglet Non Lues -->
-        <div id="nonluesTab" class="tab-content active">
-            <div id="listeNonLues" class="notifications-grid">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <div>Chargement des notifications...</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Onglet Toutes -->
-        <div id="toutesTab" class="tab-content">
-            <div id="listeToutesNotifications" class="notifications-grid">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <div>Chargement des notifications...</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Onglet Nouvelle -->
-        <div id="nouvelleTab" class="tab-content">
-            <form id="formBroadcast" onsubmit="envoyerBroadcast(event)">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label required">Type</label>
-                        <select id="broadcastType" required>
-                            <option value="">Sélectionner...</option>
-                            <option value="info">Info</option>
-                            <option value="alerte">Alerte</option>
-                            <option value="urgence">Urgence</option>
-                            <option value="succes">Succès</option>
-                            <option value="erreur">Erreur</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label required">Priorité</label>
-                        <select id="broadcastPriorite" required>
-                            <option value="">Sélectionner...</option>
-                            <option value="critique">Critique</option>
-                            <option value="haute">Haute</option>
-                            <option value="normale">Normale</option>
-                            <option value="faible">Faible</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group full-width">
-                        <label class="form-label required">Message</label>
-                        <textarea id="broadcastMessage" rows="4" required placeholder="Saisissez votre message..."></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Module concerné</label>
-                        <select id="broadcastModule">
-                            <option value="">Général</option>
-                            <option value="Projet">Projet</option>
-                            <option value="Employe">Employé</option>
-                            <option value="Vehicule">Véhicule</option>
-                            <option value="Equipement">Équipement</option>
-                            <option value="Utilisateur">Utilisateur</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Lien d'action (optionnel)</label>
-                        <input type="url" id="broadcastLien" placeholder="https://...">
-                    </div>
-
-                    <div class="form-group full-width">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="broadcastTousUtilisateurs" checked>
-                            <label for="broadcastTousUtilisateurs">Envoyer à tous les utilisateurs</label>
-                        </div>
-                    </div>
-
-                    <div class="form-group full-width" id="selectUtilisateursGroup" style="display: none;">
-                        <label class="form-label">Utilisateurs spécifiques</label>
-                        <select id="broadcastUtilisateurs" multiple style="height: 120px;">
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="reinitialiserFormBroadcast()">
-                        <span>↺</span> Réinitialiser
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <span>📢</span> Diffuser la notification
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Onglet Paramètres -->
-        <div id="parametresTab" class="tab-content">
-            <div class="settings-section">
-                <div class="settings-title">🔔 Notifications par Module</div>
-
-                <div class="settings-item">
-                    <div class="settings-label">
-                        <span class="settings-label-main">📊 Module Projet</span>
-                        <span class="settings-label-sub">Recevoir les notifications des projets</span>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="notif_projet" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-
-                <div class="settings-item">
-                    <div class="settings-label">
-                        <span class="settings-label-main">👷 Module Employé</span>
-                        <span class="settings-label-sub">Recevoir les notifications des employés</span>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="notif_employe" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-
-                <div class="settings-item">
-                    <div class="settings-label">
-                        <span class="settings-label-main">🚗 Module Véhicule</span>
-                        <span class="settings-label-sub">Recevoir les notifications des véhicules</span>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="notif_vehicule" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-
-                <div class="settings-item">
-                    <div class="settings-label">
-                        <span class="settings-label-main">📐 Module Équipement</span>
-                        <span class="settings-label-sub">Recevoir les notifications des équipements</span>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="notif_equipement" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="settings-section">
-                <div class="settings-title">⚙️ Préférences Générales</div>
-
-                <div class="settings-item">
-                    <div class="settings-label">
-                        <span class="settings-label-main">🔔 Notifications Push</span>
-                        <span class="settings-label-sub">Recevoir des notifications en temps réel</span>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="pref_push" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-
-                <div class="settings-item">
-                    <div class="settings-label">
-                        <span class="settings-label-main">📧 Résumé par Email</span>
-                        <span class="settings-label-sub">Recevoir un résumé quotidien par email</span>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="pref_email">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-
-                <div class="settings-item">
-                    <div class="settings-label">
-                        <span class="settings-label-main">⚠️ Notifications Critiques Uniquement</span>
-                        <span class="settings-label-sub">Ne recevoir que les notifications critiques</span>
-                    </div>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="pref_critique_only">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="form-actions">
-                <button class="btn btn-primary" onclick="sauvegarderParametres()">
-                    <span>✓</span> Sauvegarder les paramètres
-                </button>
-            </div>
-        </div>
+  <div class="header"><h1>🔔 Gestionnaire Notifications v2.0</h1><p>Multi-canaux • Templates • Workflows • Statistiques</p></div>
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('liste')">📋 Liste</button>
+      <button class="tab" onclick="switchTab('composer')">✍️ Composer</button>
+      <button class="tab" onclick="switchTab('templates')">📝 Templates</button>
+      <button class="tab" onclick="switchTab('stats')">📊 Statistiques</button>
+      <button class="tab" onclick="switchTab('canaux')">📡 Canaux</button>
+      <button class="tab" onclick="switchTab('workflows')">⚙️ Workflows</button>
     </div>
-
-    <script>
-        let notifications = [];
-
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            chargerNotificationsNonLues();
-            chargerUtilisateurs();
-            initFormBroadcast();
+    <div id="liste" class="tab-content active">
+      <h3 style="margin-bottom: 20px;">Toutes les notifications</h3>
+      <table class="table"><thead><tr><th>Date</th><th>Destinataire</th><th>Titre</th><th>Type</th><th>Statut</th><th>Canal</th></tr></thead><tbody><tr><td colspan="6" style="text-align: center;">Chargement...</td></tr></tbody></table>
+    </div>
+    <div id="composer" class="tab-content">
+      <h3 style="margin-bottom: 20px;">Nouvelle notification</h3>
+      <form id="notifForm" onsubmit="sendNotif(event)">
+        <div class="form-grid">
+          <div class="form-group"><label>Destinataire ID *</label><input type="text" id="userId" required></div>
+          <div class="form-group"><label>Type *</label><select id="type" required><option value="INFO">Info</option><option value="SUCCESS">Succès</option><option value="WARNING">Attention</option><option value="ERROR">Erreur</option><option value="URGENT">Urgent</option></select></div>
+          <div class="form-group"><label>Canal *</label><select id="canal" required><option value="In-App">In-App</option><option value="Email">Email</option><option value="SMS">SMS</option><option value="Push">Push</option></select></div>
+          <div class="form-group"><label>Priorité *</label><select id="priorite" required><option value="Basse">Basse</option><option value="Normale">Normale</option><option value="Haute">Haute</option><option value="Urgente">Urgente</option></select></div>
+        </div>
+        <div class="form-group"><label>Titre *</label><input type="text" id="titre" required></div>
+        <div class="form-group"><label>Message *</label><textarea id="message" rows="5" required></textarea></div>
+        <div class="form-group"><label>Lien action</label><input type="text" id="lien" placeholder="/projet/PROJ001"></div>
+        <button type="submit" class="btn btn-success">📤 Envoyer notification</button>
+      </form>
+    </div>
+    <div id="templates" class="tab-content">
+      <h3 style="margin-bottom: 20px;">Templates de notifications</h3>
+      <p style="padding: 40px; text-align: center; color: var(--text-secondary);">Fonctionnalité templates à venir...</p>
+    </div>
+    <div id="stats" class="tab-content">
+      <h3 style="margin-bottom: 20px;">Statistiques détaillées</h3>
+      <div class="chart-container"><canvas id="chartTypes"></canvas></div>
+      <div class="chart-container"><canvas id="chartCanaux"></canvas></div>
+    </div>
+    <div id="canaux" class="tab-content">
+      <h3 style="margin-bottom: 20px;">Configuration des canaux</h3>
+      <p style="padding: 40px; text-align: center; color: var(--text-secondary);">Configuration Email, SMS, Push à venir...</p>
+    </div>
+    <div id="workflows" class="tab-content">
+      <h3 style="margin-bottom: 20px;">Workflows automatiques</h3>
+      <p style="padding: 40px; text-align: center; color: var(--text-secondary);">Workflows à configurer...</p>
+    </div>
+  </div>
+  <script>
+    let charts = {};
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+      if (tabId === 'stats') initCharts();
+    }
+    function sendNotif(event) {
+      event.preventDefault();
+      const data = {
+        utilisateurId: document.getElementById('userId').value,
+        type: document.getElementById('type').value,
+        titre: document.getElementById('titre').value,
+        message: document.getElementById('message').value,
+        canal: document.getElementById('canal').value,
+        priorite: document.getElementById('priorite').value,
+        lienAction: document.getElementById('lien').value,
+        source: 'MANUEL'
+      };
+      google.script.run.withSuccessHandler(function(result) {
+        alert(result.success ? '✅ Notification envoyée' : '❌ ' + result.message);
+        if (result.success) document.getElementById('notifForm').reset();
+      }).creerNotification(data);
+    }
+    function initCharts() {
+      if (!charts.types) {
+        const ctx = document.getElementById('chartTypes');
+        charts.types = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: ['INFO', 'SUCCESS', 'WARNING', 'ERROR', 'URGENT'],
+            datasets: [{ data: [45, 30, 15, 7, 3], backgroundColor: ['#1a73e8', '#34a853', '#fbbc04', '#ea4335', '#c5221f'] }]
+          },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Notifications par type' } } }
         });
-
-        function changerOnglet(onglet) {
-            // Désactiver tous les onglets
-            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-            // Activer l'onglet sélectionné
-            event.target.classList.add('active');
-            document.getElementById(onglet + 'Tab').classList.add('active');
-
-            // Charger les données si nécessaire
-            if (onglet === 'nonlues') {
-                chargerNotificationsNonLues();
-            } else if (onglet === 'toutes') {
-                chargerToutesNotifications();
-            } else if (onglet === 'parametres') {
-                chargerParametres();
-            }
-        }
-
-        function chargerNotificationsNonLues() {
-            const container = document.getElementById('listeNonLues');
-            container.innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <div>Chargement des notifications...</div>
-                </div>
-            `;
-
-            google.script.run
-                .withSuccessHandler(function(result) {
-                    if (result && result.success) {
-                        afficherNotifications(result.data || [], 'listeNonLues', true);
-                    } else {
-                        afficherEmptyState('listeNonLues', '📭', 'Aucune notification non lue', 'Toutes vos notifications sont lues');
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    afficherErreur('Erreur: ' + error.message);
-                    afficherEmptyState('listeNonLues', '⚠️', 'Erreur de chargement', error.message);
-                })
-                .obtenirNonLues();
-        }
-
-        function chargerToutesNotifications() {
-            const container = document.getElementById('listeToutesNotifications');
-            container.innerHTML = `
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <div>Chargement de toutes les notifications...</div>
-                </div>
-            `;
-
-            google.script.run
-                .withSuccessHandler(function(result) {
-                    if (result && result.success) {
-                        afficherNotifications(result.data || [], 'listeToutesNotifications', false);
-                    } else {
-                        afficherEmptyState('listeToutesNotifications', '📭', 'Aucune notification', 'Vous n\'avez pas encore de notifications');
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    afficherErreur('Erreur: ' + error.message);
-                    afficherEmptyState('listeToutesNotifications', '⚠️', 'Erreur de chargement', error.message);
-                })
-                .obtenirToutesNotifications();
-        }
-
-        function afficherNotifications(data, containerId, filtreLues) {
-            const container = document.getElementById(containerId);
-
-            if (!data || data.length === 0) {
-                afficherEmptyState(containerId, '📭', 'Aucune notification', 'Aucune notification à afficher');
-                return;
-            }
-
-            const html = data.map(notif => {
-                const unreadClass = (!notif.lu) ? 'unread' : '';
-
-                return `
-                    <div class="notification-card ${notif.type} ${unreadClass}">
-                        <div class="notification-header">
-                            <div class="notification-meta">
-                                <span class="notification-type ${notif.type}">${notif.type}</span>
-                                <span class="notification-priority">Priorité: ${notif.priorite || 'Normale'}</span>
-                            </div>
-                            <span class="notification-date">${notif.date || 'Maintenant'}</span>
-                        </div>
-                        <div class="notification-message">${notif.message || ''}</div>
-                        <div class="notification-actions">
-                            ${notif.lien ? `<button class="btn btn-secondary" onclick="ouvrirLien('${notif.lien}')"><span>🔗</span> Action requise</button>` : ''}
-                            ${!notif.lu ? `<button class="btn btn-success" onclick="marquerCommeLu(${notif.id}, '${containerId}')"><span>✓</span> Marquer comme lu</button>` : ''}
-                            <button class="btn btn-danger" onclick="supprimerNotification(${notif.id}, '${containerId}')"><span>🗑️</span> Supprimer</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            container.innerHTML = html;
-        }
-
-        function afficherEmptyState(containerId, icon, message, submessage) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">${icon}</div>
-                    <div class="empty-state-message">${message}</div>
-                    <div class="empty-state-sub">${submessage}</div>
-                </div>
-            `;
-        }
-
-        function marquerCommeLu(id, containerId) {
-            google.script.run
-                .withSuccessHandler(function(result) {
-                    if (result && result.success) {
-                        afficherSucces('Notification marquée comme lue');
-                        // Recharger les notifications
-                        if (containerId === 'listeNonLues') {
-                            chargerNotificationsNonLues();
-                        } else {
-                            chargerToutesNotifications();
-                        }
-                    } else {
-                        afficherErreur(result.message || 'Erreur lors de la mise à jour');
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    afficherErreur('Erreur: ' + error.message);
-                })
-                .marquerCommeLu(id);
-        }
-
-        function supprimerNotification(id, containerId) {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer cette notification?')) {
-                return;
-            }
-
-            google.script.run
-                .withSuccessHandler(function(result) {
-                    if (result && result.success) {
-                        afficherSucces('Notification supprimée');
-                        // Recharger les notifications
-                        if (containerId === 'listeNonLues') {
-                            chargerNotificationsNonLues();
-                        } else {
-                            chargerToutesNotifications();
-                        }
-                    } else {
-                        afficherErreur(result.message || 'Erreur lors de la suppression');
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    afficherErreur('Erreur: ' + error.message);
-                })
-                .supprimerNotification(id);
-        }
-
-        function ouvrirLien(url) {
-            window.open(url, '_blank');
-        }
-
-        function chargerUtilisateurs() {
-            google.script.run
-                .withSuccessHandler(function(result) {
-                    if (result && result.success) {
-                        const select = document.getElementById('broadcastUtilisateurs');
-                        const options = result.data.map(u =>
-                            `<option value="${u.id}">${u.nomUtilisateur} (${u.email})</option>`
-                        ).join('');
-                        select.innerHTML = options;
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    console.error('Erreur chargement utilisateurs:', error);
-                })
-                .obtenirUtilisateursActifs();
-        }
-
-        function initFormBroadcast() {
-            const checkbox = document.getElementById('broadcastTousUtilisateurs');
-            const selectGroup = document.getElementById('selectUtilisateursGroup');
-
-            checkbox.addEventListener('change', function() {
-                if (this.checked) {
-                    selectGroup.style.display = 'none';
-                } else {
-                    selectGroup.style.display = 'block';
-                }
-            });
-        }
-
-        function envoyerBroadcast(event) {
-            event.preventDefault();
-
-            const broadcastData = {
-                type: document.getElementById('broadcastType').value,
-                priorite: document.getElementById('broadcastPriorite').value,
-                message: document.getElementById('broadcastMessage').value,
-                module: document.getElementById('broadcastModule').value,
-                lien: document.getElementById('broadcastLien').value,
-                tousUtilisateurs: document.getElementById('broadcastTousUtilisateurs').checked,
-                utilisateurs: []
-            };
-
-            // Si pas tous les utilisateurs, récupérer les sélectionnés
-            if (!broadcastData.tousUtilisateurs) {
-                const select = document.getElementById('broadcastUtilisateurs');
-                broadcastData.utilisateurs = Array.from(select.selectedOptions).map(opt => opt.value);
-
-                if (broadcastData.utilisateurs.length === 0) {
-                    afficherErreur('Veuillez sélectionner au moins un utilisateur');
-                    return;
-                }
-            }
-
-            google.script.run
-                .withSuccessHandler(function(result) {
-                    if (result && result.success) {
-                        afficherSucces('Notification diffusée avec succès à ' + result.count + ' utilisateur(s)!');
-                        reinitialiserFormBroadcast();
-                        // Retourner à l'onglet toutes
-                        document.querySelectorAll('.tab')[1].click();
-                    } else {
-                        afficherErreur(result.message || 'Erreur lors de la diffusion');
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    afficherErreur('Erreur: ' + error.message);
-                })
-                .envoyerBroadcast(broadcastData);
-        }
-
-        function reinitialiserFormBroadcast() {
-            document.getElementById('formBroadcast').reset();
-            document.getElementById('selectUtilisateursGroup').style.display = 'none';
-        }
-
-        function chargerParametres() {
-            google.script.run
-                .withSuccessHandler(function(result) {
-                    if (result && result.success) {
-                        const prefs = result.data || {};
-
-                        // Notifications par module
-                        document.getElementById('notif_projet').checked = prefs.notif_projet !== false;
-                        document.getElementById('notif_employe').checked = prefs.notif_employe !== false;
-                        document.getElementById('notif_vehicule').checked = prefs.notif_vehicule !== false;
-                        document.getElementById('notif_equipement').checked = prefs.notif_equipement !== false;
-
-                        // Préférences générales
-                        document.getElementById('pref_push').checked = prefs.pref_push !== false;
-                        document.getElementById('pref_email').checked = prefs.pref_email === true;
-                        document.getElementById('pref_critique_only').checked = prefs.pref_critique_only === true;
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    console.error('Erreur chargement paramètres:', error);
-                })
-                .obtenirParametresNotifications();
-        }
-
-        function sauvegarderParametres() {
-            const parametres = {
-                notif_projet: document.getElementById('notif_projet').checked,
-                notif_employe: document.getElementById('notif_employe').checked,
-                notif_vehicule: document.getElementById('notif_vehicule').checked,
-                notif_equipement: document.getElementById('notif_equipement').checked,
-                pref_push: document.getElementById('pref_push').checked,
-                pref_email: document.getElementById('pref_email').checked,
-                pref_critique_only: document.getElementById('pref_critique_only').checked
-            };
-
-            google.script.run
-                .withSuccessHandler(function(result) {
-                    if (result && result.success) {
-                        afficherSucces('Paramètres sauvegardés avec succès!');
-                    } else {
-                        afficherErreur(result.message || 'Erreur lors de la sauvegarde');
-                    }
-                })
-                .withFailureHandler(function(error) {
-                    afficherErreur('Erreur: ' + error.message);
-                })
-                .sauvegarderParametresNotifications(parametres);
-        }
-
-        function afficherErreur(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 5000);
-        }
-
-        function afficherSucces(message) {
-            const successDiv = document.getElementById('successMessage');
-            successDiv.textContent = message;
-            successDiv.style.display = 'block';
-            setTimeout(() => {
-                successDiv.style.display = 'none';
-            }, 3000);
-        }
-    </script>
+      }
+      if (!charts.canaux) {
+        const ctx2 = document.getElementById('chartCanaux');
+        charts.canaux = new Chart(ctx2, {
+          type: 'bar',
+          data: {
+            labels: ['In-App', 'Email', 'SMS', 'Push'],
+            datasets: [{ label: 'Notifications par canal', data: [65, 45, 12, 8], backgroundColor: ['#1a73e8', '#34a853', '#fbbc04', '#ea4335'] }]
+          },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+      }
+    }
+    window.onload = function() { console.log('Modal notifications chargé'); };
+  </script>
 </body>
 </html>

@@ -4,7 +4,50 @@
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TopoGest Pro v2.0 - Sidebar</title>
   <style>
+    /* ============================================================================
+     * VARIABLES CSS POUR DARK MODE
+     * ============================================================================ */
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f9fa;
+      --bg-header: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+      --text-primary: #333333;
+      --text-secondary: #666666;
+      --text-inverse: #ffffff;
+      --border-color: #dee2e6;
+      --shadow: rgba(0,0,0,0.1);
+      --shadow-hover: rgba(26, 115, 232, 0.3);
+      --accent-primary: #1a73e8;
+      --accent-success: #34a853;
+      --accent-warning: #fbbc04;
+      --accent-danger: #ea4335;
+      --card-bg: #ffffff;
+      --menu-hover: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #202124;
+      --bg-secondary: #292a2d;
+      --bg-header: linear-gradient(135deg, #0d47a1 0%, #01579b 100%);
+      --text-primary: #e8eaed;
+      --text-secondary: #9aa0a6;
+      --text-inverse: #ffffff;
+      --border-color: #3c4043;
+      --shadow: rgba(0,0,0,0.4);
+      --shadow-hover: rgba(26, 115, 232, 0.5);
+      --accent-primary: #8ab4f8;
+      --accent-success: #81c995;
+      --accent-warning: #fdd663;
+      --accent-danger: #f28b82;
+      --card-bg: #292a2d;
+      --menu-hover: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+    }
+
+    /* ============================================================================
+     * BASE STYLES
+     * ============================================================================ */
     * {
       margin: 0;
       padding: 0;
@@ -12,56 +55,286 @@
     }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
       padding: 0;
-      color: #333;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
+    /* ============================================================================
+     * HEADER
+     * ============================================================================ */
     .header {
-      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
-      color: white;
+      background: var(--bg-header);
+      color: var(--text-inverse);
       padding: 20px;
       text-align: center;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 10px var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
 
     .header h1 {
-      font-size: 20px;
+      font-size: 18px;
       margin-bottom: 5px;
       font-weight: 600;
+      animation: fadeInDown 0.5s ease;
     }
 
     .header p {
       font-size: 11px;
       opacity: 0.9;
+      animation: fadeInDown 0.5s ease 0.1s backwards;
     }
 
+    /* ============================================================================
+     * DARK MODE TOGGLE
+     * ============================================================================ */
+    .dark-mode-toggle {
+      background: var(--card-bg);
+      padding: 15px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+    }
+
+    .dark-mode-toggle label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      user-select: none;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 26px;
+      background: var(--border-color);
+      border-radius: 13px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .toggle-switch::before {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: white;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    input[type="checkbox"]:checked + .toggle-switch {
+      background: var(--accent-primary);
+    }
+
+    input[type="checkbox"]:checked + .toggle-switch::before {
+      transform: translateX(24px);
+    }
+
+    input[type="checkbox"] {
+      display: none;
+    }
+
+    /* ============================================================================
+     * CONTAINER
+     * ============================================================================ */
     .container {
       padding: 15px;
-      background: white;
-      min-height: calc(100vh - 80px);
+      background: var(--bg-primary);
+      min-height: calc(100vh - 100px);
+      overflow-y: auto;
     }
 
+    /* ============================================================================
+     * AUTO-REFRESH INDICATOR
+     * ============================================================================ */
+    .refresh-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px;
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      animation: slideInDown 0.3s ease;
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+      }
+    }
+
+    /* ============================================================================
+     * SECTIONS
+     * ============================================================================ */
     .section {
       margin-bottom: 20px;
+      animation: fadeInUp 0.5s ease;
     }
 
     .section-title {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
-      color: #1a73e8;
+      color: var(--accent-primary);
       margin-bottom: 10px;
       padding-bottom: 5px;
-      border-bottom: 2px solid #1a73e8;
+      border-bottom: 2px solid var(--accent-primary);
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 8px;
+      transition: color 0.3s ease;
     }
 
+    /* ============================================================================
+     * STATS CARDS avec SPARKLINES
+     * ============================================================================ */
+    .stats-card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 12px;
+      border-left: 4px solid var(--accent-primary);
+      box-shadow: 0 2px 8px var(--shadow);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stats-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(26,115,232,0.1) 0%, transparent 70%);
+      transition: transform 0.5s ease;
+    }
+
+    .stats-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px var(--shadow-hover);
+    }
+
+    .stats-card:hover::before {
+      transform: translate(-25%, -25%);
+    }
+
+    .stats-card h3 {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stats-card .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent-primary);
+      margin-bottom: 5px;
+      position: relative;
+      z-index: 1;
+      animation: countUp 0.5s ease;
+    }
+
+    .stats-card .trend {
+      font-size: 11px;
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stats-card .trend.positive {
+      color: var(--accent-success);
+    }
+
+    .stats-card .trend.negative {
+      color: var(--accent-danger);
+    }
+
+    .sparkline {
+      font-size: 24px;
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      opacity: 0.3;
+      transition: opacity 0.3s ease;
+    }
+
+    .stats-card:hover .sparkline {
+      opacity: 0.6;
+    }
+
+    /* ============================================================================
+     * SKELETON LOADERS
+     * ============================================================================ */
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--border-color) 50%, var(--bg-secondary) 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 4px;
+    }
+
+    .skeleton-text {
+      height: 12px;
+      margin-bottom: 8px;
+    }
+
+    .skeleton-value {
+      height: 28px;
+      width: 60%;
+      margin-bottom: 8px;
+    }
+
+    @keyframes loading {
+      0% {
+        background-position: 200% 0;
+      }
+      100% {
+        background-position: -200% 0;
+      }
+    }
+
+    /* ============================================================================
+     * MENU ITEMS avec TOOLTIPS
+     * ============================================================================ */
     .menu-item {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      border: 1px solid #dee2e6;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 12px 15px;
       margin-bottom: 8px;
@@ -72,21 +345,94 @@
       gap: 10px;
       font-size: 13px;
       font-weight: 500;
+      color: var(--text-primary);
+      position: relative;
     }
 
     .menu-item:hover {
-      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
-      color: white;
+      background: var(--menu-hover);
+      color: var(--text-inverse);
       transform: translateX(5px);
-      box-shadow: 0 4px 8px rgba(26, 115, 232, 0.3);
+      box-shadow: 0 4px 8px var(--shadow-hover);
     }
 
     .menu-item .icon {
       font-size: 18px;
       min-width: 25px;
       text-align: center;
+      transition: transform 0.3s ease;
     }
 
+    .menu-item:hover .icon {
+      transform: scale(1.2);
+    }
+
+    .menu-item[data-tooltip]::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      right: 100%;
+      margin-right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--text-primary);
+      color: var(--bg-primary);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      z-index: 1000;
+    }
+
+    .menu-item:hover[data-tooltip]::after {
+      opacity: 1;
+    }
+
+    /* ============================================================================
+     * BADGES ANIMÉS
+     * ============================================================================ */
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-left: auto;
+      animation: bounceIn 0.5s ease;
+    }
+
+    .badge-primary {
+      background: var(--accent-primary);
+      color: white;
+    }
+
+    .badge-success {
+      background: var(--accent-success);
+      color: white;
+    }
+
+    .badge-warning {
+      background: var(--accent-warning);
+      color: #333;
+    }
+
+    .badge-danger {
+      background: var(--accent-danger);
+      color: white;
+      animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    /* ============================================================================
+     * BUTTONS
+     * ============================================================================ */
     .btn {
       width: 100%;
       padding: 12px;
@@ -101,94 +447,205 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:active::before {
+      width: 300px;
+      height: 300px;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+      background: linear-gradient(135deg, var(--accent-primary) 0%, #174ea6 100%);
       color: white;
     }
 
     .btn-primary:hover {
-      background: linear-gradient(135deg, #174ea6 0%, #1557a0 100%);
-      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4);
       transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--shadow-hover);
     }
 
     .btn-success {
-      background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%);
+      background: linear-gradient(135deg, var(--accent-success) 0%, #2d8e47 100%);
       color: white;
     }
 
     .btn-success:hover {
-      background: linear-gradient(135deg, #2d8e47 0%, #267a3c 100%);
-      box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4);
       transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4);
     }
 
     .btn-warning {
-      background: linear-gradient(135deg, #fbbc04 0%, #ea8600 100%);
-      color: white;
+      background: linear-gradient(135deg, var(--accent-warning) 0%, #ea8600 100%);
+      color: #333;
     }
 
     .btn-warning:hover {
-      background: linear-gradient(135deg, #ea8600 0%, #ce7500 100%);
-      box-shadow: 0 4px 12px rgba(251, 188, 4, 0.4);
       transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(251, 188, 4, 0.4);
     }
 
     .btn-danger {
-      background: linear-gradient(135deg, #ea4335 0%, #d33426 100%);
+      background: linear-gradient(135deg, var(--accent-danger) 0%, #d33426 100%);
       color: white;
     }
 
     .btn-danger:hover {
-      background: linear-gradient(135deg, #d33426 0%, #b92b1d 100%);
-      box-shadow: 0 4px 12px rgba(234, 67, 53, 0.4);
       transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(234, 67, 53, 0.4);
     }
 
-    .stats-card {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      border-radius: 10px;
-      padding: 15px;
+    /* ============================================================================
+     * SEARCH BAR avec Ctrl+K
+     * ============================================================================ */
+    .search-container {
+      position: relative;
       margin-bottom: 15px;
-      border-left: 4px solid #1a73e8;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      animation: fadeInDown 0.5s ease;
     }
 
-    .stats-card h3 {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 5px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .search-bar {
+      width: 100%;
+      padding: 12px 40px 12px 15px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 13px;
+      background: var(--card-bg);
+      color: var(--text-primary);
+      transition: all 0.3s ease;
     }
 
-    .stats-card .value {
-      font-size: 24px;
-      font-weight: 700;
-      color: #1a73e8;
+    .search-bar:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
     }
 
+    .search-hint {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      color: var(--text-secondary);
+      background: var(--bg-secondary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+
+    /* ============================================================================
+     * ACCORDION
+     * ============================================================================ */
+    .accordion {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .accordion-header {
+      padding: 12px 15px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+    }
+
+    .accordion-header:hover {
+      background: var(--bg-secondary);
+    }
+
+    .accordion-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+      background: var(--bg-primary);
+    }
+
+    .accordion.active .accordion-content {
+      max-height: 500px;
+      padding: 10px 15px;
+    }
+
+    .accordion.active .accordion-header {
+      background: var(--bg-secondary);
+    }
+
+    /* ============================================================================
+     * STATUS INDICATOR
+     * ============================================================================ */
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 15px;
+      background: var(--card-bg);
+      border-radius: 6px;
+      margin-bottom: 15px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-success);
+      animation: pulse 2s infinite;
+    }
+
+    .status-dot.offline {
+      background: var(--accent-danger);
+      animation: none;
+    }
+
+    /* ============================================================================
+     * FOOTER
+     * ============================================================================ */
     .footer {
       text-align: center;
       padding: 15px;
-      font-size: 11px;
-      color: #666;
-      border-top: 1px solid #dee2e6;
-      background: #f8f9fa;
+      font-size: 10px;
+      color: var(--text-secondary);
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-secondary);
     }
 
+    /* ============================================================================
+     * LOADING
+     * ============================================================================ */
     .loading {
       display: none;
       text-align: center;
       padding: 20px;
-      color: #1a73e8;
+      color: var(--accent-primary);
     }
 
     .spinner {
-      border: 3px solid #f3f3f3;
-      border-top: 3px solid #1a73e8;
+      border: 3px solid var(--border-color);
+      border-top: 3px solid var(--accent-primary);
       border-radius: 50%;
       width: 40px;
       height: 40px;
@@ -201,93 +658,183 @@
       100% { transform: rotate(360deg); }
     }
 
-    .accordion {
-      background: #f8f9fa;
-      border: 1px solid #dee2e6;
+    /* ============================================================================
+     * ANIMATIONS
+     * ============================================================================ */
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInDown {
+      from {
+        transform: translateY(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes bounceIn {
+      0% {
+        transform: scale(0.3);
+        opacity: 0;
+      }
+      50% {
+        transform: scale(1.05);
+      }
+      70% {
+        transform: scale(0.9);
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes countUp {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ============================================================================
+     * RACCOURCIS CLAVIER
+     * ============================================================================ */
+    .shortcut-hint {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--card-bg);
+      padding: 15px;
       border-radius: 8px;
-      margin-bottom: 10px;
-      overflow: hidden;
-    }
-
-    .accordion-header {
-      padding: 12px 15px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 13px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      transition: background 0.3s ease;
-    }
-
-    .accordion-header:hover {
-      background: #e9ecef;
-    }
-
-    .accordion-content {
+      box-shadow: 0 4px 12px var(--shadow);
+      font-size: 11px;
       display: none;
-      padding: 10px 15px;
-      background: white;
+      z-index: 1000;
+      animation: bounceIn 0.5s ease;
     }
 
-    .accordion.active .accordion-content {
+    .shortcut-hint.show {
       display: block;
     }
 
-    .badge {
+    kbd {
       display: inline-block;
-      padding: 3px 8px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 600;
-      margin-left: 5px;
-    }
-
-    .badge-primary {
-      background: #1a73e8;
-      color: white;
-    }
-
-    .badge-success {
-      background: #34a853;
-      color: white;
-    }
-
-    .badge-warning {
-      background: #fbbc04;
-      color: #333;
-    }
-
-    .badge-danger {
-      background: #ea4335;
-      color: white;
+      padding: 3px 6px;
+      font-size: 10px;
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      box-shadow: 0 1px 2px var(--shadow);
+      font-family: monospace;
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>🏗️ TopoGest Pro</h1>
+    <h1>🏗️ TopoGest Pro v2.0</h1>
     <p>Gestion Topographique Intégrée - Cameroun</p>
   </div>
 
+  <!-- Toggle Dark Mode -->
+  <div class="dark-mode-toggle">
+    <label for="darkModeToggle">
+      <span id="darkModeIcon">🌙</span>
+      <span id="darkModeText">Mode Sombre</span>
+    </label>
+    <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
+    <div class="toggle-switch"></div>
+  </div>
+
+  <!-- Status Indicator -->
   <div class="container">
-    <!-- Section Statistiques Rapides -->
+    <div class="status-indicator">
+      <span>Système</span>
+      <div style="display: flex; align-items: center; gap: 5px;">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">En ligne</span>
+      </div>
+    </div>
+
+    <!-- Auto-refresh Indicator -->
+    <div class="refresh-indicator" id="refreshIndicator">
+      <span class="pulse"></span>
+      <span id="lastUpdate">Mis à jour il y a 0s</span>
+    </div>
+
+    <!-- Recherche Globale -->
+    <div class="search-container">
+      <input type="text" class="search-bar" id="globalSearch" placeholder="Recherche globale..." onkeyup="handleSearch(event)">
+      <span class="search-hint">Ctrl+K</span>
+    </div>
+
+    <!-- Section Stats avec Sparklines -->
     <div class="section">
       <div class="section-title">
         <span>📊</span>
         <span>Vue d'ensemble</span>
       </div>
+
       <div class="stats-card" style="border-left-color: #1a73e8;">
+        <div class="sparkline">📈</div>
         <h3>Projets Actifs</h3>
-        <div class="value" id="projetsActifs">-</div>
+        <div class="value" id="projetsActifs">
+          <div class="skeleton skeleton-value"></div>
+        </div>
+        <small class="trend positive" id="projetsTrend">Chargement...</small>
       </div>
+
       <div class="stats-card" style="border-left-color: #34a853;">
+        <div class="sparkline">✅</div>
         <h3>Tâches en Cours</h3>
-        <div class="value" id="tachesEnCours">-</div>
+        <div class="value" id="tachesEnCours">
+          <div class="skeleton skeleton-value"></div>
+        </div>
+        <small class="trend positive" id="tachesTrend">Chargement...</small>
       </div>
+
       <div class="stats-card" style="border-left-color: #fbbc04;">
+        <div class="sparkline">🔔</div>
         <h3>Notifications</h3>
-        <div class="value" id="notifications">-</div>
+        <div class="value" id="notifications">
+          <div class="skeleton skeleton-value"></div>
+        </div>
+        <small class="trend" id="notifTrend">Chargement...</small>
+      </div>
+
+      <div class="stats-card" style="border-left-color: #ea4335;">
+        <div class="sparkline">⚠️</div>
+        <h3>Alertes</h3>
+        <div class="value" id="alertes">
+          <div class="skeleton skeleton-value"></div>
+        </div>
+        <small class="trend negative" id="alertesTrend">Chargement...</small>
       </div>
     </div>
 
@@ -297,17 +844,17 @@
         <span>🚀</span>
         <span>Navigation Principale</span>
       </div>
-      <button class="btn btn-primary" onclick="naviguerVers('dashboard')">
+      <button class="btn btn-primary" onclick="naviguerVers('dashboard')" data-shortcut="Ctrl+D">
         <span>📊</span>
         <span>Tableau de Bord</span>
       </button>
-      <button class="btn btn-primary" onclick="ouvrirGestionnaire()">
+      <button class="btn btn-primary" onclick="ouvrirGestionnaire()" data-shortcut="Ctrl+G">
         <span>🎛️</span>
         <span>Gestionnaire Complet</span>
       </button>
     </div>
 
-    <!-- Section Gestion -->
+    <!-- Section Gestion avec Accordéon -->
     <div class="section">
       <div class="accordion">
         <div class="accordion-header" onclick="toggleAccordion(this)">
@@ -315,19 +862,22 @@
           <span>▼</span>
         </div>
         <div class="accordion-content">
-          <div class="menu-item" onclick="naviguerVers('projets')">
+          <div class="menu-item" onclick="naviguerVers('projets')" data-tooltip="Gérer les projets">
             <span class="icon">📁</span>
             <span>Projets</span>
+            <span class="badge badge-primary" id="badgeProjets">0</span>
           </div>
-          <div class="menu-item" onclick="naviguerVers('ouvrages')">
+          <div class="menu-item" onclick="naviguerVers('ouvrages')" data-tooltip="Gérer les ouvrages">
             <span class="icon">🏗️</span>
             <span>Ouvrages</span>
+            <span class="badge badge-success" id="badgeOuvrages">0</span>
           </div>
-          <div class="menu-item" onclick="naviguerVers('taches')">
+          <div class="menu-item" onclick="naviguerVers('taches')" data-tooltip="Gérer les tâches">
             <span class="icon">✅</span>
             <span>Tâches</span>
+            <span class="badge badge-warning" id="badgeTaches">0</span>
           </div>
-          <div class="menu-item" onclick="naviguerVers('releves')">
+          <div class="menu-item" onclick="naviguerVers('releves')" data-tooltip="Gérer les relevés">
             <span class="icon">📐</span>
             <span>Relevés</span>
           </div>
@@ -340,19 +890,19 @@
           <span>▼</span>
         </div>
         <div class="accordion-content">
-          <div class="menu-item" onclick="naviguerVers('equipes')">
+          <div class="menu-item" onclick="naviguerVers('equipes')" data-tooltip="Gérer les équipes">
             <span class="icon">👥</span>
             <span>Équipes</span>
           </div>
-          <div class="menu-item" onclick="naviguerVers('employes')">
+          <div class="menu-item" onclick="naviguerVers('employes')" data-tooltip="Gérer les employés">
             <span class="icon">👤</span>
             <span>Employés</span>
           </div>
-          <div class="menu-item" onclick="naviguerVers('postes')">
+          <div class="menu-item" onclick="naviguerVers('postes')" data-tooltip="Gérer les postes">
             <span class="icon">💼</span>
             <span>Postes</span>
           </div>
-          <div class="menu-item" onclick="naviguerVers('materiel')">
+          <div class="menu-item" onclick="naviguerVers('materiel')" data-tooltip="Gérer le matériel">
             <span class="icon">🔧</span>
             <span>Matériel</span>
           </div>
@@ -365,11 +915,11 @@
           <span>▼</span>
         </div>
         <div class="accordion-content">
-          <div class="menu-item" onclick="naviguerVers('budget')">
+          <div class="menu-item" onclick="naviguerVers('budget')" data-tooltip="Gérer le budget">
             <span class="icon">💰</span>
             <span>Budget</span>
           </div>
-          <div class="menu-item" onclick="naviguerVers('factures')">
+          <div class="menu-item" onclick="naviguerVers('factures')" data-tooltip="Gérer les factures">
             <span class="icon">🧾</span>
             <span>Factures</span>
           </div>
@@ -382,15 +932,15 @@
           <span>▼</span>
         </div>
         <div class="accordion-content">
-          <div class="menu-item" onclick="naviguerVers('documents')">
+          <div class="menu-item" onclick="naviguerVers('documents')" data-tooltip="Gérer les documents">
             <span class="icon">📄</span>
             <span>Documents</span>
           </div>
-          <div class="menu-item" onclick="naviguerVers('planning')">
+          <div class="menu-item" onclick="naviguerVers('planning')" data-tooltip="Gérer le planning">
             <span class="icon">📅</span>
             <span>Planning</span>
           </div>
-          <div class="menu-item" onclick="naviguerVers('controleurs')">
+          <div class="menu-item" onclick="naviguerVers('controleurs')" data-tooltip="Gérer les contrôleurs">
             <span class="icon">✓</span>
             <span>Contrôleurs</span>
           </div>
@@ -439,33 +989,92 @@
       </button>
       <button class="btn btn-danger" onclick="reinitialiser()">
         <span>🔄</span>
-        <span>Réinitialiser Système</span>
+        <span>Réinitialiser</span>
       </button>
     </div>
 
     <!-- Loading Indicator -->
     <div class="loading" id="loading">
       <div class="spinner"></div>
-      <p>Chargement en cours...</p>
+      <p>Chargement...</p>
     </div>
   </div>
 
   <div class="footer">
-    <p><strong>TopoGest Pro v1.0</strong></p>
-    <p>© 2024 - Système de Gestion Topographique</p>
-    <p>Développé pour le Cameroun</p>
+    <p><strong>TopoGest Pro v2.0</strong></p>
+    <p>© 2025 - Système de Gestion Topographique</p>
+    <p id="footerInfo">Chargement...</p>
+  </div>
+
+  <!-- Shortcut Hint -->
+  <div class="shortcut-hint" id="shortcutHint">
+    <h4>Raccourcis clavier:</h4>
+    <p><kbd>Ctrl</kbd> + <kbd>K</kbd> - Recherche globale</p>
+    <p><kbd>Ctrl</kbd> + <kbd>D</kbd> - Dashboard</p>
+    <p><kbd>Ctrl</kbd> + <kbd>G</kbd> - Gestionnaire</p>
+    <p><kbd>?</kbd> - Afficher/Masquer l'aide</p>
   </div>
 
   <script>
-    // Fonction pour basculer l'accordion
-    function toggleAccordion(header) {
-      const accordion = header.parentElement;
-      accordion.classList.toggle('active');
-      const arrow = header.querySelector('span:last-child');
-      arrow.textContent = accordion.classList.contains('active') ? '▲' : '▼';
+    // ============================================================================
+    // VARIABLES GLOBALES
+    // ============================================================================
+    let lastUpdateTime = Date.now();
+    let autoRefreshInterval;
+    let previousStats = {};
+
+    // ============================================================================
+    // DARK MODE
+    // ============================================================================
+    function toggleDarkMode() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      const newTheme = isDark ? 'light' : 'dark';
+
+      document.documentElement.setAttribute('data-theme', newTheme);
+      document.getElementById('darkModeIcon').textContent = isDark ? '🌙' : '☀️';
+      document.getElementById('darkModeText').textContent = isDark ? 'Mode Sombre' : 'Mode Clair';
+
+      // Sauvegarder la préférence
+      google.script.run.setDarkModePreference(!isDark);
     }
 
-    // Navigation
+    // Charger la préférence dark mode
+    function loadDarkModePreference() {
+      google.script.run
+        .withSuccessHandler(function(isDark) {
+          if (isDark) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            document.getElementById('darkModeToggle').checked = true;
+            document.getElementById('darkModeIcon').textContent = '☀️';
+            document.getElementById('darkModeText').textContent = 'Mode Clair';
+          }
+        })
+        .getDarkModePreference();
+    }
+
+    // ============================================================================
+    // ACCORDION
+    // ============================================================================
+    function toggleAccordion(header) {
+      const accordion = header.parentElement;
+      const isActive = accordion.classList.contains('active');
+
+      // Fermer tous les accordéons
+      document.querySelectorAll('.accordion').forEach(acc => {
+        acc.classList.remove('active');
+        acc.querySelector('.accordion-header span:last-child').textContent = '▼';
+      });
+
+      // Ouvrir l'accordéon cliqué si pas déjà ouvert
+      if (!isActive) {
+        accordion.classList.add('active');
+        header.querySelector('span:last-child').textContent = '▲';
+      }
+    }
+
+    // ============================================================================
+    // NAVIGATION
+    // ============================================================================
     function naviguerVers(destination) {
       showLoading();
       const functionMap = {
@@ -490,55 +1099,59 @@
       };
 
       const functionName = functionMap[destination];
-      if (functionName) {
+      if (functionName && google.script.run[functionName]) {
         google.script.run
           .withSuccessHandler(hideLoading)
           .withFailureHandler(handleError)
           [functionName]();
+      } else {
+        hideLoading();
+        alert('Navigation non disponible');
       }
     }
 
-    // Ouvrir le gestionnaire complet
+    // ============================================================================
+    // OUTILS
+    // ============================================================================
     function ouvrirGestionnaire() {
       google.script.run
         .withFailureHandler(handleError)
-        .afficherModalPrincipal();
+        .afficherDashboard();
     }
 
-    // Sauvegarde
     function sauvegarder() {
-      if (confirm('Voulez-vous créer une sauvegarde du système ?')) {
+      if (confirm('Créer une sauvegarde du système ?')) {
         showLoading();
         google.script.run
           .withSuccessHandler(function(result) {
             hideLoading();
-            alert('✅ ' + result.message);
+            alert('✅ Sauvegarde créée avec succès !');
+            chargerStatistiques();
           })
           .withFailureHandler(handleError)
-          .sauvegardeAutomatique();
+          .creerBackupIncremental();
       }
     }
 
-    // Vérifier l'intégrité
     function verifierIntegrite() {
       showLoading();
       google.script.run
         .withSuccessHandler(function() {
           hideLoading();
+          alert('✅ Intégrité du système vérifiée');
         })
         .withFailureHandler(handleError)
         .afficherRapportIntegrite();
     }
 
-    // Réinitialiser
     function reinitialiser() {
-      if (confirm('⚠️ ATTENTION: Cette action va réinitialiser tout le système.\n\nVoulez-vous continuer ?')) {
-        if (confirm('Êtes-vous VRAIMENT sûr ? Cette action est irréversible.')) {
+      if (confirm('⚠️ ATTENTION: Réinitialiser le système ?\n\nCette action est irréversible.')) {
+        if (confirm('Êtes-vous VRAIMENT sûr ?')) {
           showLoading();
           google.script.run
             .withSuccessHandler(function() {
               hideLoading();
-              alert('✅ Système réinitialisé avec succès!');
+              alert('✅ Système réinitialisé !');
               chargerStatistiques();
             })
             .withFailureHandler(handleError)
@@ -547,37 +1160,160 @@
       }
     }
 
-    // Charger les statistiques
-    function chargerStatistiques() {
-      // TODO: Implémenter la récupération réelle des stats
-      document.getElementById('projetsActifs').textContent = '-';
-      document.getElementById('tachesEnCours').textContent = '-';
-      document.getElementById('notifications').textContent = '-';
-      document.getElementById('badgeNotif').textContent = '0';
+    // ============================================================================
+    // RECHERCHE GLOBALE
+    // ============================================================================
+    function handleSearch(event) {
+      const query = event.target.value.toLowerCase();
+
+      if (query.length < 2) return;
+
+      // TODO: Implémenter recherche globale réelle
+      console.log('Recherche:', query);
     }
 
-    // Afficher le loading
+    // ============================================================================
+    // STATISTIQUES TEMPS RÉEL
+    // ============================================================================
+    function chargerStatistiques() {
+      google.script.run
+        .withSuccessHandler(function(metriques) {
+          // Projets
+          updateStat('projetsActifs', metriques.projets.actifs, previousStats.projets?.actifs);
+          updateStat('tachesEnCours', metriques.taches.en_cours, previousStats.taches?.en_cours);
+          updateStat('notifications', 0, 0); // TODO: implémenter
+          updateStat('alertes', metriques.taches.en_retard, previousStats.taches?.en_retard);
+
+          // Badges
+          document.getElementById('badgeProjets').textContent = metriques.projets.total;
+          document.getElementById('badgeTaches').textContent = metriques.taches.total;
+          document.getElementById('badgeNotif').textContent = '0'; // TODO
+
+          // Footer
+          document.getElementById('footerInfo').textContent =
+            `Uptime: ${metriques.systeme.uptime} | Cache: ${metriques.systeme.cache_keys} clés`;
+
+          previousStats = metriques;
+          lastUpdateTime = Date.now();
+        })
+        .withFailureHandler(function(error) {
+          console.error('Erreur chargement stats:', error);
+        })
+        .obtenirMetriquesTempsReel();
+    }
+
+    function updateStat(elementId, newValue, oldValue) {
+      const element = document.getElementById(elementId);
+      element.innerHTML = newValue;
+
+      // Calculer tendance
+      const trendElement = document.getElementById(elementId.replace(/Actifs|EnCours|notifications|alertes/, 'Trend'));
+      if (trendElement && oldValue !== undefined) {
+        const diff = newValue - oldValue;
+        if (diff > 0) {
+          trendElement.textContent = `+${diff} depuis la dernière mise à jour`;
+          trendElement.className = 'trend positive';
+        } else if (diff < 0) {
+          trendElement.textContent = `${diff} depuis la dernière mise à jour`;
+          trendElement.className = 'trend negative';
+        } else {
+          trendElement.textContent = 'Aucun changement';
+          trendElement.className = 'trend';
+        }
+      }
+    }
+
+    // ============================================================================
+    // AUTO-REFRESH
+    // ============================================================================
+    function startAutoRefresh() {
+      autoRefreshInterval = setInterval(function() {
+        chargerStatistiques();
+        updateLastUpdateTime();
+      }, 30000); // 30 secondes
+    }
+
+    function updateLastUpdateTime() {
+      const elapsed = Math.floor((Date.now() - lastUpdateTime) / 1000);
+      document.getElementById('lastUpdate').textContent = `Mis à jour il y a ${elapsed}s`;
+    }
+
+    // ============================================================================
+    // RACCOURCIS CLAVIER
+    // ============================================================================
+    document.addEventListener('keydown', function(e) {
+      // Ctrl+K - Recherche globale
+      if (e.ctrlKey && e.key === 'k') {
+        e.preventDefault();
+        document.getElementById('globalSearch').focus();
+      }
+
+      // Ctrl+D - Dashboard
+      if (e.ctrlKey && e.key === 'd') {
+        e.preventDefault();
+        naviguerVers('dashboard');
+      }
+
+      // Ctrl+G - Gestionnaire
+      if (e.ctrlKey && e.key === 'g') {
+        e.preventDefault();
+        ouvrirGestionnaire();
+      }
+
+      // ? - Aide raccourcis
+      if (e.key === '?') {
+        e.preventDefault();
+        const hint = document.getElementById('shortcutHint');
+        hint.classList.toggle('show');
+        setTimeout(() => hint.classList.remove('show'), 5000);
+      }
+    });
+
+    // ============================================================================
+    // LOADING
+    // ============================================================================
     function showLoading() {
       document.getElementById('loading').style.display = 'block';
     }
 
-    // Masquer le loading
     function hideLoading() {
       document.getElementById('loading').style.display = 'none';
     }
 
-    // Gestion des erreurs
+    // ============================================================================
+    // GESTION ERREURS
+    // ============================================================================
     function handleError(error) {
       hideLoading();
       console.error('Erreur:', error);
-      alert('❌ Erreur: ' + error.message);
+      alert('❌ Erreur: ' + (error.message || error));
+
+      // Mettre système offline
+      document.getElementById('statusDot').classList.add('offline');
+      document.getElementById('statusText').textContent = 'Hors ligne';
     }
 
-    // Initialisation au chargement
+    // ============================================================================
+    // INITIALISATION
+    // ============================================================================
     window.onload = function() {
+      // Charger dark mode
+      loadDarkModePreference();
+
+      // Charger stats initiales
       chargerStatistiques();
-      // Actualiser les stats toutes les 30 secondes
-      setInterval(chargerStatistiques, 30000);
+
+      // Démarrer auto-refresh
+      startAutoRefresh();
+
+      // Update timer toutes les secondes
+      setInterval(updateLastUpdateTime, 1000);
+
+      // Ouvrir premier accordéon par défaut
+      document.querySelector('.accordion').classList.add('active');
+      document.querySelector('.accordion .accordion-header span:last-child').textContent = '▲';
+
+      console.log('✅ TopoGest Pro v2.0 Sidebar initialisée');
     };
   </script>
 </body>

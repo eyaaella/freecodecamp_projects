@@ -3,178 +3,449 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion Factures v2.0</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
-    .header { background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%); color: white; padding: 20px; text-align: center; }
-    .header h2 { font-size: 18px; margin-bottom: 5px; }
-    .header p { font-size: 11px; opacity: 0.9; }
-    .container { padding: 15px; }
-    .stat-card { background: white; border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #1a73e8; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .stat-card h3 { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
-    .stat-card .value { font-size: 22px; font-weight: 700; color: #1a73e8; }
-    .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
-    .btn-primary { background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%); color: white; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4); }
-    .btn-success { background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%); color: white; }
-    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4); }
-    .btn-danger { background: linear-gradient(135deg, #ea4335 0%, #d33426 100%); color: white; }
-    .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(234, 67, 53, 0.4); }
-    .section-title { font-size: 13px; font-weight: 600; color: #1a73e8; margin: 15px 0 10px; padding-bottom: 5px; border-bottom: 2px solid #1a73e8; }
-    .menu-item { background: white; border-radius: 6px; padding: 10px 12px; margin-bottom: 6px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 8px; transition: all 0.2s; border: 1px solid #e0e0e0; }
-    .menu-item:hover { background: #1a73e8; color: white; transform: translateX(3px); }
-    .filter { margin-bottom: 15px; }
-    .filter select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; }
-    .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; margin-left: 5px; }
-    .badge-danger { background: #ea4335; color: white; animation: pulse 2s infinite; }
-    .badge-success { background: #34a853; color: white; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 13px;
+      padding: 0;
+      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+      color: #333;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .header h2 {
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 11px;
+      opacity: 0.9;
+    }
+
+    .container {
+      padding: 15px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 12px;
+      border-left: 4px solid #1a73e8;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .stat-card h3 {
+      font-size: 11px;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-card .value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a73e8;
+    }
+
+    .stat-card.success {
+      border-left-color: #34a853;
+    }
+
+    .stat-card.success .value {
+      color: #34a853;
+    }
+
+    .stat-card.warning {
+      border-left-color: #fbbc04;
+    }
+
+    .stat-card.warning .value {
+      color: #fbbc04;
+    }
+
+    .stat-card.danger {
+      border-left-color: #ea4335;
+    }
+
+    .stat-card.danger .value {
+      color: #ea4335;
+    }
+
+    .stat-card .percentage {
+      font-size: 14px;
+      color: #666;
+      margin-top: 3px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+      margin: 15px 0 10px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid rgba(255,255,255,0.3);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%);
+      color: white;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4);
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #fbbc04 0%, #ea8600 100%);
+      color: white;
+    }
+
+    .btn-warning:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(251, 188, 4, 0.4);
+    }
+
+    .filter {
+      margin-bottom: 10px;
+    }
+
+    .filter select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 6px;
+      font-size: 12px;
+      background: white;
+      color: #333;
+    }
+
+    .impaye-item {
+      background: white;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-left: 3px solid #ea4335;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .impaye-item.warning {
+      border-left-color: #fbbc04;
+    }
+
+    .impaye-item-title {
+      font-weight: 600;
+      font-size: 12px;
+      color: #333;
+      margin-bottom: 3px;
+    }
+
+    .impaye-item-meta {
+      font-size: 10px;
+      color: #666;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-left: 5px;
+    }
+
+    .badge-danger {
+      background: #ea4335;
+      color: white;
+    }
+
+    .badge-warning {
+      background: #fbbc04;
+      color: #333;
+    }
+
+    .badge-success {
+      background: #34a853;
+      color: white;
+    }
   </style>
 </head>
 <body>
   <div class="header">
-    <h2>🧾 Gestion Factures</h2>
-    <p>Facturation Clients - FCFA</p>
+    <h2>🧾 Gestion Factures v2.0</h2>
+    <p>TVA 19.25% • Relances • PDF</p>
   </div>
 
   <div class="container">
+    <!-- Statistiques principales -->
     <div class="stat-card">
-      <h3>CA Total (TTC)</h3>
-      <div class="value" id="caTotal">- FCFA</div>
+      <h3>Total Facturé</h3>
+      <div class="value" id="totalFacture">- FCFA</div>
     </div>
 
-    <div class="stat-card" style="border-left-color: #34a853;">
-      <h3>Montant Payé</h3>
-      <div class="value" id="montantPaye" style="color: #34a853;">- FCFA</div>
+    <div class="stat-card success">
+      <h3>Total Payé</h3>
+      <div class="value" id="totalPaye">- FCFA</div>
+      <div class="percentage" id="tauxRecouvrement">0%</div>
     </div>
 
-    <div class="stat-card" style="border-left-color: #ea4335;">
-      <h3>Créances Clients</h3>
-      <div class="value" id="creances" style="color: #ea4335;">- FCFA</div>
+    <div class="stat-card warning">
+      <h3>En Attente</h3>
+      <div class="value" id="enAttente">- FCFA</div>
     </div>
 
-    <div class="stat-card" style="border-left-color: #fbbc04;">
-      <h3>En Retard</h3>
-      <div class="value" id="enRetard" style="color: #fbbc04;">0</div>
+    <div class="stat-card danger">
+      <h3>Impayés >30j</h3>
+      <div class="value" id="impayes30j">0</div>
     </div>
 
+    <!-- Actions rapides -->
     <div class="section-title">🎯 Actions Rapides</div>
-    <button class="btn btn-success" onclick="nouvelleFacture()">
+
+    <button class="btn btn-primary" onclick="nouvelleFacture()">
       <span>➕</span>
       <span>Nouvelle Facture</span>
     </button>
-    <button class="btn btn-primary" onclick="ouvrirGestionnaire()">
+
+    <button class="btn btn-success" onclick="ouvrirGestionnaire()">
       <span>🎛️</span>
       <span>Gestionnaire Complet</span>
     </button>
-    <button class="btn btn-danger" onclick="voirRetards()">
-      <span>⚠️</span>
-      <span>Factures en Retard</span>
+
+    <button class="btn btn-warning" onclick="relances()">
+      <span>📧</span>
+      <span>Relances Automatiques</span>
     </button>
 
+    <!-- Filtres -->
     <div class="section-title">🔍 Filtres</div>
+
+    <div class="filter">
+      <select id="filtreType" onchange="appliquerFiltre()">
+        <option value="">Tous les types</option>
+        <option value="Client">Clients</option>
+        <option value="Fournisseur">Fournisseurs</option>
+      </select>
+    </div>
+
     <div class="filter">
       <select id="filtreStatut" onchange="appliquerFiltre()">
         <option value="">Tous les statuts</option>
-        <option value="Brouillon">Brouillon</option>
-        <option value="Émise">Émise</option>
-        <option value="Payée partiellement">Payée partiellement</option>
+        <option value="Non payée">Non payée</option>
+        <option value="Partiel">Payée partiellement</option>
         <option value="Payée">Payée</option>
         <option value="En retard">En retard</option>
-        <option value="Annulée">Annulée</option>
       </select>
     </div>
 
-    <div class="filter">
-      <select id="filtrePeriode" onchange="appliquerFiltre()">
-        <option value="">Toutes les périodes</option>
-        <option value="mois">Ce mois</option>
-        <option value="trimestre">Ce trimestre</option>
-        <option value="annee">Cette année</option>
-      </select>
-    </div>
+    <!-- Impayés urgents -->
+    <div class="section-title">⚠️ Impayés Urgents</div>
 
-    <div class="section-title">📊 Navigation</div>
-    <div class="menu-item" onclick="naviguer('factures')">
-      <span>🧾</span>
-      <span>Voir toutes les factures</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('retard')">
-      <span>⚠️</span>
-      <span>Factures en retard</span>
-      <span class="badge badge-danger" id="badgeRetard">0</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('impayees')">
-      <span>💸</span>
-      <span>Factures impayées</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('clients')">
-      <span>👥</span>
-      <span>Recouvrement par client</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('paiements')">
-      <span>✅</span>
-      <span>Enregistrer paiement</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('dashboard')">
-      <span>📊</span>
-      <span>Tableau de bord</span>
-    </div>
-    <div class="menu-item" onclick="retourMenu()">
-      <span>🏠</span>
-      <span>Menu Principal</span>
+    <div id="impayesContainer">
+      <div class="impaye-item">
+        <div class="impaye-item-title">
+          FAC-2024-004<span class="badge badge-danger">45 jours</span>
+        </div>
+        <div class="impaye-item-meta">
+          Commune Yaoundé • 28 000 000 FCFA
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-    function nouvelleFacture() {
-      ouvrirGestionnaire();
-    }
-
+    // Ouvrir gestionnaire complet
     function ouvrirGestionnaire() {
       google.script.run.afficherModalFacture();
     }
 
-    function voirRetards() {
-      google.script.run.afficherModalFacture();
-      // TODO: Basculer sur onglet retards
-    }
+    // Nouvelle facture
+    function nouvelleFacture() {
+      const type = prompt("Type (Client/Fournisseur):");
+      const projetId = prompt("ProjetID:");
+      const client = prompt("Client/Fournisseur:");
+      const montantHT = prompt("Montant HT (FCFA):");
+      const dateEmission = prompt("Date émission (AAAA-MM-JJ):");
+      const dateEcheance = prompt("Date échéance (AAAA-MM-JJ):");
 
-    function naviguer(dest) {
-      if (dest === 'factures') google.script.run.naviguerVersFactures();
-      else if (dest === 'dashboard') google.script.run.naviguerVersTableauDeBord();
-      else if (dest === 'retard' || dest === 'impayees') {
-        google.script.run.naviguerVersFactures();
-        alert('Filtrer par statut "' + (dest === 'retard' ? 'En retard' : 'Émise') + '"');
+      if (type && projetId && client && montantHT && dateEmission && dateEcheance) {
+        google.script.run
+          .withSuccessHandler(onSuccess)
+          .withFailureHandler(onError)
+          .creerFacture(
+            type,
+            projetId,
+            client,
+            parseFloat(montantHT),
+            dateEmission,
+            dateEcheance,
+            ""
+          );
       }
-      else if (dest === 'paiements') ouvrirGestionnaire();
     }
 
-    function retourMenu() {
-      google.script.run.afficherMenuPrincipal();
+    // Relances automatiques
+    function relances() {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            const impayees = result.facturesImpayees;
+            if (impayees.length === 0) {
+              alert('✅ Aucune facture impayée >30 jours');
+              return;
+            }
+
+            const confirmer = confirm(
+              `${impayees.length} facture(s) impayée(s) >30 jours\n` +
+              `Montant total: ${result.montantTotal.toLocaleString()} FCFA\n\n` +
+              `Envoyer les relances ?`
+            );
+
+            if (confirmer) {
+              impayees.forEach(function(facture) {
+                google.script.run.envoyerRelanceFacture(facture.factureId);
+              });
+              alert(`✅ ${impayees.length} relance(s) envoyée(s)`);
+              chargerImpayés();
+            }
+          }
+        })
+        .withFailureHandler(onError)
+        .obtenirFacturesImpayees();
     }
 
+    // Filtre
     function appliquerFiltre() {
+      const type = document.getElementById('filtreType').value;
       const statut = document.getElementById('filtreStatut').value;
-      const periode = document.getElementById('filtrePeriode').value;
-      let msg = 'Filtres appliqués:\n';
-      if (statut) msg += '- Statut: ' + statut + '\n';
-      if (periode) msg += '- Période: ' + periode;
-      if (statut || periode) alert(msg);
+      console.log('Filtre:', type, statut);
     }
 
-    function chargerStats() {
-      // TODO: Charger stats réelles depuis backend
-      document.getElementById('caTotal').textContent = '- FCFA';
-      document.getElementById('montantPaye').textContent = '- FCFA';
-      document.getElementById('creances').textContent = '- FCFA';
-      document.getElementById('enRetard').textContent = '0';
-      document.getElementById('badgeRetard').textContent = '0';
+    // Handlers
+    function onSuccess(result) {
+      alert('✅ ' + result.message);
+      if (result.numeroFacture) {
+        alert('Numéro facture: ' + result.numeroFacture);
+      }
+      location.reload();
     }
 
+    function onError(error) {
+      alert('❌ Erreur: ' + error.message);
+    }
+
+    // Charger statistiques au démarrage
     window.onload = function() {
-      chargerStats();
+      chargerStatistiques();
+      chargerImpayés();
     };
+
+    function chargerStatistiques() {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            const stats = result.statistiques;
+            document.getElementById('totalFacture').textContent = stats.caTotal.toLocaleString() + ' FCFA';
+            document.getElementById('totalPaye').textContent = stats.payeTotal.toLocaleString() + ' FCFA';
+            document.getElementById('tauxRecouvrement').textContent = stats.tauxRecouvrement.toFixed(1) + '%';
+            document.getElementById('enAttente').textContent = (stats.caTotal - stats.payeTotal).toLocaleString() + ' FCFA';
+            document.getElementById('impayes30j').textContent = stats.impayes30j;
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Erreur stats:', error);
+        })
+        .calculerStatsFacturation();
+    }
+
+    function chargerImpayés() {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            const container = document.getElementById('impayesContainer');
+            container.innerHTML = '';
+
+            if (result.count === 0) {
+              container.innerHTML = '<div style="color:white;text-align:center;padding:10px;">✓ Aucun impayé urgent</div>';
+              return;
+            }
+
+            result.facturesImpayees.forEach(function(facture) {
+              const div = document.createElement('div');
+              div.className = facture.retardJours > 60 ? 'impaye-item' : 'impaye-item warning';
+              div.innerHTML = `
+                <div class="impaye-item-title">
+                  ${facture.numeroFacture}
+                  <span class="badge ${facture.retardJours > 60 ? 'badge-danger' : 'badge-warning'}">
+                    ${facture.retardJours}j
+                  </span>
+                </div>
+                <div class="impaye-item-meta">
+                  ${facture.client} • ${facture.montantRestant.toLocaleString()} FCFA
+                  ${facture.nombreRelances > 0 ? ' • Relance ' + facture.nombreRelances : ''}
+                </div>
+              `;
+              container.appendChild(div);
+            });
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Erreur impayés:', error);
+        })
+        .obtenirFacturesImpayees();
+    }
   </script>
 </body>
 </html>

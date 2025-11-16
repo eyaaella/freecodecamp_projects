@@ -3,421 +3,112 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
+  <title>Documents v2.0 - Modal</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
+    :root {
+      --bg-primary: #ffffff; --bg-secondary: #f8f9fa; --text-primary: #333;
+      --accent-primary: #9c27b0; --accent-success: #34a853;
+    }
+    [data-theme="dark"] {
+      --bg-primary: #202124; --bg-secondary: #292a2d; --text-primary: #e8eaed;
+      --accent-primary: #ce93d8;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg-primary); color: var(--text-primary); }
     .header { background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%); color: white; padding: 20px; }
-    .header h1 { font-size: 22px; margin-bottom: 5px; }
+    .header h1 { font-size: 24px; }
     .container { padding: 20px; }
     .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #dee2e6; flex-wrap: wrap; }
-    .tab { padding: 12px 20px; background: #f8f9fa; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; }
-    .tab.active { background: #9c27b0; color: white; }
+    .tab { padding: 12px 20px; background: #f8f9fa; border: none; cursor: pointer; font-size: 13px; font-weight: 600; }
+    .tab.active { background: var(--accent-primary); color: white; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
-    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-right: 10px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-right: 10px; }
     .btn-primary { background: #9c27b0; color: white; }
-    .btn-success { background: #34a853; color: white; }
-    .btn-warning { background: #ff9800; color: white; }
-    .btn-danger { background: #ea4335; color: white; }
-    .btn-info { background: #00acc1; color: white; }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-    .data-table { width: 100%; background: white; border-radius: 8px; overflow-x: auto; }
-    .data-table table { width: 100%; border-collapse: collapse; min-width: 1000px; }
-    .data-table th { background: #9c27b0; color: white; padding: 12px; text-align: left; font-size: 12px; white-space: nowrap; }
-    .data-table td { padding: 12px; border-bottom: 1px solid #dee2e6; font-size: 13px; }
-    .action-btn { padding: 5px 10px; margin: 0 2px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
-    .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-    .badge-success { background: #34a853; color: white; }
-    .badge-warning { background: #ff9800; color: white; }
-    .badge-danger { background: #ea4335; color: white; }
-    .badge-info { background: #00acc1; color: white; }
-    .workflow-container { display: flex; justify-content: space-around; align-items: center; margin: 30px 0; flex-wrap: wrap; }
-    .workflow-step { text-align: center; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); min-width: 150px; margin: 10px; }
-    .workflow-step.active { background: #9c27b0; color: white; }
-    .workflow-arrow { font-size: 24px; color: #9c27b0; }
-    .version-item { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #9c27b0; }
-    .version-item h4 { margin-bottom: 5px; color: #9c27b0; }
-    .version-item p { font-size: 12px; color: #666; margin: 3px 0; }
+    .chart-container { position: relative; height: 300px; margin: 20px 0; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #9c27b0; color: white; padding: 12px; }
+    td { padding: 12px; border-bottom: 1px solid #dee2e6; }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>📄 Gestionnaire de Documents</h1>
-    <p>GED Technique - Système de Validation Avancé</p>
+    <h1>📄 Gestionnaire de Documents v2.0</h1>
+    <p>Gestion complète avec versioning et signature</p>
   </div>
 
   <div class="container">
     <div class="tabs">
       <button class="tab active" onclick="switchTab('liste')">📋 Liste</button>
-      <button class="tab" onclick="switchTab('nouveau')">➕ Nouveau</button>
-      <button class="tab" onclick="switchTab('workflow')">🔄 Workflow</button>
-      <button class="tab" onclick="switchTab('versions')">📚 Versions</button>
+      <button class="tab" onclick="switchTab('upload')">📤 Upload</button>
+      <button class="tab" onclick="switchTab('versioning')">🔄 Versioning</button>
+      <button class="tab" onclick="switchTab('partage')">👥 Partage</button>
+      <button class="tab" onclick="switchTab('signature')">✍️ Signature</button>
+      <button class="tab" onclick="switchTab('recherche')">🔍 Recherche</button>
     </div>
 
-    <!-- Onglet Liste -->
     <div id="liste" class="tab-content active">
-      <div class="data-table">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Nom</th>
-              <th>Type</th>
-              <th>Projet</th>
-              <th>Format</th>
-              <th>Taille</th>
-              <th>Version</th>
-              <th>Statut</th>
-              <th>Contrôle</th>
-              <th>Hiérarchie</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="listeDocuments">
-            <tr><td colspan="11" style="text-align:center;">Chargement...</td></tr>
-          </tbody>
-        </table>
+      <h2>Liste des Documents</h2>
+      <button class="btn btn-primary" onclick="rafraichir()">🔄 Rafraîchir</button>
+      <table id="tableDocuments">
+        <thead><tr><th>ID</th><th>Titre</th><th>Type</th><th>Version</th><th>Statut</th><th>Actions</th></tr></thead>
+        <tbody><tr><td colspan="6">Chargement...</td></tr></tbody>
+      </table>
+    </div>
+
+    <div id="upload" class="tab-content">
+      <h2>Upload de Document</h2>
+      <p>Fonctionnalité d'upload à implémenter avec Google Drive API</p>
+    </div>
+
+    <div id="versioning" class="tab-content">
+      <h2>Gestion des Versions</h2>
+      <div class="chart-container">
+        <canvas id="chartVersions"></canvas>
       </div>
     </div>
 
-    <!-- Onglet Nouveau -->
-    <div id="nouveau" class="tab-content">
-      <form id="formDocument">
-        <div class="form-row">
-          <div class="form-group">
-            <label>Nom du Document *</label>
-            <input type="text" id="nom" required>
-          </div>
-          <div class="form-group">
-            <label>Type *</label>
-            <select id="type" required>
-              <option value="">Sélectionner...</option>
-              <option value="Plan">Plan</option>
-              <option value="Rapport">Rapport</option>
-              <option value="Photo">Photo</option>
-              <option value="Certificat">Certificat</option>
-              <option value="Compte-rendu">Compte-rendu</option>
-              <option value="Étude">Étude</option>
-              <option value="Devis">Devis</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Projet *</label>
-            <select id="projetId" required>
-              <option value="">Sélectionner...</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Ouvrage</label>
-            <select id="ouvrageId">
-              <option value="">Aucun</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Auteur *</label>
-            <input type="text" id="auteur" required>
-          </div>
-          <div class="form-group">
-            <label>Format *</label>
-            <select id="format" required>
-              <option value="">Sélectionner...</option>
-              <option value="PDF">PDF</option>
-              <option value="DWG">DWG</option>
-              <option value="DXF">DXF</option>
-              <option value="JPG">JPG</option>
-              <option value="DOCX">DOCX</option>
-              <option value="XLSX">XLSX</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Chemin d'Accès *</label>
-          <input type="text" id="chemin" placeholder="Google Drive / SharePoint URL" required>
-        </div>
-        <div class="form-group">
-          <label>Description</label>
-          <textarea id="description" rows="3"></textarea>
-        </div>
-        <button type="submit" class="btn btn-success">💾 Enregistrer</button>
-      </form>
+    <div id="partage" class="tab-content">
+      <h2>Partage et Permissions</h2>
+      <p>Gérer les partages de documents</p>
     </div>
 
-    <!-- Onglet Workflow -->
-    <div id="workflow" class="tab-content">
-      <h3 style="margin-bottom: 20px;">🔄 Workflow de Validation des Documents</h3>
-
-      <div class="workflow-container">
-        <div class="workflow-step" id="step1">
-          <div style="font-size: 32px;">📝</div>
-          <h4>Soumis</h4>
-          <p>Document créé</p>
-        </div>
-        <div class="workflow-arrow">→</div>
-        <div class="workflow-step" id="step2">
-          <div style="font-size: 32px;">✓</div>
-          <h4>Contrôle</h4>
-          <p>Vérification technique</p>
-        </div>
-        <div class="workflow-arrow">→</div>
-        <div class="workflow-step" id="step3">
-          <div style="font-size: 32px;">👔</div>
-          <h4>Hiérarchie</h4>
-          <p>Validation finale</p>
-        </div>
-        <div class="workflow-arrow">→</div>
-        <div class="workflow-step" id="step4">
-          <div style="font-size: 32px;">✅</div>
-          <h4>Validé</h4>
-          <p>Document approuvé</p>
-        </div>
-      </div>
-
-      <div style="background: white; padding: 20px; border-radius: 8px; margin-top: 30px;">
-        <h4 style="margin-bottom: 15px;">Actions de Validation</h4>
-        <div class="form-group">
-          <label>Sélectionner un Document</label>
-          <select id="docWorkflow">
-            <option value="">Choisir...</option>
-          </select>
-        </div>
-        <div style="margin-top: 15px;">
-          <button class="btn btn-success" onclick="approuverDocument()">✓ Approuver</button>
-          <button class="btn btn-danger" onclick="rejeterDocument()">✗ Rejeter</button>
-          <button class="btn btn-warning" onclick="demanderRevision()">↩️ Demander Révision</button>
-        </div>
-      </div>
+    <div id="signature" class="tab-content">
+      <h2>Signature Électronique</h2>
+      <p>Signatures de documents</p>
     </div>
 
-    <!-- Onglet Versions -->
-    <div id="versions" class="tab-content">
-      <h3 style="margin-bottom: 20px;">📚 Historique des Versions</h3>
-
-      <div class="form-group">
-        <label>Sélectionner un Document</label>
-        <select id="docVersions" onchange="chargerVersions()">
-          <option value="">Choisir...</option>
-        </select>
-      </div>
-
-      <div id="listeVersions" style="margin-top: 20px;">
-        <p style="text-align: center; color: #666;">Sélectionnez un document pour voir ses versions</p>
-      </div>
+    <div id="recherche" class="tab-content">
+      <h2>Recherche Full-Text</h2>
+      <input type="text" id="searchQuery" placeholder="Rechercher..." style="width: 100%; padding: 10px; margin-bottom: 15px;">
+      <div id="searchResults"></div>
     </div>
   </div>
 
   <script>
-    let documentsData = [];
-
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       event.target.classList.add('active');
-      if (tabId === 'liste') chargerDocuments();
-      if (tabId === 'workflow') chargerDocumentsWorkflow();
-      if (tabId === 'versions') chargerDocumentsVersions();
     }
 
-    function chargerDocuments() {
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success) {
-          documentsData = result.documents;
-          let html = '';
-          result.documents.forEach(d => {
-            const statutBadge = d.statut === 'Validé' ? 'badge-success' :
-                               d.statut === 'En attente' ? 'badge-warning' :
-                               d.statut === 'Rejeté' ? 'badge-danger' : 'badge-info';
-            html += `<tr>
-              <td>${d.id}</td>
-              <td>${d.nom}</td>
-              <td>${d.type}</td>
-              <td>${d.projetNom || '-'}</td>
-              <td>${d.format}</td>
-              <td>${d.taille || '-'}</td>
-              <td>v${d.version || '1.0'}</td>
-              <td><span class="badge ${statutBadge}">${d.statut}</span></td>
-              <td>${d.decisionControle || '-'}</td>
-              <td>${d.decisionHierarchie || '-'}</td>
-              <td>
-                <button class="action-btn btn-info" onclick="telecharger('${d.id}')">📥</button>
-                <button class="action-btn btn-primary" onclick="visualiser('${d.id}')">👁️</button>
-                <button class="action-btn btn-warning" onclick="archiver('${d.id}')">📦</button>
-              </td>
-            </tr>`;
+    function rafraichir() {
+      google.script.run
+        .withSuccessHandler(function(docs) {
+          let html = '<table><thead><tr><th>ID</th><th>Titre</th><th>Type</th><th>Version</th><th>Statut</th></tr></thead><tbody>';
+          docs.forEach(doc => {
+            html += `<tr><td>${doc.DocumentID}</td><td>${doc.Titre}</td><td>${doc.Type}</td><td>${doc.Version}</td><td>${doc.Statut}</td></tr>`;
           });
-          document.getElementById('listeDocuments').innerHTML = html || '<tr><td colspan="11" style="text-align:center;">Aucun document</td></tr>';
-        }
-      }).obtenirTousDocuments();
-    }
-
-    function chargerDocumentsWorkflow() {
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success) {
-          let html = '<option value="">Choisir...</option>';
-          result.documents.forEach(d => {
-            html += `<option value="${d.id}">${d.nom} - ${d.statut}</option>`;
-          });
-          document.getElementById('docWorkflow').innerHTML = html;
-        }
-      }).obtenirTousDocuments();
-    }
-
-    function chargerDocumentsVersions() {
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success) {
-          let html = '<option value="">Choisir...</option>';
-          result.documents.forEach(d => {
-            html += `<option value="${d.id}">${d.nom}</option>`;
-          });
-          document.getElementById('docVersions').innerHTML = html;
-        }
-      }).obtenirTousDocuments();
-    }
-
-    function chargerVersions() {
-      const docId = document.getElementById('docVersions').value;
-      if (!docId) {
-        document.getElementById('listeVersions').innerHTML = '<p style="text-align: center; color: #666;">Sélectionnez un document</p>';
-        return;
-      }
-
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success && result.versions.length > 0) {
-          let html = '';
-          result.versions.forEach(v => {
-            html += `<div class="version-item">
-              <h4>Version ${v.numero} - ${v.date}</h4>
-              <p><strong>Auteur:</strong> ${v.auteur}</p>
-              <p><strong>Changements:</strong> ${v.changements || 'Aucune description'}</p>
-            </div>`;
-          });
-          document.getElementById('listeVersions').innerHTML = html;
-        } else {
-          document.getElementById('listeVersions').innerHTML = '<p style="text-align: center; color: #666;">Aucune version disponible</p>';
-        }
-      }).obtenirVersions(docId);
-    }
-
-    document.getElementById('formDocument').onsubmit = function(e) {
-      e.preventDefault();
-      const data = {
-        nom: document.getElementById('nom').value,
-        type: document.getElementById('type').value,
-        projetId: document.getElementById('projetId').value,
-        ouvrageId: document.getElementById('ouvrageId').value || null,
-        auteur: document.getElementById('auteur').value,
-        format: document.getElementById('format').value,
-        chemin: document.getElementById('chemin').value,
-        description: document.getElementById('description').value
-      };
-
-      google.script.run.withSuccessHandler(function(result) {
-        alert(result.message);
-        if (result.success) {
-          document.getElementById('formDocument').reset();
-          switchTab('liste');
-        }
-      }).ajouterDocument(data.nom, data.type, data.projetId, data.ouvrageId, data.auteur, data.format, data.chemin, data.description);
-    };
-
-    function approuverDocument() {
-      const docId = document.getElementById('docWorkflow').value;
-      if (!docId) {
-        alert('Veuillez sélectionner un document');
-        return;
-      }
-      google.script.run.withSuccessHandler(function(result) {
-        alert(result.message);
-        if (result.success) chargerDocumentsWorkflow();
-      }).validerDocument(docId);
-    }
-
-    function rejeterDocument() {
-      const docId = document.getElementById('docWorkflow').value;
-      if (!docId) {
-        alert('Veuillez sélectionner un document');
-        return;
-      }
-      const motif = prompt('Motif du rejet:');
-      if (motif) {
-        google.script.run.withSuccessHandler(function(result) {
-          alert(result.message);
-          if (result.success) chargerDocumentsWorkflow();
-        }).rejeterDocument(docId, motif);
-      }
-    }
-
-    function demanderRevision() {
-      const docId = document.getElementById('docWorkflow').value;
-      if (!docId) {
-        alert('Veuillez sélectionner un document');
-        return;
-      }
-      const commentaire = prompt('Commentaires pour la révision:');
-      if (commentaire) {
-        alert('Révision demandée: ' + commentaire);
-      }
-    }
-
-    function telecharger(id) {
-      const doc = documentsData.find(d => d.id == id);
-      if (doc && doc.chemin) {
-        window.open(doc.chemin, '_blank');
-      } else {
-        alert('Chemin de téléchargement non disponible');
-      }
-    }
-
-    function visualiser(id) {
-      const doc = documentsData.find(d => d.id == id);
-      if (doc && doc.chemin) {
-        window.open(doc.chemin, '_blank');
-      } else {
-        alert('Impossible de visualiser le document');
-      }
-    }
-
-    function archiver(id) {
-      if (confirm('Archiver le document #' + id + ' ?')) {
-        google.script.run.withSuccessHandler(function(result) {
-          alert(result.message);
-          if (result.success) chargerDocuments();
-        }).archiverDocument(id);
-      }
+          html += '</tbody></table>';
+          document.getElementById('tableDocuments').outerHTML = html;
+        })
+        .listerDocuments();
     }
 
     window.onload = function() {
-      chargerDocuments();
-
-      // Charger les projets
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success) {
-          let html = '<option value="">Sélectionner...</option>';
-          result.projets.forEach(p => {
-            html += `<option value="${p.id}">${p.nom}</option>`;
-          });
-          document.getElementById('projetId').innerHTML = html;
-        }
-      }).obtenirTousProjets();
-
-      // Charger les ouvrages
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success) {
-          let html = '<option value="">Aucun</option>';
-          result.ouvrages.forEach(o => {
-            html += `<option value="${o.id}">${o.nom}</option>`;
-          });
-          document.getElementById('ouvrageId').innerHTML = html;
-        }
-      }).obtenirTousOuvrages();
+      rafraichir();
     };
   </script>
 </body>

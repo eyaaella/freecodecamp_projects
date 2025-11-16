@@ -3,169 +3,499 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion Budget v2.0</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
-    .header { background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%); color: white; padding: 20px; text-align: center; }
-    .header h2 { font-size: 18px; margin-bottom: 5px; }
-    .header p { font-size: 11px; opacity: 0.9; }
-    .container { padding: 15px; }
-    .stat-card { background: white; border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #34a853; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .stat-card h3 { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
-    .stat-card .value { font-size: 22px; font-weight: 700; color: #34a853; }
-    .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
-    .btn-primary { background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%); color: white; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4); }
-    .btn-success { background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%); color: white; }
-    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4); }
-    .btn-warning { background: linear-gradient(135deg, #fbbc04 0%, #ea8600 100%); color: white; }
-    .btn-warning:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(251, 188, 4, 0.4); }
-    .section-title { font-size: 13px; font-weight: 600; color: #34a853; margin: 15px 0 10px; padding-bottom: 5px; border-bottom: 2px solid #34a853; }
-    .menu-item { background: white; border-radius: 6px; padding: 10px 12px; margin-bottom: 6px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 8px; transition: all 0.2s; border: 1px solid #e0e0e0; }
-    .menu-item:hover { background: #34a853; color: white; transform: translateX(3px); }
-    .filter { margin-bottom: 15px; }
-    .filter select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; }
-    .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; margin-left: 5px; }
-    .badge-danger { background: #ea4335; color: white; }
-    .badge-warning { background: #fbbc04; color: #333; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 13px;
+      padding: 0;
+      background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%);
+      color: #333;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+
+    .header h2 {
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 11px;
+      opacity: 0.9;
+    }
+
+    .container {
+      padding: 15px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 12px;
+      border-left: 4px solid #34a853;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+
+    .stat-card h3 {
+      font-size: 11px;
+      color: #666;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-card .value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #34a853;
+    }
+
+    .stat-card.warning {
+      border-left-color: #fbbc04;
+    }
+
+    .stat-card.warning .value {
+      color: #fbbc04;
+    }
+
+    .stat-card.danger {
+      border-left-color: #ea4335;
+    }
+
+    .stat-card.danger .value {
+      color: #ea4335;
+    }
+
+    .stat-card .percentage {
+      font-size: 14px;
+      color: #666;
+      margin-top: 3px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+      margin: 15px 0 10px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid rgba(255,255,255,0.3);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%);
+      color: white;
+    }
+
+    .btn-success:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4);
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, #fbbc04 0%, #ea8600 100%);
+      color: white;
+    }
+
+    .btn-warning:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(251, 188, 4, 0.4);
+    }
+
+    .filter {
+      margin-bottom: 10px;
+    }
+
+    .filter select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 6px;
+      font-size: 12px;
+      background: white;
+      color: #333;
+    }
+
+    .alert-item {
+      background: white;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-left: 3px solid #ea4335;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .alert-item.warning {
+      border-left-color: #fbbc04;
+    }
+
+    .alert-item-title {
+      font-weight: 600;
+      font-size: 12px;
+      color: #333;
+      margin-bottom: 3px;
+    }
+
+    .alert-item-meta {
+      font-size: 10px;
+      color: #666;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-left: 5px;
+    }
+
+    .badge-danger {
+      background: #ea4335;
+      color: white;
+    }
+
+    .badge-warning {
+      background: #fbbc04;
+      color: #333;
+    }
+
+    .badge-success {
+      background: #34a853;
+      color: white;
+    }
+
+    .mini-chart {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .mini-chart h4 {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 20px;
+      background: #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #34a853 0%, #2d8e47 100%);
+      transition: width 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .progress-fill.danger {
+      background: linear-gradient(90deg, #ea4335 0%, #c5221f 100%);
+    }
+
+    .progress-fill.warning {
+      background: linear-gradient(90deg, #fbbc04 0%, #ea8600 100%);
+    }
   </style>
 </head>
 <body>
   <div class="header">
-    <h2>💰 Gestion Budget</h2>
-    <p>Gestion Budgétaire et Financière</p>
+    <h2>💰 Gestion Budget v2.0</h2>
+    <p>Prévisionnel • Réalisé • Alertes</p>
   </div>
 
   <div class="container">
+    <!-- Statistiques principales -->
     <div class="stat-card">
-      <h3>Budget Total Prévu</h3>
+      <h3>Budget Total</h3>
       <div class="value" id="budgetTotal">- FCFA</div>
     </div>
 
-    <div class="stat-card" style="border-left-color: #1a73e8;">
-      <h3>Budget Utilisé</h3>
-      <div class="value" id="budgetUtilise" style="color: #1a73e8;">- FCFA</div>
+    <div class="stat-card">
+      <h3>Budget Consommé</h3>
+      <div class="value" id="budgetConsomme">- FCFA</div>
+      <div class="percentage" id="pourcentageConsomme">0%</div>
     </div>
 
-    <div class="stat-card" style="border-left-color: #ea4335;">
-      <h3>Dépassements</h3>
-      <div class="value" id="depassements" style="color: #ea4335;">0</div>
+    <div class="stat-card">
+      <h3>Disponible</h3>
+      <div class="value" id="budgetDisponible">- FCFA</div>
+      <div class="percentage" id="pourcentageDisponible">0%</div>
     </div>
 
+    <div class="stat-card danger">
+      <h3>Alertes Dépassement</h3>
+      <div class="value" id="alertesDepassement">0</div>
+    </div>
+
+    <!-- Mini graphique consommation -->
+    <div class="mini-chart">
+      <h4>Taux de Consommation</h4>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressConsommation" style="width: 0%">0%</div>
+      </div>
+    </div>
+
+    <!-- Actions rapides -->
     <div class="section-title">🎯 Actions Rapides</div>
+
     <button class="btn btn-primary" onclick="nouveauBudget()">
       <span>➕</span>
-      <span>Nouveau Poste Budgétaire</span>
+      <span>Nouvelle Ligne Budget</span>
     </button>
+
     <button class="btn btn-success" onclick="ouvrirGestionnaire()">
       <span>🎛️</span>
       <span>Gestionnaire Complet</span>
     </button>
-    <button class="btn btn-warning" onclick="genererRapport()">
+
+    <button class="btn btn-warning" onclick="consolidation()">
       <span>📊</span>
-      <span>Rapport Budgétaire</span>
+      <span>Consolidation</span>
     </button>
 
+    <!-- Filtres -->
     <div class="section-title">🔍 Filtres</div>
+
     <div class="filter">
-      <select id="filtreCategorie" onchange="appliquerFiltre()">
-        <option value="">Toutes les catégories</option>
-        <option value="Main d'oeuvre">Main d'oeuvre</option>
+      <select id="filtreProjet" onchange="appliquerFiltre()">
+        <option value="">Tous les projets</option>
+        <option value="PROJ001">PROJ001</option>
+        <option value="PROJ002">PROJ002</option>
+        <option value="PROJ003">PROJ003</option>
+      </select>
+    </div>
+
+    <div class="filter">
+      <select id="filtreLigne" onchange="appliquerFiltre()">
+        <option value="">Toutes les lignes</option>
+        <option value="Main d'œuvre">Main d'œuvre</option>
         <option value="Matériel">Matériel</option>
-        <option value="Transport">Transport</option>
-        <option value="Études">Études</option>
-        <option value="Imprévus">Imprévus</option>
-        <option value="Autre">Autre</option>
+        <option value="Sous-traitance">Sous-traitance</option>
+        <option value="Logistique">Logistique</option>
+        <option value="Divers">Divers</option>
       </select>
     </div>
 
-    <div class="filter">
-      <select id="filtreStatut" onchange="appliquerFiltre()">
-        <option value="">Tous les statuts</option>
-        <option value="Prévisionnel">Prévisionnel</option>
-        <option value="Engagé">Engagé</option>
-        <option value="En cours">En cours</option>
-        <option value="Soldé">Soldé</option>
-        <option value="Dépassé">Dépassé</option>
-        <option value="Annulé">Annulé</option>
-      </select>
-    </div>
+    <!-- Alertes dépassement -->
+    <div class="section-title">⚠️ Alertes Urgentes</div>
 
-    <div class="section-title">📊 Navigation</div>
-    <div class="menu-item" onclick="naviguer('budget')">
-      <span>💰</span>
-      <span>Voir tous les postes</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('depassements')">
-      <span>⚠️</span>
-      <span>Postes en dépassement</span>
-      <span class="badge badge-danger" id="badgeDepassements">0</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('projet')">
-      <span>📁</span>
-      <span>Budget par projet</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('trimestre')">
-      <span>📅</span>
-      <span>Budget par trimestre</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('dashboard')">
-      <span>📊</span>
-      <span>Tableau de bord</span>
-    </div>
-    <div class="menu-item" onclick="retourMenu()">
-      <span>🏠</span>
-      <span>Menu Principal</span>
+    <div id="alertesContainer">
+      <div class="alert-item">
+        <div class="alert-item-title">Sous-traitance<span class="badge badge-danger">Dépassé</span></div>
+        <div class="alert-item-meta">PROJ001 • +4.0% • 5 000 000 FCFA</div>
+      </div>
     </div>
   </div>
 
   <script>
-    function nouveauBudget() {
-      ouvrirGestionnaire();
-    }
-
+    // Fonction pour ouvrir le gestionnaire complet
     function ouvrirGestionnaire() {
       google.script.run.afficherModalBudget();
     }
 
-    function genererRapport() {
-      alert('Génération du rapport budgétaire...');
-      // TODO: Implémenter génération rapport
-    }
+    // Fonction pour nouveau budget
+    function nouveauBudget() {
+      const projetId = prompt("ProjetID:");
+      const ouvrageId = prompt("OuvrageID:");
+      const ligneBudgetaire = prompt("Ligne budgétaire (Main d'œuvre, Matériel, etc.):");
+      const montantPrevu = prompt("Montant prévu (FCFA):");
+      const responsable = prompt("Responsable:");
 
-    function naviguer(dest) {
-      if (dest === 'budget') google.script.run.naviguerVersBudget();
-      else if (dest === 'dashboard') google.script.run.naviguerVersTableauDeBord();
-      else if (dest === 'depassements') {
-        google.script.run.naviguerVersBudget();
-        alert('Filtrer par statut "Dépassé"');
+      if (projetId && ouvrageId && ligneBudgetaire && montantPrevu && responsable) {
+        google.script.run
+          .withSuccessHandler(onSuccess)
+          .withFailureHandler(onError)
+          .ajouterLigneBudget(
+            projetId,
+            ouvrageId,
+            "Mensuel",
+            new Date().getFullYear(),
+            new Date().getMonth() + 1,
+            ligneBudgetaire,
+            parseFloat(montantPrevu),
+            responsable,
+            ""
+          );
       }
     }
 
-    function retourMenu() {
-      google.script.run.afficherMenuPrincipal();
+    // Fonction consolidation
+    function consolidation() {
+      const projetId = prompt("ProjetID à consolider:");
+      if (projetId) {
+        google.script.run
+          .withSuccessHandler(function(result) {
+            if (result.success) {
+              alert(`Consolidation Projet ${result.consolidation.projetId}\n\n` +
+                    `Budget Total: ${result.consolidation.budgetTotal.toLocaleString()} FCFA\n` +
+                    `Réalisé Total: ${result.consolidation.realiseTotal.toLocaleString()} FCFA\n` +
+                    `Taux Consommation: ${result.consolidation.tauxConsommationGlobal.toFixed(1)}%\n` +
+                    `Dépassements: ${result.consolidation.alertes.depassements}\n` +
+                    `Alertes >90%: ${result.consolidation.alertes.alertes90}`);
+            }
+          })
+          .withFailureHandler(onError)
+          .consoliderBudgetsProjet(projetId);
+      }
     }
 
+    // Filtre
     function appliquerFiltre() {
-      const categorie = document.getElementById('filtreCategorie').value;
-      const statut = document.getElementById('filtreStatut').value;
-      let msg = 'Filtres appliqués:\n';
-      if (categorie) msg += '- Catégorie: ' + categorie + '\n';
-      if (statut) msg += '- Statut: ' + statut;
-      if (categorie || statut) alert(msg);
+      const projet = document.getElementById('filtreProjet').value;
+      const ligne = document.getElementById('filtreLigne').value;
+      // Logic à implémenter
+      console.log('Filtre:', projet, ligne);
     }
 
-    function chargerStats() {
-      // TODO: Charger stats réelles depuis backend
-      document.getElementById('budgetTotal').textContent = '- FCFA';
-      document.getElementById('budgetUtilise').textContent = '- FCFA';
-      document.getElementById('depassements').textContent = '0';
-      document.getElementById('badgeDepassements').textContent = '0';
+    // Handlers
+    function onSuccess(result) {
+      alert('✅ ' + result.message);
+      location.reload();
     }
 
+    function onError(error) {
+      alert('❌ Erreur: ' + error.message);
+    }
+
+    // Charger les statistiques au démarrage
     window.onload = function() {
-      chargerStats();
+      chargerStatistiques();
+      chargerAlertes();
     };
+
+    function chargerStatistiques() {
+      // Simulé - À connecter avec Google Sheets
+      document.getElementById('budgetTotal').textContent = '503 000 000 FCFA';
+      document.getElementById('budgetConsomme').textContent = '352 500 000 FCFA';
+      document.getElementById('pourcentageConsomme').textContent = '70.1%';
+      document.getElementById('budgetDisponible').textContent = '150 500 000 FCFA';
+      document.getElementById('pourcentageDisponible').textContent = '29.9%';
+      document.getElementById('alertesDepassement').textContent = '1';
+
+      // Mise à jour barre de progression
+      const tauxConsommation = 70.1;
+      const progressBar = document.getElementById('progressConsommation');
+      progressBar.style.width = tauxConsommation + '%';
+      progressBar.textContent = tauxConsommation.toFixed(1) + '%';
+
+      if (tauxConsommation > 100) {
+        progressBar.classList.add('danger');
+      } else if (tauxConsommation > 90) {
+        progressBar.classList.add('warning');
+      }
+    }
+
+    function chargerAlertes() {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            const container = document.getElementById('alertesContainer');
+            container.innerHTML = '';
+
+            // Afficher dépassements
+            result.alertes.depassements.forEach(function(alerte) {
+              const div = document.createElement('div');
+              div.className = 'alert-item';
+              div.innerHTML = `
+                <div class="alert-item-title">
+                  ${alerte.ligneBudgetaire}
+                  <span class="badge badge-danger">Dépassé</span>
+                </div>
+                <div class="alert-item-meta">
+                  ${alerte.projetId} • +${(alerte.tauxConsommation - 100).toFixed(1)}% •
+                  ${Math.abs(alerte.ecart).toLocaleString()} FCFA
+                </div>
+              `;
+              container.appendChild(div);
+            });
+
+            // Afficher alertes >90%
+            result.alertes.alertes90.forEach(function(alerte) {
+              const div = document.createElement('div');
+              div.className = 'alert-item warning';
+              div.innerHTML = `
+                <div class="alert-item-title">
+                  ${alerte.ligneBudgetaire}
+                  <span class="badge badge-warning">Alerte >90%</span>
+                </div>
+                <div class="alert-item-meta">
+                  ${alerte.projetId} • ${alerte.tauxConsommation.toFixed(1)}% •
+                  Marge: ${alerte.margeRestante.toLocaleString()} FCFA
+                </div>
+              `;
+              container.appendChild(div);
+            });
+
+            if (result.countDepassements === 0 && result.countAlertes90 === 0) {
+              container.innerHTML = '<div style="color:white;text-align:center;padding:10px;">✓ Aucune alerte</div>';
+            }
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Erreur chargement alertes:', error);
+        })
+        .obtenirAlertesDepassement();
+    }
   </script>
 </body>
 </html>

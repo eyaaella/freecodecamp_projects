@@ -3,155 +3,346 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documents v2.0 - Sidebar</title>
   <style>
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f9fa;
+      --bg-header: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+      --text-primary: #333333;
+      --text-secondary: #666666;
+      --text-inverse: #ffffff;
+      --border-color: #dee2e6;
+      --shadow: rgba(0,0,0,0.1);
+      --shadow-hover: rgba(156, 39, 176, 0.3);
+      --accent-primary: #9c27b0;
+      --accent-success: #34a853;
+      --accent-warning: #fbbc04;
+      --accent-danger: #ea4335;
+      --card-bg: #ffffff;
+      --menu-hover: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #202124;
+      --bg-secondary: #292a2d;
+      --bg-header: linear-gradient(135deg, #7b1fa2 0%, #4a148c 100%);
+      --text-primary: #e8eaed;
+      --text-secondary: #9aa0a6;
+      --border-color: #3c4043;
+      --shadow: rgba(0,0,0,0.4);
+      --shadow-hover: rgba(156, 39, 176, 0.5);
+      --accent-primary: #ce93d8;
+      --card-bg: #292a2d;
+      --menu-hover: linear-gradient(135deg, #8e24aa 0%, #6a1b9a 100%);
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
-    .header { background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%); color: white; padding: 20px; text-align: center; }
-    .header h2 { font-size: 18px; margin-bottom: 5px; }
-    .header p { font-size: 11px; opacity: 0.9; }
-    .container { padding: 15px; }
-    .stat-card { background: white; border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #9c27b0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .stat-card h3 { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
-    .stat-card .value { font-size: 22px; font-weight: 700; color: #9c27b0; }
-    .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
-    .btn-primary { background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%); color: white; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(156, 39, 176, 0.4); }
-    .btn-success { background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%); color: white; }
-    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4); }
-    .btn-info { background: linear-gradient(135deg, #00acc1 0%, #00838f 100%); color: white; }
-    .btn-info:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 172, 193, 0.4); }
-    .section-title { font-size: 13px; font-weight: 600; color: #9c27b0; margin: 15px 0 10px; padding-bottom: 5px; border-bottom: 2px solid #9c27b0; }
-    .menu-item { background: white; border-radius: 6px; padding: 10px 12px; margin-bottom: 6px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 8px; transition: all 0.2s; border: 1px solid #e0e0e0; }
-    .menu-item:hover { background: #9c27b0; color: white; transform: translateX(3px); }
-    .filter { margin-bottom: 15px; }
-    .filter label { display: block; font-size: 11px; color: #666; margin-bottom: 5px; font-weight: 600; }
-    .filter select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; background: white; }
+    
+    body {
+      font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .header {
+      background: var(--bg-header);
+      color: var(--text-inverse);
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 10px var(--shadow);
+    }
+
+    .header h1 {
+      font-size: 18px;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    .header p {
+      font-size: 11px;
+      opacity: 0.9;
+    }
+
+    .dark-mode-toggle {
+      background: var(--card-bg);
+      padding: 15px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .container {
+      padding: 15px;
+      background: var(--bg-primary);
+    }
+
+    .stats-card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 12px;
+      border-left: 4px solid var(--accent-primary);
+      box-shadow: 0 2px 8px var(--shadow);
+      transition: all 0.3s ease;
+    }
+
+    .stats-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px var(--shadow-hover);
+    }
+
+    .stats-card h3 {
+      font-size: 11px;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+
+    .stats-card .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent-primary);
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-primary);
+      margin: 15px 0 10px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid var(--accent-primary);
+    }
+
+    .filter select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 12px;
+      background: var(--card-bg);
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, #7b1fa2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--shadow-hover);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, var(--accent-success) 0%, #2d8e47 100%);
+      color: white;
+    }
+
+    .menu-item {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 13px;
+    }
+
+    .menu-item:hover {
+      background: var(--menu-hover);
+      color: var(--text-inverse);
+      transform: translateX(5px);
+    }
+
+    .recent-doc {
+      background: var(--card-bg);
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      border-left: 3px solid var(--accent-primary);
+    }
+
+    .recent-doc strong {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--accent-primary);
+    }
+
+    .recent-doc small {
+      color: var(--text-secondary);
+    }
   </style>
 </head>
 <body>
   <div class="header">
-    <h2>📄 Gestion Documents</h2>
-    <p>GED Technique</p>
+    <h1>📄 Documents v2.0</h1>
+    <p>Gestion Documentaire Complète</p>
+  </div>
+
+  <div class="dark-mode-toggle">
+    <label>
+      <span id="darkModeIcon">🌙</span>
+      <span>Mode Sombre</span>
+    </label>
+    <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()">
   </div>
 
   <div class="container">
-    <div class="stat-card">
+    <div class="section-title">📊 Statistiques</div>
+
+    <div class="stats-card" style="border-left-color: #9c27b0;">
       <h3>Total Documents</h3>
-      <div class="value" id="totalDocuments">-</div>
+      <div class="value" id="totalDocs">-</div>
     </div>
 
-    <div class="stat-card" style="border-left-color: #ff9800;">
-      <h3>En Attente Validation</h3>
-      <div class="value" id="enAttenteValidation" style="color: #ff9800;">-</div>
+    <div class="stats-card" style="border-left-color: #34a853;">
+      <h3>Aujourd'hui</h3>
+      <div class="value" id="aujourdhuiDocs">-</div>
     </div>
 
-    <div class="stat-card" style="border-left-color: #34a853;">
-      <h3>Version Moyenne</h3>
-      <div class="value" id="versionMoyenne" style="color: #34a853;">-</div>
+    <div class="stats-card" style="border-left-color: #fbbc04;">
+      <h3>Taille Totale</h3>
+      <div class="value" id="tailleTotale">-</div>
+      <small style="font-size: 11px; color: var(--text-secondary);">MB</small>
     </div>
 
-    <div class="section-title">🎯 Actions Rapides</div>
-    <button class="btn btn-success" onclick="nouveauDocument()">
-      <span>➕</span>
-      <span>Nouveau Document</span>
-    </button>
-    <button class="btn btn-info" onclick="uploadDocument()">
-      <span>📤</span>
-      <span>Upload</span>
-    </button>
-    <button class="btn btn-primary" onclick="ouvrirGestionnaire()">
-      <span>📋</span>
-      <span>Workflow</span>
-    </button>
+    <div class="stats-card" style="border-left-color: #ea4335;">
+      <h3>En Attente Signature</h3>
+      <div class="value" id="enAttenteSignature">-</div>
+    </div>
 
     <div class="section-title">🔍 Filtres</div>
+
     <div class="filter">
-      <label>Par Type</label>
-      <select id="filtreType" onchange="appliquerFiltre()">
+      <select id="filtreType">
         <option value="">Tous les types</option>
         <option value="Plan">Plan</option>
         <option value="Rapport">Rapport</option>
         <option value="Photo">Photo</option>
-        <option value="Certificat">Certificat</option>
-        <option value="Compte-rendu">Compte-rendu</option>
-        <option value="Étude">Étude</option>
-        <option value="Devis">Devis</option>
+        <option value="Contrat">Contrat</option>
+        <option value="Cahier des charges">Cahier des charges</option>
+        <option value="PV">PV</option>
       </select>
     </div>
 
     <div class="filter">
-      <label>Par Statut</label>
-      <select id="filtreStatut" onchange="appliquerFiltre()">
+      <select id="filtreStatut">
         <option value="">Tous les statuts</option>
         <option value="Brouillon">Brouillon</option>
         <option value="Validé">Validé</option>
-        <option value="En attente">En attente</option>
-        <option value="Rejeté">Rejeté</option>
+        <option value="Signé">Signé</option>
+        <option value="Archivé">Archivé</option>
       </select>
     </div>
 
-    <div class="section-title">📊 Navigation</div>
-    <div class="menu-item" onclick="naviguer('tous')">
-      <span>📄</span>
-      <span>Voir tous les documents</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('attente')">
-      <span>⏳</span>
-      <span>En attente de validation</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('projet')">
-      <span>📁</span>
-      <span>Par projet</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('ouvrage')">
-      <span>🏗️</span>
-      <span>Par ouvrage</span>
-    </div>
-    <div class="menu-item" onclick="retourMenu()">
-      <span>🏠</span>
-      <span>Menu Principal</span>
+    <div class="section-title">⚡ Actions Rapides</div>
+
+    <button class="btn btn-primary" onclick="uploadDocument()">
+      <span>📤</span>
+      <span>Upload Document</span>
+    </button>
+
+    <button class="btn btn-success" onclick="ouvrirGestionnaire()">
+      <span>🎛️</span>
+      <span>Gestionnaire Complet</span>
+    </button>
+
+    <button class="btn btn-primary" onclick="rechercheGlobale()">
+      <span>🔍</span>
+      <span>Recherche Full-Text</span>
+    </button>
+
+    <div class="section-title">📋 Documents Récents (5)</div>
+
+    <div id="docsRecents">
+      <div class="recent-doc">
+        <strong>Chargement...</strong>
+      </div>
     </div>
   </div>
 
   <script>
-    function nouveauDocument() {
-      ouvrirGestionnaire();
+    function toggleDarkMode() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      document.getElementById('darkModeIcon').textContent = isDark ? '🌙' : '☀️';
+      google.script.run.setDarkModePreference(!isDark);
+    }
+
+    function chargerStatistiques() {
+      google.script.run
+        .withSuccessHandler(function(stats) {
+          document.getElementById('totalDocs').textContent = stats.total;
+          document.getElementById('aujourdhuiDocs').textContent = stats.aujourdHui;
+          document.getElementById('tailleTotale').textContent = stats.tailleTotaleMB;
+          document.getElementById('enAttenteSignature').textContent = stats.enAttenteSignature;
+          chargerDocumentsRecents();
+        })
+        .obtenirKPIsDocuments();
+    }
+
+    function chargerDocumentsRecents() {
+      google.script.run
+        .withSuccessHandler(function(docs) {
+          let html = '';
+          docs.slice(0, 5).forEach(doc => {
+            html += `
+              <div class="recent-doc">
+                <strong>${doc.Titre}</strong>
+                <small>${doc.Type} - ${doc.Version}</small>
+              </div>
+            `;
+          });
+          document.getElementById('docsRecents').innerHTML = html || '<div class="recent-doc">Aucun document</div>';
+        })
+        .listerDocuments();
     }
 
     function uploadDocument() {
-      ouvrirGestionnaire();
+      alert('Upload de document - Fonctionnalité à implémenter');
     }
 
     function ouvrirGestionnaire() {
-      google.script.run.afficherModalDocument();
+      google.script.run.afficherModalDocuments();
     }
 
-    function naviguer(dest) {
-      if (dest === 'tous') google.script.run.naviguerVersDocuments();
-      else if (dest === 'attente') google.script.run.naviguerVersDocuments('En attente');
-      else if (dest === 'projet') google.script.run.naviguerVersDocuments('projet');
-      else if (dest === 'ouvrage') google.script.run.naviguerVersDocuments('ouvrage');
+    function rechercheGlobale() {
+      const query = prompt('Rechercher un document:');
+      if (query) {
+        google.script.run
+          .withSuccessHandler(function(resultats) {
+            alert(`${resultats.length} document(s) trouvé(s)`);
+          })
+          .rechercherDocuments(query);
+      }
     }
 
-    function retourMenu() {
-      google.script.run.afficherMenuPrincipal();
-    }
-
-    function appliquerFiltre() {
-      const type = document.getElementById('filtreType').value;
-      const statut = document.getElementById('filtreStatut').value;
-      google.script.run.naviguerVersDocuments(statut, type);
-    }
-
-    // Charger les statistiques au démarrage
     window.onload = function() {
-      google.script.run
-        .withSuccessHandler(function(stats) {
-          document.getElementById('totalDocuments').textContent = stats.total || 0;
-          document.getElementById('enAttenteValidation').textContent = stats.enAttente || 0;
-          document.getElementById('versionMoyenne').textContent = (stats.versionMoyenne || 1.0).toFixed(1);
-        })
-        .obtenirStatistiquesDocuments();
+      chargerStatistiques();
+      setInterval(chargerStatistiques, 30000);
     };
   </script>
 </body>

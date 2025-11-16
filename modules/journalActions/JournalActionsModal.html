@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <title>Journal v2.0</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root { --bg-primary: #fff; --bg-secondary: #f8f9fa; --text-primary: #333; --text-secondary: #666; --border-color: #dee2e6; --shadow: rgba(0,0,0,0.1); --accent-primary: #1a73e8; --accent-success: #34a853; --accent-warning: #fbbc04; --accent-danger: #ea4335; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg-primary); color: var(--text-primary); }
+    .header { background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%); color: white; padding: 20px; box-shadow: 0 2px 10px var(--shadow); }
+    .header h1 { font-size: 22px; margin-bottom: 5px; }
+    .header p { font-size: 13px; opacity: 0.9; }
+    .container { padding: 20px; }
+    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid var(--border-color); overflow-x: auto; }
+    .tab { padding: 12px 20px; background: var(--bg-secondary); border: none; border-top-left-radius: 8px; border-top-right-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; color: var(--text-secondary); white-space: nowrap; }
+    .tab:hover { background: #e9ecef; color: var(--accent-primary); }
+    .tab.active { background: var(--accent-primary); color: white; }
+    .tab-content { display: none; animation: fadeIn 0.3s ease; }
+    .tab-content.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
+    .btn { padding: 10px 20px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+    .btn-primary { background: linear-gradient(135deg, var(--accent-primary) 0%, #174ea6 100%); color: white; }
+    .btn-success { background: linear-gradient(135deg, var(--accent-success) 0%, #2d8e47 100%); color: white; }
+    .btn-warning { background: linear-gradient(135deg, var(--accent-warning) 0%, #ea8600 100%); color: #333; }
+    .btn-danger { background: linear-gradient(135deg, var(--accent-danger) 0%, #d33426 100%); color: white; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px var(--shadow); }
+    .table { width: 100%; border-collapse: collapse; margin: 20px 0; box-shadow: 0 2px 8px var(--shadow); border-radius: 8px; overflow: hidden; }
+    .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+    .table th { background: var(--accent-primary); color: white; font-weight: 600; font-size: 12px; text-transform: uppercase; }
+    .table tr:hover { background: var(--bg-secondary); }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .badge-success { background: var(--accent-success); color: white; }
+    .badge-warning { background: var(--accent-warning); color: #333; }
+    .badge-danger { background: var(--accent-danger); color: white; }
+    .badge-info { background: var(--accent-primary); color: white; }
+    .chart-container { position: relative; height: 300px; margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="header"><h1>📝 Journal Actions v2.0</h1><p>Logs • Analyse • Anomalies • Export</p></div>
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('logs')">📋 Logs</button>
+      <button class="tab" onclick="switchTab('analyse')">📊 Analyse</button>
+      <button class="tab" onclick="switchTab('erreurs')">❌ Erreurs</button>
+      <button class="tab" onclick="switchTab('anomalies')">🚨 Anomalies</button>
+      <button class="tab" onclick="switchTab('export')">📥 Export</button>
+    </div>
+    <div id="logs" class="tab-content active">
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="refreshLogs()">🔄 Rafraîchir</button>
+        <button class="btn btn-warning" onclick="filterLogs()">🔍 Filtrer</button>
+      </div>
+      <table class="table" id="logTable"><thead><tr><th>Date/Heure</th><th>Utilisateur</th><th>Module</th><th>Action</th><th>Détails</th><th>Statut</th></tr></thead><tbody><tr><td colspan="6" style="text-align: center;">Chargement...</td></tr></tbody></table>
+    </div>
+    <div id="analyse" class="tab-content">
+      <h3 style="margin-bottom: 20px;">Analyse des Patterns</h3>
+      <div class="chart-container"><canvas id="chartActivity"></canvas></div>
+      <div class="chart-container"><canvas id="chartModules"></canvas></div>
+    </div>
+    <div id="erreurs" class="tab-content">
+      <h3 style="margin-bottom: 20px;">Erreurs Système</h3>
+      <table class="table"><thead><tr><th>Date</th><th>Module</th><th>Erreur</th><th>Statut</th></tr></thead><tbody id="errorList"><tr><td colspan="4" style="text-align: center;">Chargement...</td></tr></tbody></table>
+    </div>
+    <div id="anomalies" class="tab-content">
+      <h3 style="margin-bottom: 20px;">Détection Anomalies</h3>
+      <p style="padding: 40px; text-align: center; color: var(--text-secondary);">Analyse en cours...</p>
+    </div>
+    <div id="export" class="tab-content">
+      <h3 style="margin-bottom: 20px;">Export Logs</h3>
+      <div class="btn-group">
+        <button class="btn btn-success" onclick="exportCSV()">📥 Export CSV</button>
+        <button class="btn btn-primary" onclick="exportJSON()">📥 Export JSON</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    let charts = {};
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      event.target.classList.add('active');
+      if (tabId === 'analyse') initCharts();
+    }
+    function refreshLogs() {
+      google.script.run.withSuccessHandler(function(result) {
+        if (result.success) displayLogs(result.logs);
+      }).obtenirLogsRecentsJournal(50);
+    }
+    function displayLogs(logs) {
+      const tbody = document.querySelector('#logTable tbody');
+      if (!logs || logs.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Aucun log</td></tr>'; return; }
+      let html = '';
+      logs.forEach(log => {
+        const badgeClass = log.statutHTTP >= 400 ? 'badge-danger' : log.action === 'CREATE' ? 'badge-success' : 'badge-info';
+        html += `<tr><td>${new Date(log.dateHeure).toLocaleString()}</td><td>${log.utilisateur}</td><td>${log.module}</td><td><span class="badge ${badgeClass}">${log.action}</span></td><td>${log.details}</td><td>${log.statutHTTP}</td></tr>`;
+      });
+      tbody.innerHTML = html;
+    }
+    function initCharts() {
+      if (!charts.activity) {
+        const ctx = document.getElementById('chartActivity');
+        charts.activity = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['00h', '04h', '08h', '12h', '16h', '20h'],
+            datasets: [{ label: 'Actions', data: [12, 19, 15, 25, 22, 30], borderColor: '#1a73e8', backgroundColor: 'rgba(26, 115, 232, 0.1)', tension: 0.4 }]
+          },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+      }
+      if (!charts.modules) {
+        const ctx2 = document.getElementById('chartModules');
+        charts.modules = new Chart(ctx2, {
+          type: 'bar',
+          data: {
+            labels: ['PROJET', 'TACHE', 'UTILISATEUR', 'DOCUMENT'],
+            datasets: [{ label: 'Actions par module', data: [45, 120, 28, 65], backgroundColor: ['#1a73e8', '#34a853', '#fbbc04', '#ea4335'] }]
+          },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+      }
+    }
+    function filterLogs() { alert('Filtrage - À implémenter'); }
+    function exportCSV() { google.script.run.withSuccessHandler(function(csv) { if (csv) { const blob = new Blob([csv], {type: 'text/csv'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'logs.csv'; a.click(); } }).exporterLogsCSV({}); }
+    function exportJSON() { google.script.run.withSuccessHandler(function(json) { if (json) { const blob = new Blob([json], {type: 'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'logs.json'; a.click(); } }).exporterLogsJSON({}); }
+    window.onload = function() { refreshLogs(); };
+  </script>
+</body>
+</html>

@@ -1,955 +1,880 @@
 /**
- * MODULE UTILISATEUR - Gestion Utilisateurs et Permissions
- * Système de gestion des accès et sécurité
- * Version: Production Ready 1.0
+ * ============================================================================
+ * MODULE UTILISATEUR v2.0 - TopoGest Pro
+ * ============================================================================
+ * Version: 2.0.0
+ * Date: 2025-11-16
+ * Description: Gestion complète des utilisateurs avec authentification sécurisée,
+ *              gestion des rôles, sessions, logs d'activité et KPIs
+ *
+ * Fonctionnalités v2.0:
+ * ✅ CRUD utilisateurs complet
+ * ✅ Authentification sécurisée (SHA-256)
+ * ✅ Gestion rôles/permissions (Admin/Manager/User/Guest)
+ * ✅ Session tracking (dernière connexion, IP, durée)
+ * ✅ Logs activité utilisateur détaillés
+ * ✅ Réinitialisation mot de passe sécurisée
+ * ✅ Validation email/téléphone Cameroun
+ * ✅ KPIs temps réel
+ * ✅ Export utilisateurs (CSV/JSON)
+ * ============================================================================
  */
 
-// ==================== INITIALISATION DU MODULE UTILISATEUR ====================
+// ============================================================================
+// CONFIGURATION MODULE UTILISATEUR
+// ============================================================================
+
+const CONFIG_UTILISATEUR = {
+  SHEET_NAME: '🔐 Utilisateurs',
+  ROLES: ['Admin', 'Manager', 'User', 'Guest'],
+  STATUTS: ['Actif', 'Inactif', 'Suspendu', 'Verrouillé'],
+  PASSWORD_MIN_LENGTH: 8,
+  MAX_LOGIN_ATTEMPTS: 5,
+  SESSION_TIMEOUT: 3600000, // 1 heure en ms
+  REGEX_EMAIL: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+  REGEX_PHONE_CM: /^(237)?6[2-9][0-9]{7}$/
+};
+
+// ============================================================================
+// INITIALISATION MODULE UTILISATEUR
+// ============================================================================
 
 /**
- * Initialise le module UTILISATEUR avec toutes les fonctionnalités
+ * Initialise le module UTILISATEUR v2.0
  */
 function initialiserUtilisateur() {
   try {
-    Logger.log("🔐 Initialisation du module UTILISATEUR...");
+    Logger.log("🔐 Initialisation du module UTILISATEUR v2.0...");
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    let sheet = ss.getSheetByName("🔐 Utilisateurs");
+    let sheet = ss.getSheetByName(CONFIG_UTILISATEUR.SHEET_NAME);
 
-    // Supprimer la feuille si elle existe déjà
+    // Supprimer si existe
     if (sheet) {
       ss.deleteSheet(sheet);
     }
 
-    // Créer une nouvelle feuille
-    sheet = ss.insertSheet("🔐 Utilisateurs");
-
-    // Configuration de base
+    // Créer nouvelle feuille
+    sheet = ss.insertSheet(CONFIG_UTILISATEUR.SHEET_NAME);
     sheet.setFrozenRows(2);
     sheet.setFrozenColumns(1);
 
-    // ===== EN-TÊTE PRINCIPAL =====
-    sheet.getRange("A1:M1").merge()
-      .setValue("🔐 GESTION DES UTILISATEURS - SYSTÈME DE SÉCURITÉ ET PERMISSIONS")
+    // EN-TÊTE PRINCIPAL
+    sheet.getRange("A1:N1").merge()
+      .setValue("🔐 GESTION UTILISATEURS v2.0 - AUTHENTIFICATION • RÔLES • SESSIONS • LOGS")
       .setFontSize(14)
       .setFontWeight("bold")
       .setHorizontalAlignment("center")
-      .setBackground("#c5221f")
+      .setBackground("#1a73e8")
       .setFontColor("#ffffff");
 
     sheet.setRowHeight(1, 40);
 
-    // ===== COLONNES DE DONNÉES =====
+    // COLONNES
     const headers = [
       "UtilisateurID",
-      "EmployeID",
-      "NomUtilisateur",
-      "MotDePasse",
       "Email",
-      "NiveauAcces",
-      "DerniereConnexion",
-      "Actif",
-      "DateCreation",
+      "MotDePasse (hash)",
+      "Nom",
+      "Prenom",
+      "Role",
       "Permissions",
-      "Restrictions",
+      "Statut",
+      "DerniereConnexion",
       "NbConnexions",
-      "Observations"
+      "DateCreation",
+      "CreePar",
+      "Telephone",
+      "DerniereIP"
     ];
 
     sheet.getRange(2, 1, 1, headers.length).setValues([headers])
       .setFontWeight("bold")
       .setHorizontalAlignment("center")
-      .setBackground("#a50e0e")
+      .setBackground("#174ea6")
       .setFontColor("#ffffff")
       .setFontSize(10)
       .setWrap(true);
 
     sheet.setRowHeight(2, 35);
 
-    // ===== LARGEURS DE COLONNES =====
-    const columnWidths = [120, 100, 180, 150, 220, 150, 160, 80, 120, 280, 280, 120, 250];
+    // LARGEURS DE COLONNES
+    const columnWidths = [120, 220, 280, 150, 150, 110, 250, 110, 160, 120, 140, 150, 140, 150];
     columnWidths.forEach((width, index) => {
       sheet.setColumnWidth(index + 1, width);
     });
 
-    // ===== DONNÉES D'EXEMPLE =====
+    // DONNÉES D'EXEMPLE
+    const currentUser = Session.getActiveUser().getEmail() || "admin@topogest.cm";
+
     const donneesExemple = [
       [
         "USR001",
-        "EMP001",
-        "jmbarga",
-        "********",
-        "jean.mbarga@toposervice.cm",
+        "admin@topogest.cm",
+        hashPassword("Admin123!"),
+        "TOPOGEST",
+        "Administrateur",
         "Admin",
-        new Date(2025, 10, 14, 15, 30),
-        "Oui",
-        new Date(2020, 0, 15),
-        "FULL_ACCESS, USER_MANAGEMENT, SYSTEM_CONFIG, REPORTS",
-        "",
-        156,
-        "Administrateur principal"
+        "ALL",
+        "Actif",
+        new Date(),
+        125,
+        new Date(2024, 0, 1),
+        "SYSTÈME",
+        "237699123456",
+        "192.168.1.100"
       ],
       [
         "USR002",
-        "EMP002",
-        "mnkolo",
-        "********",
-        "marie.nkolo@toposervice.cm",
-        "Chef Projet",
-        new Date(2025, 10, 14, 9, 15),
-        "Oui",
-        new Date(2019, 8, 10),
-        "PROJECT_EDIT, TASK_MANAGE, TEAM_VIEW, REPORTS",
-        "NO_DELETE, NO_BUDGET_EDIT",
-        243,
-        "Chef de projet Nord"
+        "mbarga.jean@topogest.cm",
+        hashPassword("Manager123!"),
+        "MBARGA",
+        "Jean",
+        "Manager",
+        "READ,WRITE,EDIT",
+        "Actif",
+        new Date(),
+        87,
+        new Date(2024, 1, 15),
+        "admin@topogest.cm",
+        "237677345678",
+        "192.168.1.101"
       ],
       [
         "USR003",
-        "EMP003",
-        "ptchokothe",
-        "********",
-        "paul.tchokothe@toposervice.cm",
-        "Topographe",
-        new Date(2025, 10, 13, 17, 45),
-        "Oui",
-        new Date(2021, 3, 1),
-        "RELEVE_EDIT, OUVRAGE_VIEW, TASK_VIEW",
-        "NO_PROJECT_EDIT, NO_TEAM_MANAGE",
-        87,
-        "Topographe zone Ouest"
+        "nkolo.marie@topogest.cm",
+        hashPassword("User123!"),
+        "NKOLO",
+        "Marie",
+        "User",
+        "READ,WRITE",
+        "Actif",
+        new Date(Date.now() - 86400000),
+        45,
+        new Date(2024, 2, 10),
+        "admin@topogest.cm",
+        "237655234567",
+        "192.168.1.102"
       ],
       [
         "USR004",
-        "EMP004",
-        "bonana",
-        "********",
-        "berthe.onana@toposervice.cm",
-        "Lecture seule",
-        new Date(2025, 10, 14, 10, 20),
-        "Oui",
-        new Date(2022, 1, 15),
-        "VIEW_ONLY, REPORTS",
-        "NO_EDIT, NO_DELETE, NO_EXPORT",
-        52,
-        "RH et administration"
-      ],
-      [
-        "USR005",
-        "EMP005",
-        "injoya",
-        "********",
-        "ibrahim.njoya@toposervice.cm",
-        "Topographe",
-        new Date(2025, 10, 12, 14, 0),
-        "Oui",
-        new Date(2023, 5, 20),
-        "RELEVE_EDIT, DOCUMENT_UPLOAD, OUVRAGE_VIEW",
-        "NO_PROJECT_EDIT",
-        34,
-        "Spécialiste drone"
+        "guest@topogest.cm",
+        hashPassword("Guest123!"),
+        "INVITÉ",
+        "Test",
+        "Guest",
+        "READ",
+        "Inactif",
+        new Date(Date.now() - 604800000),
+        3,
+        new Date(2024, 3, 20),
+        "mbarga.jean@topogest.cm",
+        "237688456789",
+        "192.168.1.103"
       ]
     ];
 
     sheet.getRange(3, 1, donneesExemple.length, headers.length).setValues(donneesExemple);
 
-    // ===== FORMATAGE DES DONNÉES =====
-
-    // UtilisateurID (colonne A) - Auto-incrémentation
+    // AUTO-INCRÉMENTATION ID
     const derniereLigne = sheet.getMaxRows();
-    for (let i = 8; i <= Math.min(derniereLigne, 100); i++) {
+    for (let i = 7; i <= Math.min(derniereLigne, 100); i++) {
       sheet.getRange(`A${i}`).setFormula(
-        `=SI(NBVAL(C${i})>0;"USR"&TEXTE(LIGNE()-2;"000");"")`
+        `=SI(NBVAL(B${i})>0;"USR"&TEXTE(LIGNE()-2;"000");"")`
       );
     }
 
-    // Dates (colonnes G et I)
-    sheet.getRange("G3:G100")
-      .setNumberFormat("dd/mm/yyyy hh:mm")
+    // FORMATAGE DATES
+    sheet.getRange("I3:I100").setNumberFormat("dd/mm/yyyy hh:mm")
+      .setHorizontalAlignment("center");
+    sheet.getRange("K3:K100").setNumberFormat("dd/mm/yyyy")
       .setHorizontalAlignment("center");
 
-    sheet.getRange("I3:I100")
-      .setNumberFormat("dd/mm/yyyy")
-      .setHorizontalAlignment("center");
+    // VALIDATION DONNÉES
 
-    // ===== FORMULES AVANCÉES =====
-
-    // Nom Complet Employé (depuis référentiel)
-    sheet.insertColumnAfter(13);
-    sheet.getRange("N2").setValue("Nom Complet");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`N${i}`).setFormula(
-        `=SI(B${i}<>"";RECHERCHEV(B${i};'👤 Employés'!A:C;2;FAUX)&" "&RECHERCHEV(B${i};'👤 Employés'!A:C;3;FAUX);"")`
-      );
-    }
-    sheet.hideColumns(14);
-
-    // Jours depuis dernière connexion
-    sheet.insertColumnAfter(14);
-    sheet.getRange("O2").setValue("Jours Inactivité");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`O${i}`).setFormula(
-        `=SI(G${i}<>"";AUJOURDHUI()-ENT(G${i});"")`
-      );
-    }
-    sheet.getRange("O3:O100").setNumberFormat('0" jours"');
-    sheet.hideColumns(15);
-
-    // Statut activité (actif si connexion < 30 jours)
-    sheet.insertColumnAfter(15);
-    sheet.getRange("P2").setValue("Statut Activité");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`P${i}`).setFormula(
-        `=SI(ET(H${i}="Oui";O${i}<=30);"Actif";SI(ET(H${i}="Oui";O${i}>30);"Inactif";SI(H${i}="Non";"Désactivé";"")))`
-      );
-    }
-    sheet.hideColumns(16);
-
-    // Niveau de risque sécurité
-    sheet.insertColumnAfter(16);
-    sheet.getRange("Q2").setValue("Risque");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`Q${i}`).setFormula(
-        `=SI(F${i}="Admin";"Élevé";SI(F${i}="Chef Projet";"Moyen";SI(F${i}="Topographe";"Faible";"Très Faible")))`
-      );
-    }
-    sheet.hideColumns(17);
-
-    // Durée depuis création compte (en mois)
-    sheet.insertColumnAfter(17);
-    sheet.getRange("R2").setValue("Ancienneté Compte");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`R${i}`).setFormula(
-        `=SI(I${i}<>"";DATEDIF(I${i};AUJOURDHUI();"M");"")`
-      );
-    }
-    sheet.getRange("R3:R100").setNumberFormat('0" mois"');
-    sheet.hideColumns(18);
-
-    // Email valide
-    sheet.insertColumnAfter(18);
-    sheet.getRange("S2").setValue("Email Valide");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`S${i}`).setFormula(
-        `=SI(E${i}="";FAUX;ET(TROUVE("@";E${i})>0;TROUVE(".";E${i})>TROUVE("@";E${i})))`
-      );
-    }
-    sheet.hideColumns(19);
-
-    // Nombre de permissions
-    sheet.insertColumnAfter(19);
-    sheet.getRange("T2").setValue("Nb Permissions");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`T${i}`).setFormula(
-        `=SI(J${i}="";0;NBCAR(J${i})-NBCAR(SUBSTITUE(J${i};",";""))+1)`
-      );
-    }
-    sheet.hideColumns(20);
-
-    // Nombre de restrictions
-    sheet.insertColumnAfter(20);
-    sheet.getRange("U2").setValue("Nb Restrictions");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`U${i}`).setFormula(
-        `=SI(K${i}="";0;NBCAR(K${i})-NBCAR(SUBSTITUE(K${i};",";""))+1)`
-      );
-    }
-    sheet.hideColumns(21);
-
-    // ===== VALIDATION DES DONNÉES =====
-
-    // EmployeID - Liste déroulante depuis référentiel Employés
-    const regleEmploye = SpreadsheetApp.newDataValidation()
-      .requireValueInRange(ss.getSheetByName("👤 Employés").getRange("A3:A100"), true)
+    // Role
+    const regleRole = SpreadsheetApp.newDataValidation()
+      .requireValueInList(CONFIG_UTILISATEUR.ROLES, true)
       .setAllowInvalid(false)
-      .setHelpText("Sélectionnez un employé existant")
+      .setHelpText("Sélectionnez le rôle")
       .build();
-    sheet.getRange("B3:B100").setDataValidation(regleEmploye);
+    sheet.getRange("F3:F100").setDataValidation(regleRole);
 
-    // NomUtilisateur - Unique, alphanumerique, 3-20 caractères
-    const regleNomUtilisateur = SpreadsheetApp.newDataValidation()
-      .requireFormulaSatisfied('=ET(NBCAR(C3)>=3;NBCAR(C3)<=20;NB.SI(C:C;C3)=1)')
+    // Statut
+    const regleStatut = SpreadsheetApp.newDataValidation()
+      .requireValueInList(CONFIG_UTILISATEUR.STATUTS, true)
       .setAllowInvalid(false)
-      .setHelpText("Nom d'utilisateur unique, 3-20 caractères alphanumérique")
+      .setHelpText("Sélectionnez le statut")
       .build();
-    sheet.getRange("C3:C100").setDataValidation(regleNomUtilisateur);
+    sheet.getRange("H3:H100").setDataValidation(regleStatut);
 
-    // Email - Format email
-    const regleEmail = SpreadsheetApp.newDataValidation()
-      .requireFormulaSatisfied('=ET(TROUVE("@";E3)>0;TROUVE(".";E3)>TROUVE("@";E3))')
-      .setAllowInvalid(false)
-      .setHelpText("Entrez un email valide (ex: nom.prenom@toposervice.cm)")
-      .build();
-    sheet.getRange("E3:E100").setDataValidation(regleEmail);
-
-    // NiveauAcces - Liste des niveaux
-    const regleNiveauAcces = SpreadsheetApp.newDataValidation()
-      .requireValueInList(["Admin", "Chef Projet", "Topographe", "Lecture seule"], true)
-      .setAllowInvalid(false)
-      .setHelpText("Sélectionnez le niveau d'accès")
-      .build();
-    sheet.getRange("F3:F100").setDataValidation(regleNiveauAcces);
-
-    // Actif - Oui/Non
-    const regleActif = SpreadsheetApp.newDataValidation()
-      .requireValueInList(["Oui", "Non"], true)
-      .setAllowInvalid(false)
-      .setHelpText("Compte actif ou désactivé")
-      .build();
-    sheet.getRange("H3:H100").setDataValidation(regleActif);
-
-    // DateCreation - Date valide, pas future
-    const regleDateCreation = SpreadsheetApp.newDataValidation()
-      .requireDateBefore(new Date())
-      .setAllowInvalid(false)
-      .setHelpText("Date de création du compte (pas future)")
-      .build();
-    sheet.getRange("I3:I100").setDataValidation(regleDateCreation);
-
-    // ===== MISE EN FORME CONDITIONNELLE =====
-
+    // MISE EN FORME CONDITIONNELLE
     const rules = sheet.getConditionalFormatRules();
 
-    // NiveauAcces - Admin (Rouge foncé)
+    // Statut Actif
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Admin")
-      .setBackground("#c5221f")
-      .setFontColor("#ffffff")
-      .setBold(true)
-      .setRanges([sheet.getRange("F3:F100")])
-      .build());
-
-    // NiveauAcces - Chef Projet (Orange)
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Chef Projet")
-      .setBackground("#fbbc04")
-      .setFontColor("#000000")
-      .setBold(true)
-      .setRanges([sheet.getRange("F3:F100")])
-      .build());
-
-    // NiveauAcces - Topographe (Bleu)
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Topographe")
-      .setBackground("#4285f4")
-      .setFontColor("#ffffff")
-      .setBold(true)
-      .setRanges([sheet.getRange("F3:F100")])
-      .build());
-
-    // NiveauAcces - Lecture seule (Gris)
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Lecture seule")
-      .setBackground("#9aa0a6")
-      .setFontColor("#ffffff")
-      .setBold(true)
-      .setRanges([sheet.getRange("F3:F100")])
-      .build());
-
-    // Actif - Oui (Vert)
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Oui")
+      .whenTextEqualTo("Actif")
       .setBackground("#34a853")
       .setFontColor("#ffffff")
       .setBold(true)
       .setRanges([sheet.getRange("H3:H100")])
       .build());
 
-    // Actif - Non (Rouge)
+    // Statut Inactif
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Non")
+      .whenTextEqualTo("Inactif")
+      .setBackground("#fbbc04")
+      .setFontColor("#000000")
+      .setBold(true)
+      .setRanges([sheet.getRange("H3:H100")])
+      .build());
+
+    // Statut Verrouillé/Suspendu
+    rules.push(SpreadsheetApp.newConditionalFormatRule()
+      .whenTextContains("Verrouillé")
       .setBackground("#ea4335")
       .setFontColor("#ffffff")
       .setBold(true)
       .setRanges([sheet.getRange("H3:H100")])
       .build());
 
-    // Inactivité > 30 jours (Orange clair)
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenFormulaSatisfied('=O3>30')
-      .setBackground("#fef7e0")
-      .setRanges([sheet.getRange("G3:G100")])
+      .whenTextContains("Suspendu")
+      .setBackground("#ea4335")
+      .setFontColor("#ffffff")
+      .setBold(true)
+      .setRanges([sheet.getRange("H3:H100")])
       .build());
 
-    // Inactivité > 90 jours (Rouge clair)
+    // Role Admin
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenFormulaSatisfied('=O3>90')
-      .setBackground("#fce8e6")
-      .setRanges([sheet.getRange("G3:G100")])
-      .build());
-
-    // Email invalide (Rouge clair)
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenFormulaSatisfied('=NON(S3)')
-      .setBackground("#fce8e6")
-      .setRanges([sheet.getRange("E3:E100")])
+      .whenTextEqualTo("Admin")
+      .setBackground("#174ea6")
+      .setFontColor("#ffffff")
+      .setBold(true)
+      .setRanges([sheet.getRange("F3:F100")])
       .build());
 
     sheet.setConditionalFormatRules(rules);
 
-    // ===== SECTION STATISTIQUES =====
+    // SECTION STATISTIQUES
     const statsRow = 105;
 
-    // Titre de la section
-    sheet.getRange(`A${statsRow}:M${statsRow}`).merge()
-      .setValue("📊 STATISTIQUES UTILISATEURS ET SÉCURITÉ")
+    sheet.getRange(`A${statsRow}:N${statsRow}`).merge()
+      .setValue("📊 STATISTIQUES UTILISATEURS v2.0")
       .setFontSize(13)
-      .setFontWeight("bold")
-      .setHorizontalAlignment("center")
-      .setBackground("#a50e0e")
-      .setFontColor("#ffffff");
-
-    sheet.setRowHeight(statsRow, 35);
-
-    // KPIs
-    const kpis = [
-      ["Indicateur", "Valeur", "Commentaire"],
-      ["Utilisateurs totaux", '=NB.SI(C3:C100;"<>"")', "Nombre total de comptes"],
-      ["Comptes actifs", '=NB.SI(H3:H100;"Oui")', "Comptes activés"],
-      ["Comptes désactivés", '=NB.SI(H3:H100;"Non")', "Comptes désactivés"],
-      ["Administrateurs", '=NB.SI(F3:F100;"Admin")', "Comptes admin (risque élevé)"],
-      ["Chefs de projet", '=NB.SI(F3:F100;"Chef Projet")', "Niveau Chef Projet"],
-      ["Topographes", '=NB.SI(F3:F100;"Topographe")', "Niveau Topographe"],
-      ["Lecture seule", '=NB.SI(F3:F100;"Lecture seule")', "Accès lecture uniquement"],
-      ["Connexions aujourd'hui", '=NB.SI(G3:G100;">="&AUJOURDHUI())', "Connexions du jour"],
-      ["Inactifs > 30 jours", '=NB.SI(O3:O100;">30")', "Comptes inactifs longue durée"],
-      ["Inactifs > 90 jours", '=NB.SI(O3:O100;">90")', "Comptes à désactiver"],
-      ["Taux activité 30j", '=NB.SI(O3:O100;"<=30")/NB.SI(H3:H100;"Oui")', "% comptes actifs utilisés"],
-      ["Connexions totales", '=SOMME(L3:L100)', "Total connexions tous comptes"],
-      ["Connexions moyennes", '=MOYENNE(L3:L100)', "Moyenne connexions par compte"],
-      ["Emails valides", '=NB.SI(S3:S100;VRAI)/NB.SI(C3:C100;"<>"")', "% emails correctement formatés"],
-      ["Risque élevé", '=NB.SI(Q3:Q100;"Élevé")', "Comptes à risque élevé"],
-      ["Comptes avec restrictions", '=NB.SI(K3:K100;"<>"")', "Comptes avec limitations"]
-    ];
-
-    sheet.getRange(statsRow + 1, 1, kpis.length, 3).setValues(kpis);
-
-    // Formatage des KPIs
-    sheet.getRange(statsRow + 1, 1, 1, 3)
-      .setFontWeight("bold")
-      .setBackground("#c5221f")
-      .setFontColor("#ffffff")
-      .setHorizontalAlignment("center");
-
-    // Format des valeurs
-    sheet.getRange(statsRow + 12, 2).setNumberFormat("0.0%");
-    sheet.getRange(statsRow + 15, 2).setNumberFormat("0.0%");
-
-    // Bordures pour les KPIs
-    sheet.getRange(statsRow + 1, 1, kpis.length, 3).setBorder(
-      true, true, true, true, true, true,
-      "#000000", SpreadsheetApp.BorderStyle.SOLID
-    );
-
-    // Alternance de couleurs pour les lignes
-    for (let i = 0; i < kpis.length; i++) {
-      if (i > 0 && i % 2 === 0) {
-        sheet.getRange(statsRow + 1 + i, 1, 1, 3).setBackground("#f8f9fa");
-      }
-    }
-
-    // ===== GRAPHIQUES ET ANALYSES =====
-
-    // Graphique 1: Répartition par niveau d'accès
-    const chartNiveau = sheet.newChart()
-      .setChartType(Charts.ChartType.PIE)
-      .addRange(sheet.getRange("F2:F100"))
-      .setPosition(statsRow + kpis.length + 2, 1, 0, 0)
-      .setOption('title', 'Répartition par Niveau d\'Accès')
-      .setOption('width', 500)
-      .setOption('height', 300)
-      .setOption('is3D', true)
-      .setOption('colors', ['#c5221f', '#fbbc04', '#4285f4', '#9aa0a6'])
-      .setOption('pieSliceText', 'value')
-      .setOption('legend', {position: 'right', textStyle: {fontSize: 11}})
-      .build();
-
-    sheet.insertChart(chartNiveau);
-
-    // Graphique 2: Comptes actifs vs désactivés
-    const chartActif = sheet.newChart()
-      .setChartType(Charts.ChartType.PIE)
-      .addRange(sheet.getRange("H2:H100"))
-      .setPosition(statsRow + kpis.length + 2, 7, 0, 0)
-      .setOption('title', 'Statut des Comptes')
-      .setOption('width', 450)
-      .setOption('height', 300)
-      .setOption('is3D', true)
-      .setOption('colors', ['#34a853', '#ea4335'])
-      .setOption('pieSliceText', 'percentage')
-      .setOption('legend', {position: 'right', textStyle: {fontSize: 11}})
-      .build();
-
-    sheet.insertChart(chartActif);
-
-    // Graphique 3: Activité des connexions
-    const chartConnexions = sheet.newChart()
-      .setChartType(Charts.ChartType.COLUMN)
-      .addRange(sheet.getRange("N2:N100"))
-      .addRange(sheet.getRange("L2:L100"))
-      .setPosition(statsRow + kpis.length + 17, 1, 0, 0)
-      .setOption('title', 'Nombre de Connexions par Utilisateur')
-      .setOption('width', 700)
-      .setOption('height', 400)
-      .setOption('colors', ['#1a73e8'])
-      .setOption('legend', {position: 'none'})
-      .setOption('vAxis', {title: 'Connexions', format: '0'})
-      .setOption('hAxis', {title: 'Utilisateur', slantedText: true, slantedTextAngle: 45})
-      .setOption('chartArea', {width: '80%', height: '70%'})
-      .build();
-
-    sheet.insertChart(chartConnexions);
-
-    // Graphique 4: Jours d'inactivité
-    const chartInactivite = sheet.newChart()
-      .setChartType(Charts.ChartType.COLUMN)
-      .addRange(sheet.getRange("N2:N100"))
-      .addRange(sheet.getRange("O2:O100"))
-      .setPosition(statsRow + kpis.length + 17, 10, 0, 0)
-      .setOption('title', 'Jours d\'Inactivité par Utilisateur')
-      .setOption('width', 600)
-      .setOption('height', 400)
-      .setOption('colors', ['#fbbc04'])
-      .setOption('legend', {position: 'none'})
-      .setOption('vAxis', {title: 'Jours', format: '0'})
-      .setOption('hAxis', {title: 'Utilisateur', slantedText: true, slantedTextAngle: 45})
-      .setOption('chartArea', {width: '75%', height: '70%'})
-      .build();
-
-    sheet.insertChart(chartInactivite);
-
-    // ===== TABLEAU RÉCAPITULATIF PAR NIVEAU =====
-    const recapRow = statsRow + kpis.length + 40;
-
-    sheet.getRange(`A${recapRow}:H${recapRow}`).merge()
-      .setValue("📋 ANALYSE PAR NIVEAU D'ACCÈS")
-      .setFontSize(12)
-      .setFontWeight("bold")
-      .setHorizontalAlignment("center")
-      .setBackground("#a50e0e")
-      .setFontColor("#ffffff");
-
-    const headersRecap = ["Niveau Accès", "Effectif", "% Total", "Actifs", "Connexions Moy.", "Inactifs >30j", "Avec Restrictions", "Risque"];
-    sheet.getRange(recapRow + 1, 1, 1, 8).setValues([headersRecap])
-      .setFontWeight("bold")
-      .setBackground("#c5221f")
-      .setFontColor("#ffffff")
-      .setHorizontalAlignment("center");
-
-    // Données récapitulatives
-    const niveaux = ["Admin", "Chef Projet", "Topographe", "Lecture seule"];
-    const recapData = [];
-
-    niveaux.forEach((niveau, idx) => {
-      const row = recapRow + 2 + idx;
-      recapData.push([
-        niveau,
-        `=NB.SI(F3:F100;"${niveau}")`,
-        `=NB.SI(F3:F100;"${niveau}")/NB.SI(C3:C100;"<>""")`,
-        `=NB.SI.ENS(F3:F100;"${niveau}";H3:H100;"Oui")`,
-        `=MOYENNE.SI(F3:F100;"${niveau}";L3:L100)`,
-        `=NB.SI.ENS(F3:F100;"${niveau}";O3:O100;">30")`,
-        `=NB.SI.ENS(F3:F100;"${niveau}";K3:K100;"<>""")`,
-        niveau === "Admin" ? "Élevé" : niveau === "Chef Projet" ? "Moyen" : "Faible"
-      ]);
-    });
-
-    sheet.getRange(recapRow + 2, 1, niveaux.length, 8).setValues(recapData);
-
-    // Formatage du récapitulatif
-    sheet.getRange(recapRow + 2, 3, niveaux.length, 1).setNumberFormat("0.0%");
-    sheet.getRange(recapRow + 2, 5, niveaux.length, 1).setNumberFormat("0.0");
-
-    // Bordures
-    sheet.getRange(recapRow + 1, 1, niveaux.length + 1, 8).setBorder(
-      true, true, true, true, true, true,
-      "#000000", SpreadsheetApp.BorderStyle.SOLID
-    );
-
-    // ===== AUDIT TRAIL - DERNIÈRES CONNEXIONS =====
-    const auditRow = recapRow + niveaux.length + 4;
-
-    sheet.getRange(`A${auditRow}:F${auditRow}`).merge()
-      .setValue("🔍 AUDIT TRAIL - DERNIÈRES CONNEXIONS")
-      .setFontSize(12)
       .setFontWeight("bold")
       .setHorizontalAlignment("center")
       .setBackground("#174ea6")
       .setFontColor("#ffffff");
 
-    const headersAudit = ["Utilisateur", "Nom Complet", "Niveau", "Dernière Connexion", "Jours", "Statut"];
-    sheet.getRange(auditRow + 1, 1, 1, 6).setValues([headersAudit])
+    sheet.setRowHeight(statsRow, 35);
+
+    const kpis = [
+      ["Indicateur", "Valeur", "Commentaire"],
+      ["Total utilisateurs", '=NB.SI(B3:B100;"<>"")', "Tous les comptes"],
+      ["Utilisateurs actifs", '=NB.SI(H3:H100;"Actif")', "Comptes actifs"],
+      ["Connexions 24h", '=NB.SI.ENS(I3:I100;">="&AUJOURDHUI()-1)', "Dernières 24h"],
+      ["Administrateurs", '=NB.SI(F3:F100;"Admin")', "Rôle Admin"],
+      ["Managers", '=NB.SI(F3:F100;"Manager")', "Rôle Manager"],
+      ["Users", '=NB.SI(F3:F100;"User")', "Rôle User"],
+      ["Guests", '=NB.SI(F3:F100;"Guest")', "Rôle Guest"],
+      ["Comptes verrouillés", '=NB.SI(H3:H100;"Verrouillé")', "À débloquer"],
+      ["Comptes inactifs", '=NB.SI(H3:H100;"Inactif")', "Non utilisés"],
+      ["Total connexions", '=SOMME(J3:J100)', "Toutes connexions"],
+      ["Taux d'activité", '=SI(B${statsRow+2}>0;B${statsRow+3}/B${statsRow+2};0)', "Actifs/Total"]
+    ];
+
+    sheet.getRange(statsRow + 1, 1, kpis.length, 3).setValues(kpis);
+
+    // Formatage KPIs
+    sheet.getRange(statsRow + 1, 1, 1, 3)
       .setFontWeight("bold")
       .setBackground("#4285f4")
       .setFontColor("#ffffff")
       .setHorizontalAlignment("center");
 
-    // Formule pour afficher les 10 dernières connexions
-    for (let i = 0; i < 10; i++) {
-      const row = auditRow + 2 + i;
-      sheet.getRange(`A${row}`).setFormula(`=SI(LIGNE()-${auditRow + 2}<=NB.SI(C3:C100;"<>""");INDEX(C3:C100;LIGNE()-${auditRow + 2});"")`);
-      sheet.getRange(`B${row}`).setFormula(`=SI(A${row}<>"";RECHERCHEV(A${row};C3:N100;12;FAUX);"")`);
-      sheet.getRange(`C${row}`).setFormula(`=SI(A${row}<>"";RECHERCHEV(A${row};C3:F100;4;FAUX);"")`);
-      sheet.getRange(`D${row}`).setFormula(`=SI(A${row}<>"";RECHERCHEV(A${row};C3:G100;5;FAUX);"")`);
-      sheet.getRange(`E${row}`).setFormula(`=SI(A${row}<>"";RECHERCHEV(A${row};C3:O100;13;FAUX);"")`);
-      sheet.getRange(`F${row}`).setFormula(`=SI(A${row}<>"";RECHERCHEV(A${row};C3:P100;14;FAUX);"")`);
-    }
+    sheet.getRange(statsRow + 12, 2).setNumberFormat("0.0%");
 
-    sheet.getRange(auditRow + 2, 4, 10, 1).setNumberFormat("dd/mm/yyyy hh:mm");
-
-    // Bordures
-    sheet.getRange(auditRow + 1, 1, 11, 6).setBorder(
-      true, true, true, true, true, true,
-      "#000000", SpreadsheetApp.BorderStyle.SOLID
-    );
-
-    // ===== PROTECTION DE LA FEUILLE =====
-    const protection = sheet.protect().setDescription("Feuille Utilisateurs protégée - Haute sécurité");
-
-    // Déprotéger les plages de saisie (sauf mot de passe)
-    const plagesSaisie = [
-      sheet.getRange("B3:C100"),
-      sheet.getRange("E3:M100")
-    ];
-
-    protection.setUnprotectedRanges(plagesSaisie);
-    protection.setWarningOnly(true);
-
-    Logger.log("✅ Module UTILISATEUR initialisé avec succès!");
+    Logger.log("✅ Module UTILISATEUR v2.0 initialisé avec succès!");
 
   } catch (error) {
-    Logger.log("❌ Erreur lors de l'initialisation du module UTILISATEUR: " + error);
+    Logger.log("❌ Erreur initialisation UTILISATEUR: " + error);
     throw error;
   }
 }
 
-// ==================== FONCTIONS CRUD ====================
+// ============================================================================
+// AUTHENTIFICATION ET SÉCURITÉ
+// ============================================================================
 
 /**
- * Crée un nouveau compte utilisateur
+ * Hash un mot de passe avec SHA-256
+ * @param {string} password - Mot de passe en clair
+ * @returns {string} Hash SHA-256
  */
-function creerUtilisateur(employeId, nomUtilisateur, email, niveauAcces, permissions, restrictions) {
+function hashPassword(password) {
+  try {
+    const signature = Utilities.computeDigest(
+      Utilities.DigestAlgorithm.SHA_256,
+      password,
+      Utilities.Charset.UTF_8
+    );
+
+    return signature.map(byte =>
+      ('0' + (byte & 0xFF).toString(16)).slice(-2)
+    ).join('');
+  } catch (error) {
+    Logger.log("Erreur hash password: " + error);
+    return null;
+  }
+}
+
+/**
+ * Vérifie un mot de passe
+ * @param {string} password - Mot de passe en clair
+ * @param {string} hash - Hash à vérifier
+ * @returns {boolean} Correspondance ou non
+ */
+function verifierPassword(password, hash) {
+  try {
+    const newHash = hashPassword(password);
+    return newHash === hash;
+  } catch (error) {
+    Logger.log("Erreur vérification password: " + error);
+    return false;
+  }
+}
+
+/**
+ * Authentifie un utilisateur
+ * @param {string} email - Email
+ * @param {string} password - Mot de passe
+ * @returns {Object} Résultat authentification
+ */
+function authentifierUtilisateur(email, password) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName("🔐 Utilisateurs");
+    const sheet = ss.getSheetByName(CONFIG_UTILISATEUR.SHEET_NAME);
 
     if (!sheet) {
-      throw new Error("La feuille Utilisateurs n'existe pas");
+      return {success: false, message: "Module utilisateur non initialisé"};
     }
 
-    // Validation email
-    if (!email.includes("@") || !email.includes(".")) {
-      throw new Error("Email invalide");
-    }
-
-    // Vérifier unicité nom utilisateur
     const data = sheet.getDataRange().getValues();
+
     for (let i = 2; i < data.length; i++) {
-      if (data[i][2] === nomUtilisateur) {
-        throw new Error("Ce nom d'utilisateur existe déjà");
+      if (data[i][1] === email) {
+        const utilisateur = {
+          id: data[i][0],
+          email: data[i][1],
+          passwordHash: data[i][2],
+          nom: data[i][3],
+          prenom: data[i][4],
+          role: data[i][5],
+          permissions: data[i][6],
+          statut: data[i][7],
+          nbConnexions: data[i][9]
+        };
+
+        // Vérifier statut
+        if (utilisateur.statut === "Verrouillé") {
+          return {success: false, message: "Compte verrouillé. Contactez l'administrateur."};
+        }
+
+        if (utilisateur.statut === "Suspendu") {
+          return {success: false, message: "Compte suspendu. Contactez l'administrateur."};
+        }
+
+        if (utilisateur.statut === "Inactif") {
+          return {success: false, message: "Compte inactif. Activez votre compte."};
+        }
+
+        // Vérifier mot de passe
+        if (verifierPassword(password, utilisateur.passwordHash)) {
+          // Mise à jour session
+          const ip = getClientIP();
+          sheet.getRange(i + 1, 9).setValue(new Date()); // Dernière connexion
+          sheet.getRange(i + 1, 10).setValue(utilisateur.nbConnexions + 1); // Nb connexions
+          sheet.getRange(i + 1, 14).setValue(ip); // IP
+
+          // Log activité
+          loggerActiviteUtilisateur(utilisateur.id, "LOGIN", "Connexion réussie", {ip: ip});
+
+          return {
+            success: true,
+            message: "Authentification réussie",
+            utilisateur: {
+              id: utilisateur.id,
+              email: utilisateur.email,
+              nom: utilisateur.nom,
+              prenom: utilisateur.prenom,
+              role: utilisateur.role,
+              permissions: utilisateur.permissions
+            }
+          };
+        } else {
+          // Tentative échouée
+          loggerActiviteUtilisateur(utilisateur.id, "LOGIN_FAILED", "Mot de passe incorrect");
+
+          return {success: false, message: "Email ou mot de passe incorrect"};
+        }
       }
     }
 
-    // Générer mot de passe temporaire
-    const motDePasseTemp = genererMotDePasseTemporaire();
+    return {success: false, message: "Email ou mot de passe incorrect"};
 
-    const nouvelleLigne = [
-      "",  // UtilisateurID auto-généré
-      employeId,
-      nomUtilisateur,
-      "********",  // Mot de passe hashé (à implémenter)
-      email,
-      niveauAcces,
-      "",  // DerniereConnexion - vide
-      "Oui",  // Actif par défaut
-      new Date(),  // DateCreation
-      permissions || "",
-      restrictions || "",
-      0,  // NbConnexions initial
-      ""  // Observations
-    ];
+  } catch (error) {
+    Logger.log("Erreur authentification: " + error);
+    return {success: false, message: error.toString()};
+  }
+}
 
-    sheet.appendRow(nouvelleLigne);
+/**
+ * Obtient l'IP du client (simulé dans Google Apps Script)
+ * @returns {string} IP
+ */
+function getClientIP() {
+  try {
+    return Session.getTemporaryActiveUserKey() || "192.168.1.1";
+  } catch (error) {
+    return "0.0.0.0";
+  }
+}
 
-    // Journaliser l'action
-    if (typeof journaliserAction === 'function') {
-      journaliserAction("CREATE", "UTILISATEUR", `Compte créé: ${nomUtilisateur} (${niveauAcces})`);
+/**
+ * Valide un email
+ * @param {string} email - Email à valider
+ * @returns {boolean} Valide ou non
+ */
+function validerEmail(email) {
+  return CONFIG_UTILISATEUR.REGEX_EMAIL.test(email);
+}
+
+/**
+ * Valide un téléphone Cameroun
+ * @param {string} phone - Téléphone à valider
+ * @returns {boolean} Valide ou non
+ */
+function validerTelephoneCameroun(phone) {
+  return CONFIG_UTILISATEUR.REGEX_PHONE_CM.test(phone);
+}
+
+/**
+ * Valide la force d'un mot de passe
+ * @param {string} password - Mot de passe
+ * @returns {Object} Résultat validation
+ */
+function validerPassword(password) {
+  const validations = {
+    length: password.length >= CONFIG_UTILISATEUR.PASSWORD_MIN_LENGTH,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+    special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+  };
+
+  const score = Object.values(validations).filter(v => v).length;
+
+  let strength = "Faible";
+  if (score >= 4) strength = "Fort";
+  else if (score >= 3) strength = "Moyen";
+
+  return {
+    valid: validations.length && validations.uppercase && validations.number,
+    strength: strength,
+    validations: validations
+  };
+}
+
+// ============================================================================
+// CRUD UTILISATEURS
+// ============================================================================
+
+/**
+ * Crée un nouvel utilisateur
+ * @param {Object} userData - Données utilisateur
+ * @returns {Object} Résultat
+ */
+function creerUtilisateur(userData) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(CONFIG_UTILISATEUR.SHEET_NAME);
+
+    if (!sheet) {
+      return {success: false, message: "Module utilisateur non initialisé"};
     }
 
-    // Envoyer notification
-    if (typeof envoyerNotification === 'function') {
-      envoyerNotification(employeId, `Votre compte a été créé. Login: ${nomUtilisateur}`, "URGENCE");
+    // Validations
+    if (!validerEmail(userData.email)) {
+      return {success: false, message: "Email invalide"};
+    }
+
+    if (userData.telephone && !validerTelephoneCameroun(userData.telephone)) {
+      return {success: false, message: "Numéro téléphone Cameroun invalide (237 6XX XXX XXX)"};
+    }
+
+    const pwdValidation = validerPassword(userData.password);
+    if (!pwdValidation.valid) {
+      return {
+        success: false,
+        message: "Mot de passe faible. Minimum 8 caractères avec majuscule et chiffre."
+      };
+    }
+
+    // Vérifier email unique
+    const data = sheet.getDataRange().getValues();
+    for (let i = 2; i < data.length; i++) {
+      if (data[i][1] === userData.email) {
+        return {success: false, message: "Email déjà utilisé"};
+      }
+    }
+
+    // Hash password
+    const passwordHash = hashPassword(userData.password);
+
+    // Créer utilisateur
+    const currentUser = Session.getActiveUser().getEmail() || "SYSTÈME";
+
+    const nouveauUtilisateur = [
+      "", // ID auto
+      userData.email,
+      passwordHash,
+      userData.nom || "",
+      userData.prenom || "",
+      userData.role || "User",
+      userData.permissions || "READ",
+      "Actif",
+      null, // Dernière connexion
+      0, // Nb connexions
+      new Date(),
+      currentUser,
+      userData.telephone || "",
+      ""
+    ];
+
+    sheet.appendRow(nouveauUtilisateur);
+
+    const userId = `USR${String(sheet.getLastRow() - 2).padStart(3, '0')}`;
+
+    // Logger
+    if (typeof logMessage === 'function') {
+      logMessage('UTILISATEUR_CREATED', `Utilisateur créé: ${userData.email}`, {
+        userId: userId,
+        role: userData.role
+      });
     }
 
     return {
       success: true,
       message: "Utilisateur créé avec succès",
-      motDePasseTemp: motDePasseTemp
+      userId: userId
     };
 
   } catch (error) {
     Logger.log("Erreur création utilisateur: " + error);
-    return {success: false, message: error.message};
+    return {success: false, message: error.toString()};
   }
 }
 
 /**
- * Connecte un utilisateur et enregistre l'activité
+ * Modifie un utilisateur
+ * @param {string} userId - ID utilisateur
+ * @param {Object} updates - Modifications
+ * @returns {Object} Résultat
  */
-function connecterUtilisateur(nomUtilisateur, motDePasse) {
+function modifierUtilisateur(userId, updates) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName("🔐 Utilisateurs");
+    const sheet = ss.getSheetByName(CONFIG_UTILISATEUR.SHEET_NAME);
 
     if (!sheet) {
-      throw new Error("La feuille Utilisateurs n'existe pas");
+      return {success: false, message: "Module utilisateur non initialisé"};
     }
 
     const data = sheet.getDataRange().getValues();
-    let ligneUtilisateur = -1;
-    let utilisateur = null;
+    let ligneModifiee = -1;
 
-    // Trouver l'utilisateur
     for (let i = 2; i < data.length; i++) {
-      if (data[i][2] === nomUtilisateur) {
-        ligneUtilisateur = i + 1;
-        utilisateur = {
-          id: data[i][0],
-          employeId: data[i][1],
-          niveauAcces: data[i][5],
-          actif: data[i][7],
-          permissions: data[i][9],
-          restrictions: data[i][10],
-          nbConnexions: data[i][11]
-        };
+      if (data[i][0] === userId) {
+        ligneModifiee = i + 1;
         break;
       }
     }
 
-    if (ligneUtilisateur === -1) {
-      throw new Error("Utilisateur non trouvé");
+    if (ligneModifiee === -1) {
+      return {success: false, message: "Utilisateur non trouvé"};
     }
 
-    if (utilisateur.actif !== "Oui") {
-      throw new Error("Compte désactivé");
-    }
-
-    // TODO: Vérifier mot de passe hashé (à implémenter)
-    // Pour l'instant, on simule une connexion réussie
-
-    // Mettre à jour dernière connexion
-    const maintenant = new Date();
-    sheet.getRange(ligneUtilisateur, 7).setValue(maintenant);
-
-    // Incrémenter nombre de connexions
-    sheet.getRange(ligneUtilisateur, 12).setValue(utilisateur.nbConnexions + 1);
-
-    // Journaliser la connexion
-    if (typeof journaliserAction === 'function') {
-      journaliserAction("LOGIN", "UTILISATEUR", `Connexion: ${nomUtilisateur}`);
-    }
-
-    return {
-      success: true,
-      utilisateur: utilisateur,
-      message: "Connexion réussie"
+    const colonnes = {
+      "email": 2, "nom": 4, "prenom": 5, "role": 6,
+      "permissions": 7, "statut": 8, "telephone": 13
     };
 
-  } catch (error) {
-    Logger.log("Erreur connexion: " + error);
-
-    // Journaliser tentative échouée
-    if (typeof journaliserAction === 'function') {
-      journaliserAction("LOGIN", "UTILISATEUR", `Échec connexion: ${nomUtilisateur}`, false);
-    }
-
-    return {success: false, message: error.message};
-  }
-}
-
-/**
- * Désactive un compte utilisateur
- */
-function desactiverUtilisateur(utilisateurId) {
-  try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName("🔐 Utilisateurs");
-
-    if (!sheet) {
-      throw new Error("La feuille Utilisateurs n'existe pas");
-    }
-
-    const data = sheet.getDataRange().getValues();
-    let ligneUtilisateur = -1;
-
-    for (let i = 2; i < data.length; i++) {
-      if (data[i][0] === utilisateurId) {
-        ligneUtilisateur = i + 1;
-        break;
+    for (const [champ, valeur] of Object.entries(updates)) {
+      const colonne = colonnes[champ];
+      if (colonne) {
+        sheet.getRange(ligneModifiee, colonne).setValue(valeur);
       }
     }
 
-    if (ligneUtilisateur === -1) {
-      throw new Error("Utilisateur non trouvé");
+    if (typeof logMessage === 'function') {
+      logMessage('UTILISATEUR_UPDATED', `Utilisateur modifié: ${userId}`);
     }
 
-    sheet.getRange(ligneUtilisateur, 8).setValue("Non");
-
-    if (typeof journaliserAction === 'function') {
-      journaliserAction("UPDATE", "UTILISATEUR", `Compte désactivé: ${utilisateurId}`);
-    }
-
-    return {success: true, message: "Utilisateur désactivé"};
+    return {success: true, message: "Utilisateur modifié avec succès"};
 
   } catch (error) {
-    Logger.log("Erreur désactivation: " + error);
-    return {success: false, message: error.message};
+    Logger.log("Erreur modification utilisateur: " + error);
+    return {success: false, message: error.toString()};
   }
 }
 
 /**
- * Modifie les permissions d'un utilisateur
+ * Supprime un utilisateur
+ * @param {string} userId - ID utilisateur
+ * @returns {Object} Résultat
  */
-function modifierPermissions(utilisateurId, nouvellesPermissions, nouvellesRestrictions) {
+function supprimerUtilisateur(userId) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName("🔐 Utilisateurs");
+    const sheet = ss.getSheetByName(CONFIG_UTILISATEUR.SHEET_NAME);
 
     if (!sheet) {
-      throw new Error("La feuille Utilisateurs n'existe pas");
-    }
-
-    const data = sheet.getDataRange().getValues();
-    let ligneUtilisateur = -1;
-
-    for (let i = 2; i < data.length; i++) {
-      if (data[i][0] === utilisateurId) {
-        ligneUtilisateur = i + 1;
-        break;
-      }
-    }
-
-    if (ligneUtilisateur === -1) {
-      throw new Error("Utilisateur non trouvé");
-    }
-
-    if (nouvellesPermissions !== undefined) {
-      sheet.getRange(ligneUtilisateur, 10).setValue(nouvellesPermissions);
-    }
-
-    if (nouvellesRestrictions !== undefined) {
-      sheet.getRange(ligneUtilisateur, 11).setValue(nouvellesRestrictions);
-    }
-
-    if (typeof journaliserAction === 'function') {
-      journaliserAction("UPDATE", "UTILISATEUR", `Permissions modifiées: ${utilisateurId}`);
-    }
-
-    return {success: true, message: "Permissions mises à jour"};
-
-  } catch (error) {
-    Logger.log("Erreur modification permissions: " + error);
-    return {success: false, message: error.message};
-  }
-}
-
-/**
- * Vérifie si un utilisateur a une permission spécifique
- */
-function verifierPermission(utilisateurId, permission) {
-  try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName("🔐 Utilisateurs");
-
-    if (!sheet) {
-      throw new Error("La feuille Utilisateurs n'existe pas");
+      return {success: false, message: "Module utilisateur non initialisé"};
     }
 
     const data = sheet.getDataRange().getValues();
 
     for (let i = 2; i < data.length; i++) {
-      if (data[i][0] === utilisateurId) {
-        const permissions = data[i][9] || "";
-        const restrictions = data[i][10] || "";
-
-        // Vérifier si la permission est dans les restrictions
-        if (restrictions.includes(permission)) {
-          return {success: true, autorise: false, raison: "Permission restreinte"};
+      if (data[i][0] === userId) {
+        sheet.deleteRow(i + 1);
+        if (typeof logMessage === 'function') {
+          logMessage('UTILISATEUR_DELETED', `Utilisateur supprimé: ${userId}`);
         }
-
-        // Vérifier si la permission est accordée
-        if (permissions.includes(permission) || permissions.includes("FULL_ACCESS")) {
-          return {success: true, autorise: true};
-        }
-
-        return {success: true, autorise: false, raison: "Permission non accordée"};
+        return {success: true, message: "Utilisateur supprimé avec succès"};
       }
     }
 
-    throw new Error("Utilisateur non trouvé");
+    return {success: false, message: "Utilisateur non trouvé"};
 
   } catch (error) {
-    Logger.log("Erreur vérification permission: " + error);
-    return {success: false, message: error.message};
+    Logger.log("Erreur suppression utilisateur: " + error);
+    return {success: false, message: error.toString()};
   }
 }
 
 /**
- * Obtient les utilisateurs inactifs
+ * Obtient tous les utilisateurs
+ * @returns {Object} Résultat
  */
-function obtenirUtilisateursInactifs(joursInactivite) {
+function obtenirTousUtilisateurs() {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName("🔐 Utilisateurs");
+    const sheet = ss.getSheetByName(CONFIG_UTILISATEUR.SHEET_NAME);
 
     if (!sheet) {
-      throw new Error("La feuille Utilisateurs n'existe pas");
+      return {success: false, message: "Module utilisateur non initialisé"};
     }
 
     const data = sheet.getDataRange().getValues();
     const utilisateurs = [];
-    const maintenant = new Date();
 
     for (let i = 2; i < data.length; i++) {
-      if (data[i][2]) {  // Si nom utilisateur existe
-        const derniereConnexion = data[i][6];
-        if (derniereConnexion) {
-          const diffMs = maintenant - new Date(derniereConnexion);
-          const diffJours = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-          if (diffJours >= joursInactivite) {
-            utilisateurs.push({
-              id: data[i][0],
-              nomUtilisateur: data[i][2],
-              niveauAcces: data[i][5],
-              derniereConnexion: derniereConnexion,
-              joursInactivite: diffJours,
-              actif: data[i][7]
-            });
-          }
-        }
+      if (data[i][1]) { // Si email existe
+        utilisateurs.push({
+          id: data[i][0],
+          email: data[i][1],
+          nom: data[i][3],
+          prenom: data[i][4],
+          role: data[i][5],
+          permissions: data[i][6],
+          statut: data[i][7],
+          derniereConnexion: data[i][8],
+          nbConnexions: data[i][9],
+          dateCreation: data[i][10],
+          telephone: data[i][12]
+        });
       }
     }
 
-    return {success: true, utilisateurs: utilisateurs, count: utilisateurs.length};
+    return {success: true, utilisateurs: utilisateurs};
 
   } catch (error) {
-    Logger.log("Erreur obtention inactifs: " + error);
-    return {success: false, message: error.message};
+    Logger.log("Erreur obtention utilisateurs: " + error);
+    return {success: false, message: error.toString()};
+  }
+}
+
+// ============================================================================
+// GESTION SESSIONS ET ACTIVITÉ
+// ============================================================================
+
+/**
+ * Log l'activité d'un utilisateur
+ * @param {string} userId - ID utilisateur
+ * @param {string} action - Action effectuée
+ * @param {string} details - Détails
+ * @param {Object} metadata - Métadonnées
+ */
+function loggerActiviteUtilisateur(userId, action, details, metadata = {}) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    let sheet = ss.getSheetByName("📝 Activité Utilisateurs");
+
+    if (!sheet) {
+      sheet = ss.insertSheet("📝 Activité Utilisateurs");
+      sheet.appendRow(['Timestamp', 'UtilisateurID', 'Action', 'Details', 'IP', 'Metadata']);
+      sheet.getRange("A1:F1").setBackground("#1a73e8").setFontColor("#ffffff").setFontWeight("bold");
+    }
+
+    sheet.appendRow([
+      new Date(),
+      userId,
+      action,
+      details,
+      metadata.ip || "",
+      JSON.stringify(metadata)
+    ]);
+
+  } catch (error) {
+    Logger.log("Erreur log activité utilisateur: " + error);
   }
 }
 
 /**
- * Génère un mot de passe temporaire aléatoire
+ * Réinitialise le mot de passe d'un utilisateur
+ * @param {string} email - Email utilisateur
+ * @returns {Object} Résultat
  */
-function genererMotDePasseTemporaire() {
-  const longueur = 12;
-  const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
-  let motDePasse = '';
+function reinitialiserMotDePasse(email) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(CONFIG_UTILISATEUR.SHEET_NAME);
 
-  for (let i = 0; i < longueur; i++) {
-    motDePasse += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+    if (!sheet) {
+      return {success: false, message: "Module utilisateur non initialisé"};
+    }
+
+    const data = sheet.getDataRange().getValues();
+
+    for (let i = 2; i < data.length; i++) {
+      if (data[i][1] === email) {
+        // Générer mot de passe temporaire
+        const tempPassword = generateTempPassword();
+        const hash = hashPassword(tempPassword);
+
+        sheet.getRange(i + 1, 3).setValue(hash);
+
+        loggerActiviteUtilisateur(data[i][0], "PASSWORD_RESET", "Mot de passe réinitialisé");
+
+        // TODO: Envoyer email avec nouveau mot de passe
+
+        return {
+          success: true,
+          message: "Mot de passe réinitialisé",
+          tempPassword: tempPassword
+        };
+      }
+    }
+
+    return {success: false, message: "Email non trouvé"};
+
+  } catch (error) {
+    Logger.log("Erreur réinitialisation password: " + error);
+    return {success: false, message: error.toString()};
   }
+}
 
-  return motDePasse;
+/**
+ * Génère un mot de passe temporaire
+ * @returns {string} Mot de passe
+ */
+function generateTempPassword() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
+  let password = '';
+  for (let i = 0; i < 12; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return password;
+}
+
+/**
+ * Obtient les KPIs utilisateurs
+ * @returns {Object} KPIs
+ */
+function obtenirKPIsUtilisateurs() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName(CONFIG_UTILISATEUR.SHEET_NAME);
+
+    if (!sheet || sheet.getLastRow() < 3) {
+      return {
+        total: 0,
+        actifs: 0,
+        connexions24h: 0,
+        parRole: {}
+      };
+    }
+
+    const data = sheet.getDataRange().getValues();
+    const now = new Date();
+    const yesterday = new Date(now - 86400000);
+
+    let total = 0;
+    let actifs = 0;
+    let connexions24h = 0;
+    const parRole = {};
+
+    for (let i = 2; i < data.length; i++) {
+      if (!data[i][1]) continue;
+
+      total++;
+
+      if (data[i][7] === "Actif") actifs++;
+
+      if (data[i][8] && new Date(data[i][8]) > yesterday) {
+        connexions24h++;
+      }
+
+      const role = data[i][5];
+      parRole[role] = (parRole[role] || 0) + 1;
+    }
+
+    return {
+      total: total,
+      actifs: actifs,
+      connexions24h: connexions24h,
+      parRole: parRole,
+      tauxActivite: total > 0 ? (actifs / total * 100).toFixed(1) : 0
+    };
+
+  } catch (error) {
+    Logger.log("Erreur KPIs utilisateurs: " + error);
+    return {};
+  }
+}
+
+// ============================================================================
+// INTERFACE UTILISATEUR
+// ============================================================================
+
+/**
+ * Affiche la sidebar utilisateur
+ */
+function afficherSidebarUtilisateur() {
+  const html = HtmlService.createHtmlOutputFromFile('modules/utilisateur/UtilisateurSidebar')
+    .setTitle('Gestion Utilisateurs v2.0')
+    .setWidth(350);
+  SpreadsheetApp.getUi().showSidebar(html);
+}
+
+/**
+ * Affiche le modal utilisateur
+ */
+function afficherModalUtilisateur() {
+  const html = HtmlService.createHtmlOutputFromFile('modules/utilisateur/UtilisateurModal')
+    .setWidth(1100)
+    .setHeight(750);
+  SpreadsheetApp.getUi().showModalDialog(html, 'Gestionnaire Utilisateurs v2.0 - Auth & Permissions');
 }

@@ -3,108 +3,439 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion Projets v2.0</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
-    .header { background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%); color: white; padding: 20px; text-align: center; }
-    .header h2 { font-size: 18px; margin-bottom: 5px; }
-    .header p { font-size: 11px; opacity: 0.9; }
-    .container { padding: 15px; }
-    .stat-card { background: white; border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 4px solid #1a73e8; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .stat-card h3 { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 5px; }
-    .stat-card .value { font-size: 22px; font-weight: 700; color: #1a73e8; }
-    .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s; }
-    .btn-primary { background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%); color: white; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4); }
-    .btn-success { background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%); color: white; }
-    .btn-success:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4); }
-    .section-title { font-size: 13px; font-weight: 600; color: #1a73e8; margin: 15px 0 10px; padding-bottom: 5px; border-bottom: 2px solid #1a73e8; }
-    .menu-item { background: white; border-radius: 6px; padding: 10px 12px; margin-bottom: 6px; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 8px; transition: all 0.2s; border: 1px solid #e0e0e0; }
-    .menu-item:hover { background: #1a73e8; color: white; transform: translateX(3px); }
-    .filter { margin-bottom: 15px; }
-    .filter select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 12px; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-size: 13px;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    h2 {
+      color: #1a73e8;
+      margin-bottom: 15px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      background: #1a73e8;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    .section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #1a73e8;
+    }
+
+    .section-title {
+      font-weight: bold;
+      color: #1a73e8;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .kanban {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .kanban-card {
+      background: white;
+      padding: 10px;
+      border-radius: 6px;
+      border-left: 3px solid #fbbc04;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+    }
+
+    .kanban-card:hover {
+      transform: translateX(3px);
+    }
+
+    .kanban-card.planifie {
+      border-left-color: #4285f4;
+    }
+
+    .kanban-card.en-cours {
+      border-left-color: #fbbc04;
+    }
+
+    .kanban-card.termine {
+      border-left-color: #34a853;
+    }
+
+    .kanban-title {
+      font-weight: bold;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .kanban-meta {
+      font-size: 10px;
+      color: #666;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 20px;
+      margin-top: 10px;
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-bottom: 15px;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -15px;
+      top: 5px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #1a73e8;
+    }
+
+    .timeline-item::after {
+      content: '';
+      position: absolute;
+      left: -11px;
+      top: 15px;
+      width: 2px;
+      height: 100%;
+      background: #e0e0e0;
+    }
+
+    .timeline-item:last-child::after {
+      display: none;
+    }
+
+    .risk-alert {
+      background: #fff3e0;
+      border: 1px solid #ff9800;
+      border-radius: 6px;
+      padding: 10px;
+      margin-top: 8px;
+    }
+
+    .risk-alert.critical {
+      background: #ffebee;
+      border-color: #ea4335;
+    }
+
+    .risk-alert.low {
+      background: #e8f5e9;
+      border-color: #34a853;
+    }
+
+    .risk-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: bold;
+      margin-left: 5px;
+    }
+
+    .risk-badge.critical {
+      background: #ea4335;
+      color: white;
+    }
+
+    .risk-badge.high {
+      background: #fbbc04;
+      color: #000;
+    }
+
+    .risk-badge.low {
+      background: #34a853;
+      color: white;
+    }
+
+    .evm-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .evm-stat {
+      background: white;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .evm-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #1a73e8;
+    }
+
+    .evm-label {
+      font-size: 10px;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    .evm-good {
+      color: #34a853;
+    }
+
+    .evm-bad {
+      color: #ea4335;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #f1f3f4;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background: #e8eaed;
+    }
+
+    .btn-export {
+      background: #34a853;
+      color: white;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0,0,0,0.1);
+      border-left-color: #1a73e8;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h2>📁 Gestion Projets</h2>
-    <p>Aménagement Périmètres Agricoles</p>
-  </div>
-
   <div class="container">
-    <div class="stat-card">
-      <h3>Projets Actifs</h3>
-      <div class="value" id="projetsActifs">-</div>
+    <h2>
+      📁 Projets v2.0
+      <span class="badge">EVM</span>
+      <span class="badge">IA</span>
+    </h2>
+
+    <!-- Section EVM Global -->
+    <div class="section">
+      <div class="section-title">📊 Performance EVM Globale</div>
+      <div class="evm-stats">
+        <div class="evm-stat">
+          <div class="evm-value evm-good" id="cpi-global">1.05</div>
+          <div class="evm-label">CPI Global</div>
+        </div>
+        <div class="evm-stat">
+          <div class="evm-value evm-bad" id="spi-global">0.92</div>
+          <div class="evm-label">SPI Global</div>
+        </div>
+      </div>
     </div>
 
-    <div class="stat-card" style="border-left-color: #34a853;">
-      <h3>Budget Total</h3>
-      <div class="value" id="budgetTotal">- FCFA</div>
+    <!-- Vue Kanban Mini -->
+    <div class="section">
+      <div class="section-title">🎯 Projets Actifs (Kanban)</div>
+      <div class="kanban" id="kanban-container">
+        <div class="kanban-card en-cours">
+          <div class="kanban-title">Logone et Chari</div>
+          <div class="kanban-meta">50% • CPI: 1.00</div>
+        </div>
+        <div class="kanban-card en-cours">
+          <div class="kanban-title">Périmètre Yaoundé</div>
+          <div class="kanban-meta">50% • CPI: 1.00</div>
+        </div>
+        <div class="kanban-card planifie">
+          <div class="kanban-title">Vallée du Noun</div>
+          <div class="kanban-meta">0% • En attente</div>
+        </div>
+      </div>
     </div>
 
-    <div class="section-title">🎯 Actions Rapides</div>
-    <button class="btn btn-success" onclick="nouveauProjet()">
-      <span>➕</span>
-      <span>Nouveau Projet</span>
+    <!-- Alertes Risques -->
+    <div class="section">
+      <div class="section-title">⚠️ Alertes Risques</div>
+      <div class="risk-alert">
+        <strong>PROJ001</strong>
+        <span class="risk-badge high">Moyen</span>
+        <div style="font-size: 11px; margin-top: 5px;">
+          SPI faible (0.50) - Surveiller délais
+        </div>
+      </div>
+      <div class="risk-alert critical">
+        <strong>PROJ003</strong>
+        <span class="risk-badge critical">Élevé</span>
+        <div style="font-size: 11px; margin-top: 5px;">
+          Financement non confirmé
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline Rapide -->
+    <div class="section">
+      <div class="section-title">📅 Timeline Rapide</div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <strong>Jan 2024</strong>
+          <div style="font-size: 11px; color: #666;">Démarrage Logone et Chari</div>
+        </div>
+        <div class="timeline-item">
+          <strong>Mar 2024</strong>
+          <div style="font-size: 11px; color: #666;">Lancement Yaoundé</div>
+        </div>
+        <div class="timeline-item">
+          <strong>Mai 2024</strong>
+          <div style="font-size: 11px; color: #666;">Planification Noun</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Boutons d'action -->
+    <button class="btn btn-primary" onclick="ouvrirModal()">
+      🎯 Ouvrir Gestionnaire Complet
     </button>
-    <button class="btn btn-primary" onclick="ouvrirGestionnaire()">
-      <span>🎛️</span>
-      <span>Gestionnaire Complet</span>
+
+    <button class="btn btn-export" onclick="exporterPDF()">
+      📄 Export Rapport PDF
     </button>
 
-    <div class="section-title">🔍 Filtres</div>
-    <div class="filter">
-      <select id="filtreStatut" onchange="appliquerFiltre()">
-        <option value="">Tous les statuts</option>
-        <option value="En cours">En cours</option>
-        <option value="Planifié">Planifié</option>
-        <option value="Terminé">Terminé</option>
-        <option value="En attente">En attente</option>
-        <option value="Suspendu">Suspendu</option>
-      </select>
-    </div>
-
-    <div class="section-title">📊 Navigation</div>
-    <div class="menu-item" onclick="naviguer('projets')">
-      <span>📁</span>
-      <span>Voir tous les projets</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('dashboard')">
-      <span>📊</span>
-      <span>Tableau de bord</span>
-    </div>
-    <div class="menu-item" onclick="naviguer('rapports')">
-      <span>📈</span>
-      <span>Rapports</span>
-    </div>
-    <div class="menu-item" onclick="retourMenu()">
-      <span>🏠</span>
-      <span>Menu Principal</span>
-    </div>
+    <button class="btn btn-secondary" onclick="rafraichir()">
+      🔄 Rafraîchir
+    </button>
   </div>
 
   <script>
-    function nouveauProjet() {
-      ouvrirGestionnaire();
-    }
-
-    function ouvrirGestionnaire() {
+    // Fonction pour ouvrir le modal complet
+    function ouvrirModal() {
       google.script.run.afficherModalProjet();
     }
 
-    function naviguer(dest) {
-      if (dest === 'projets') google.script.run.naviguerVersProjets();
-      else if (dest === 'dashboard') google.script.run.naviguerVersTableauDeBord();
+    // Fonction pour exporter en PDF
+    function exporterPDF() {
+      google.script.run.withSuccessHandler(onExportSuccess)
+        .withFailureHandler(onError)
+        .genererRapportPDF();
     }
 
-    function retourMenu() {
-      google.script.run.afficherMenuPrincipal();
+    function onExportSuccess(result) {
+      alert('✅ Rapport PDF généré avec succès !');
     }
 
-    function appliquerFiltre() {
-      const statut = document.getElementById('filtreStatut').value;
-      // TODO: Implémenter le filtrage
-      alert('Filtre: ' + (statut || 'Tous'));
+    function onError(error) {
+      alert('❌ Erreur : ' + error.message);
+    }
+
+    // Fonction de rafraîchissement
+    function rafraichir() {
+      location.reload();
+    }
+
+    // Charger les données au démarrage
+    window.onload = function() {
+      chargerDonneesEVM();
+      chargerProjetsKanban();
+    };
+
+    function chargerDonneesEVM() {
+      google.script.run.withSuccessHandler(function(data) {
+        if (data && data.success) {
+          // Mettre à jour les valeurs EVM
+          document.getElementById('cpi-global').textContent = data.cpi.toFixed(2);
+          document.getElementById('spi-global').textContent = data.spi.toFixed(2);
+
+          // Couleurs conditionnelles
+          const cpiElement = document.getElementById('cpi-global');
+          const spiElement = document.getElementById('spi-global');
+
+          cpiElement.className = data.cpi >= 1 ? 'evm-value evm-good' : 'evm-value evm-bad';
+          spiElement.className = data.spi >= 1 ? 'evm-value evm-good' : 'evm-value evm-bad';
+        }
+      }).obtenirTousProjets();
+    }
+
+    function chargerProjetsKanban() {
+      google.script.run.withSuccessHandler(function(data) {
+        if (data && data.success && data.projets) {
+          const container = document.getElementById('kanban-container');
+          container.innerHTML = '';
+
+          data.projets.slice(0, 5).forEach(function(projet) {
+            const card = document.createElement('div');
+            const statut = projet.statut.toLowerCase().replace(/ /g, '-');
+            card.className = 'kanban-card ' + statut;
+            card.innerHTML = `
+              <div class="kanban-title">${projet.nom.substring(0, 30)}...</div>
+              <div class="kanban-meta">
+                ${(projet.progression * 100).toFixed(0)}% •
+                CPI: ${(projet.cpi || 0).toFixed(2)}
+              </div>
+            `;
+            container.appendChild(card);
+          });
+        }
+      }).obtenirTousProjets();
     }
   </script>
 </body>

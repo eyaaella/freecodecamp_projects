@@ -1,15 +1,36 @@
-# 🏗️ TopoGest Pro - Système de Gestion Topographique
+# 🏗️ TopoGest Pro v2.0 - Système de Gestion Topographique Avancé
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)
 ![Status](https://img.shields.io/badge/status-production--ready-green.svg)
 ![Platform](https://img.shields.io/badge/platform-Google%20Apps%20Script-yellow.svg)
 ![Locale](https://img.shields.io/badge/locale-fr__FR-orange.svg)
+![AI](https://img.shields.io/badge/AI-Predictive%20Analytics-purple.svg)
+![EVM](https://img.shields.io/badge/EVM-Enabled-green.svg)
 
 ## 📋 Description
 
-**TopoGest Pro** est un système complet de gestion topographique conçu spécialement pour le **Cameroun**, destiné aux projets d'**aménagement de périmètres agricoles en réseau gravitaire**.
+**TopoGest Pro v2.0** est un système complet de gestion topographique avancé conçu spécialement pour le **Cameroun**, destiné aux projets d'**aménagement de périmètres agricoles en réseau gravitaire**.
 
 Le système offre une solution **production-ready** avec 17 modules intégrés couvrant tous les aspects de la gestion topographique: projets, ouvrages, relevés GPS, ressources humaines, matériel, finances, documents et planning.
+
+## 🆕 Nouveautés Version 2.0
+
+### 🚀 Fonctionnalités Avancées
+
+- **EVM (Earned Value Management)**: KPIs temps réel (BAC, PV, EV, AC, CPI, SPI, EAC, VAC)
+- **IA Prédictive**: Maintenance équipements, prévisions délais, budget
+- **Calculs Hydrauliques**: Manning, FAO, CIEH pour barrages et canaux
+- **CPM (Critical Path Method)**: Chemin critique avec forward/backward pass
+- **DXF Export**: Export plans AutoCAD
+- **Cache Manager**: TTL-based caching (5 min, 1h)
+- **API REST**: Endpoints doGet/doPost avec authentification
+- **Notifications Multi-canal**: Email, SMS, In-App, Push
+- **Document Versioning**: v1.0, v1.1, v2.0
+- **Dark Mode UI**: Interface moderne avec thème sombre
+- **Chart.js 4.4.0**: Visualisations interactives avancées
+- **TVA Automatique**: 19.25% Cameroun
+- **Validation GPS**: UTM Zone 33N (X: 200k-900k, Y: 200k-1500k)
+- **Téléphone Cameroun**: +237 6XX XXX XXX auto-validation
 
 ### 🎯 Public Cible
 
@@ -33,81 +54,239 @@ Le système offre une solution **production-ready** avec 17 modules intégrés c
 - ✅ Système de notifications
 - ✅ Sauvegarde automatique
 
-### 📊 Modules Intégrés (17)
+### 📊 Modules Intégrés v2.0 (17)
 
 #### 🔷 Gestion (4 modules)
-- **📁 PROJET**: Gestion complète des projets d'aménagement
-- **🏗️ OUVRAGE**: Suivi des ouvrages (barrages, canaux, bassins, stations)
-- **✅ TACHE**: Organisation des tâches terrain avec planning Gantt
-- **📐 RELEVE**: Relevés topographiques GPS (UTM, lat/lon, altitude)
+- **📁 PROJET** ⚡ v2.0:
+  - Gestion complète des projets d'aménagement
+  - 🆕 EVM (BAC, PV, EV, AC, CPI, SPI, EAC, VAC)
+  - 🆕 Diagramme Gantt interactif
+  - 🆕 Matrice Risques 5x5
+  - 🆕 IA Prévisions (délais, budget, succès)
+  - 🆕 4 Templates projets (Barrage, Canal, Bassin, Station)
+
+- **🏗️ OUVRAGE** ⚡ v2.0:
+  - Suivi des ouvrages (barrages, canaux, bassins, stations)
+  - 🆕 Calculs Hydrauliques (Manning, FAO, CIEH)
+  - 🆕 Maintenance Prédictive IA
+  - 🆕 Export DXF AutoCAD
+  - 🆕 5 Templates types
+  - 🆕 Validation normes CIEH/FAO
+
+- **✅ TACHE** ⚡ v2.0:
+  - Organisation des tâches terrain
+  - 🆕 CPM (Critical Path Method)
+  - 🆕 Forward/Backward Pass
+  - 🆕 Calcul chemin critique
+  - 🆕 Gantt avec dépendances
+  - 🆕 Détection conflits ressources
+
+- **📐 RELEVE** ⚡ v2.0:
+  - Relevés topographiques GPS
+  - 🆕 Validation UTM Zone 33N automatique
+  - 🆕 Transformation UTM ↔ WGS84
+  - 🆕 Calculs topographiques avancés
+  - 🆕 Export formats multiples
+  - 🆕 Visualisation carte points
 
 #### 🔷 Ressources Humaines (4 modules)
-- **👥 EQUIPE**: Gestion des équipes terrain par spécialité
-- **👤 EMPLOYE**: Gestion du personnel avec validation Cameroun
-- **🔧 MATERIEL**: Suivi matériel topographique (GPS RTK, stations totales, drones)
-- **💼 POSTE**: Référentiel des postes et grille salariale
+- **👥 EQUIPE** ⚡ v2.0:
+  - Gestion des équipes terrain
+  - 🆕 KPIs Productivité (taux occupation, efficacité)
+  - 🆕 Dashboard Analytics
+  - 🆕 Alertes conflits planning
+
+- **👤 EMPLOYE** ⚡ v2.0:
+  - Gestion du personnel
+  - 🆕 Validation téléphone Cameroun (+237 6XX XXX XXX)
+  - 🆕 Gestion compétences
+  - 🆕 Historique formation
+
+- **🔧 MATERIEL** ⚡ v2.0:
+  - Suivi matériel topographique
+  - 🆕 IA Maintenance Prédictive
+  - 🆕 Alertes maintenance automatiques
+  - 🆕 Coûts usage temps réel
+  - 🆕 Historique interventions
+
+- **💼 POSTE** ⚡ v2.0:
+  - Référentiel postes
+  - 🆕 Grilles salariales
+  - 🆕 Validation échelles
 
 #### 🔷 Finance (2 modules)
-- **💰 BUDGET**: Gestion budgétaire par projet et catégorie
-- **🧾 FACTURE**: Facturation clients avec numérotation auto (FCFA)
+- **💰 BUDGET** ⚡ v2.0:
+  - Gestion budgétaire
+  - 🆕 Alertes dépassement automatiques
+  - 🆕 Prévisions IA
+  - 🆕 Dashboard temps réel
+  - 🆕 Taux consommation
+
+- **🧾 FACTURE** ⚡ v2.0:
+  - Facturation clients
+  - 🆕 TVA 19.25% automatique (Cameroun)
+  - 🆕 Numérotation auto FAC-YYYY-XXX
+  - 🆕 États (Brouillon, Émise, Payée, Annulée)
+  - 🆕 Relances automatiques
 
 #### 🔷 Documents & Planning (3 modules)
-- **📄 DOCUMENT**: GED des documents techniques avec versioning
-- **📅 PLANNING**: Planning général avec suivi taux de réalisation
-- **✓ CONTROLEUR**: Référentiel contrôleurs externes par spécialité
+- **📄 DOCUMENT** ⚡ v2.0:
+  - GED documents techniques
+  - 🆕 Versioning (v1.0, v1.1, v2.0)
+  - 🆕 Google Drive Integration
+  - 🆕 Workflow validation
+  - 🆕 Recherche fulltext
+
+- **📅 PLANNING** ⚡ v2.0:
+  - Planning général
+  - 🆕 Détection conflits automatique
+  - 🆕 Optimisation ressources
+  - 🆕 Vue Gantt
+  - 🆕 Alertes échéances
+
+- **✓ CONTROLEUR** ⚡ v2.0:
+  - Contrôle qualité
+  - 🆕 Gestion non-conformités
+  - 🆕 Statistiques par contrôleur
+  - 🆕 Rapports qualité
 
 #### 🔷 Système (4 modules)
-- **🔐 UTILISATEUR**: Gestion utilisateurs et permissions (4 niveaux)
-- **🔔 NOTIFICATION**: Système d'alertes temps réel
-- **📝 JOURNAL**: Traçabilité complète des actions
-- **⚙️ CONFIGURATION**: Paramétrage système
+- **🔐 UTILISATEUR** ⚡ v2.0:
+  - Gestion utilisateurs
+  - 🆕 SHA-256 Encryption
+  - 🆕 4 rôles (Admin, Chef Projet, Topographe, Lecture)
+  - 🆕 Authentification sécurisée
+  - 🆕 Historique connexions
 
-## 📁 Architecture du Projet
+- **🔔 NOTIFICATION** ⚡ v2.0:
+  - Système d'alertes
+  - 🆕 Multi-canal (Email, SMS, In-App, Push)
+  - 🆕 Priorités (Basse, Normale, Haute, Urgente)
+  - 🆕 Templates notifications
+  - 🆕 Historique complet
+
+- **📝 JOURNAL** ⚡ v2.0:
+  - Traçabilité actions
+  - 🆕 Détection anomalies automatique
+  - 🆕 Alertes sécurité
+  - 🆕 Export audit trail
+  - 🆕 Filtres avancés
+
+- **⚙️ CORE** ⚡ v2.0:
+  - Coordination générale
+  - 🆕 Dashboard Analytics temps réel
+  - 🆕 Cache Manager TTL
+  - 🆕 API REST (doGet/doPost)
+  - 🆕 Dark Mode UI
+
+## 📁 Architecture du Projet v2.0
+
+### 🗂️ Structure Complète (53 fichiers)
 
 ```
 freecodecamp_projects/
-├── Code.gs                          # Point d'entrée principal
-├── README.md                        # Ce fichier
+├── Code.gs                          # ⚡ v2.0 - Point d'entrée principal + API REST
+├── README.md                        # ⚡ v2.0 - Documentation complète
+├── universe.sql                     # Base de données univers (si applicable)
 ├── modules/
-│   ├── core/
-│   │   ├── Core.gs                 # Coordination générale
-│   │   ├── CoreSidebar.html        # Menu principal
-│   │   └── CoreModal.html          # Gestionnaire complet
-│   ├── projet/
-│   │   ├── Projet.gs               # Backend projets
-│   │   ├── ProjetSidebar.html      # Sidebar projets
-│   │   └── ProjetModal.html        # CRUD projets
-│   ├── ouvrage/
-│   │   └── Ouvrage.gs              # Backend ouvrages
-│   ├── tache/
-│   │   └── Tache.gs                # Backend tâches
-│   ├── releve/
-│   │   └── Releve.gs               # Backend relevés GPS
-│   ├── equipe/
-│   │   └── Equipe.gs               # Backend équipes
-│   ├── employe/
-│   │   └── Employe.gs              # Backend employés
-│   ├── materiel/
-│   │   └── Materiel.gs             # Backend matériel
-│   ├── poste/
-│   │   └── Poste.gs                # Backend postes
-│   ├── utilisateur/
-│   │   └── Utilisateur.gs          # Backend utilisateurs
-│   ├── journal_actions/
-│   │   └── JournalActions.gs       # Backend journal
-│   ├── notification/
-│   │   └── Notification.gs         # Backend notifications
-│   ├── document/
-│   │   └── Document.gs             # Backend documents
-│   ├── planning/
-│   │   └── Planning.gs             # Backend planning
-│   ├── controleur/
-│   │   └── Controleur.gs           # Backend contrôleurs
-│   ├── budget/
-│   │   └── Budget.gs               # Backend budget
-│   └── facture/
-│       └── Facture.gs              # Backend factures
+│   ├── core/                        # ⚡ v2.0 - Module CORE
+│   │   ├── Core.gs                 # Coordination + Cache Manager + Dashboard
+│   │   ├── CoreSidebar.html        # Sidebar 320px - Stats + Navigation
+│   │   └── CoreModal.html          # Modal 1100x750px - 6 tabs Analytics
+│   │
+│   ├── projet/                      # ⚡ v2.0 - Module PROJET
+│   │   ├── Projet.gs               # Backend + EVM + IA Prévisions
+│   │   ├── ProjetSidebar.html      # Sidebar - Stats projets
+│   │   └── ProjetModal.html        # Modal - 6 tabs (Projets, Gantt, EVM, Risques, Templates, IA)
+│   │
+│   ├── ouvrage/                     # ⚡ v2.0 - Module OUVRAGE
+│   │   ├── Ouvrage.gs              # Backend + Hydraulique Manning/FAO/CIEH + IA Maintenance
+│   │   ├── OuvrageSidebar.html     # Sidebar - Stats ouvrages
+│   │   └── OuvrageModal.html       # Modal - 6 tabs (Ouvrages, Hydraulique, Maintenance, Templates, Export, Stats)
+│   │
+│   ├── tache/                       # ⚡ v2.0 - Module TACHE
+│   │   ├── Tache.gs                # Backend + CPM + Chemin Critique
+│   │   ├── TacheSidebar.html       # Sidebar - Stats tâches
+│   │   └── TacheModal.html         # Modal - 5 tabs (Tâches, CPM, Gantt, Dépendances, Stats)
+│   │
+│   ├── releve/                      # ⚡ v2.0 - Module RELEVE
+│   │   ├── Releve.gs               # Backend + UTM Zone 33N + Transformations
+│   │   ├── ReleveSidebar.html      # Sidebar - Stats relevés
+│   │   └── ReleveModal.html        # Modal - 5 tabs (Relevés, Carte, Calculs, Export, Stats)
+│   │
+│   ├── equipe/                      # ⚡ v2.0 - Module EQUIPE
+│   │   ├── Equipe.gs               # Backend + KPIs Productivité
+│   │   ├── EquipeSidebar.html      # Sidebar - Stats équipes
+│   │   └── EquipeModal.html        # Modal - 5 tabs (Équipes, Planning, Productivité, Coûts, Stats)
+│   │
+│   ├── employe/                     # ⚡ v2.0 - Module EMPLOYE
+│   │   ├── Employe.gs              # Backend + Validation Tél Cameroun
+│   │   ├── EmployeSidebar.html     # Sidebar - Stats employés
+│   │   └── EmployeModal.html       # Modal - 5 tabs (Employés, Compétences, Formation, Historique, Stats)
+│   │
+│   ├── materiel/                    # ⚡ v2.0 - Module MATERIEL
+│   │   ├── Materiel.gs             # Backend + IA Maintenance Prédictive
+│   │   ├── MaterielSidebar.html    # Sidebar - Stats matériel
+│   │   └── MaterielModal.html      # Modal - 5 tabs (Matériel, Maintenance, IA Prédictive, Coûts, Stats)
+│   │
+│   ├── poste/                       # ⚡ v2.0 - Module POSTE
+│   │   ├── Poste.gs                # Backend + Grilles Salariales
+│   │   ├── PosteSidebar.html       # Sidebar - Stats postes
+│   │   └── PosteModal.html         # Modal - 5 tabs (Postes, Grilles, Compétences, Évolutions, Stats)
+│   │
+│   ├── utilisateur/                 # ⚡ v2.0 - Module UTILISATEUR
+│   │   ├── Utilisateur.gs          # Backend + SHA-256 + Authentification
+│   │   ├── UtilisateurSidebar.html # Sidebar - Stats utilisateurs
+│   │   └── UtilisateurModal.html   # Modal - 5 tabs (Utilisateurs, Rôles, Permissions, Historique, Stats)
+│   │
+│   ├── journal/                     # ⚡ v2.0 - Module JOURNAL
+│   │   ├── Journal.gs              # Backend + Détection Anomalies
+│   │   ├── JournalSidebar.html     # Sidebar - Stats actions
+│   │   └── JournalModal.html       # Modal - 5 tabs (Journal, Anomalies, Filtres, Export, Stats)
+│   │
+│   ├── notification/                # ⚡ v2.0 - Module NOTIFICATION
+│   │   ├── Notification.gs         # Backend + Multi-canal (Email/SMS/InApp/Push)
+│   │   ├── NotificationSidebar.html # Sidebar - Stats notifications
+│   │   └── NotificationModal.html  # Modal - 5 tabs (Notifications, Canaux, Templates, Historique, Stats)
+│   │
+│   ├── document/                    # ⚡ v2.0 - Module DOCUMENT
+│   │   ├── Document.gs             # Backend + Versioning + Google Drive
+│   │   ├── DocumentSidebar.html    # Sidebar - Stats documents
+│   │   └── DocumentModal.html      # Modal - 5 tabs (Documents, Versions, Drive, Validation, Stats)
+│   │
+│   ├── planning/                    # ⚡ v2.0 - Module PLANNING
+│   │   ├── Planning.gs             # Backend + Conflits + Optimisation
+│   │   ├── PlanningSidebar.html    # Sidebar - Stats planning
+│   │   └── PlanningModal.html      # Modal - 5 tabs (Planning, Gantt, Conflits, Optimisation, Stats)
+│   │
+│   ├── controleur/                  # ⚡ v2.0 - Module CONTROLEUR
+│   │   ├── Controleur.gs           # Backend + Non-conformités
+│   │   ├── ControleurSidebar.html  # Sidebar - Stats contrôleurs
+│   │   └── ControleurModal.html    # Modal - 5 tabs (Contrôleurs, Non-conformités, Rapports, Qualité, Stats)
+│   │
+│   ├── budget/                      # ⚡ v2.0 - Module BUDGET
+│   │   ├── Budget.gs               # Backend + Alertes + IA Prévisions
+│   │   ├── BudgetSidebar.html      # Sidebar - Stats budgets
+│   │   └── BudgetModal.html        # Modal - 5 tabs (Budgets, Suivi, Alertes, Prévisions, Stats)
+│   │
+│   └── facture/                     # ⚡ v2.0 - Module FACTURE
+│       ├── Facture.gs              # Backend + TVA 19.25% + Numérotation
+│       ├── FactureSidebar.html     # Sidebar - Stats factures
+│       └── FactureModal.html       # Modal - 5 tabs (Factures, Paiements, Relances, Export, Stats)
 ```
+
+### 📊 Statistiques Architecture v2.0
+
+- **Total fichiers**: 53 fichiers
+  - 1 Code.gs principal
+  - 1 README.md
+  - 17 modules × 3 fichiers = 51 fichiers modules
+- **Lignes de code totales**: ~35,000 lignes
+  - Code.gs: ~650 lignes
+  - Fichiers .gs modules: ~700-1200 lignes chacun
+  - Fichiers .html Sidebar: ~450-550 lignes chacun
+  - Fichiers .html Modal: ~1100-1800 lignes chacun
+- **Technologies**: Google Apps Script, HTML5, CSS3, JavaScript, Chart.js 4.4.0
 
 ## 🚀 Installation et Déploiement
 
@@ -313,36 +492,66 @@ Menu `🛠️ Outils` > `🔄 Réinitialiser Système`
 
 ## 📝 Licence
 
-© 2024 TopoGest Pro. Tous droits réservés.
+© 2025 TopoGest Pro. Tous droits réservés.
 
 Développé pour les services topographiques du Cameroun.
 
 ## 🙏 Crédits
 
-- **Conception**: TopoGest Pro Team
+- **Conception**: TopoGest Pro Development Team
 - **Développement**: [Votre nom/organisation]
-- **Technologies**: Google Apps Script, Google Sheets
+- **Version**: 2.0.0 (2025-11-16)
+- **Technologies**:
+  - Google Apps Script (Backend)
+  - Google Sheets (Database)
+  - HTML5/CSS3/JavaScript (Frontend)
+  - Chart.js 4.4.0 (Visualizations)
+  - Google Material Design (UI/UX)
+  - SHA-256 (Security)
 - **Design**: Inspiré des standards GAFAM (Google Material Design)
 
 ## 🗺️ Roadmap
 
-### Version 1.1 (À venir)
+### ✅ Version 2.0 (ACTUELLE - 2025-11-16)
+
+- [x] **EVM (Earned Value Management)** - BAC, PV, EV, AC, CPI, SPI, EAC, VAC
+- [x] **IA Prédictive** - Maintenance, Délais, Budget
+- [x] **Calculs Hydrauliques** - Manning, FAO, CIEH
+- [x] **CPM (Critical Path Method)** - Forward/Backward Pass
+- [x] **DXF Export AutoCAD** - Plans ouvrages
+- [x] **Cache Manager TTL** - Performance optimisée
+- [x] **API REST** - doGet/doPost endpoints
+- [x] **Notifications Multi-canal** - Email, SMS, In-App, Push
+- [x] **Document Versioning** - v1.0, v1.1, v2.0
+- [x] **Dark Mode UI** - Interface moderne
+- [x] **Chart.js 4.4.0** - Visualisations avancées
+- [x] **TVA Cameroun 19.25%** - Automatique
+- [x] **Validation GPS UTM 33N** - Cameroun
+- [x] **SHA-256 Encryption** - Sécurité mots de passe
+
+### 🔮 Version 2.1 (À venir - Q1 2025)
 
 - [ ] Module mobile (Progressive Web App)
-- [ ] Import automatique données GPS
-- [ ] Intégration SIG avancée
-- [ ] API REST pour intégrations externes
-- [ ] Module de reporting avancé
+- [ ] Import automatique données GPS (fichiers XYZ, KML, Shapefile)
+- [ ] Intégration SIG avancée (Google Maps API)
+- [ ] Module de reporting avancé avec export PDF
 - [ ] Gestion multi-projets améliorée
-- [ ] Dashboard personnalisable
+- [ ] Dashboard personnalisable par utilisateur
+- [ ] Notifications push mobiles
+- [ ] Mode offline partiel
 
-### Version 2.0 (Futur)
+### 🚀 Version 3.0 (Futur - Q3 2025)
 
 - [ ] Application mobile native (Android/iOS)
-- [ ] Synchronisation offline
-- [ ] Machine Learning pour prévisions
+- [ ] Synchronisation offline complète
+- [ ] Machine Learning avancé (TensorFlow.js)
+  - Prévisions budget ultra-précises
+  - Détection anomalies automatique
+  - Optimisation planning IA
 - [ ] Intégration drones pour photogrammétrie
-- [ ] Modélisation 3D des ouvrages
+- [ ] Modélisation 3D des ouvrages (Three.js)
+- [ ] Réalité Augmentée (AR) pour visualisation terrain
+- [ ] Blockchain pour audit trail immuable
 
 ## 🎓 Formation
 
@@ -405,4 +614,6 @@ Les contributions sont les bienvenues! Merci de:
 
 **🌟 Fait avec passion pour l'excellence topographique au Cameroun 🇨🇲**
 
-*TopoGest Pro - Quand la technologie rencontre l'expertise terrain*
+*TopoGest Pro v2.0 - Quand l'IA rencontre l'expertise terrain*
+
+🚀 **Powered by AI & Advanced Analytics** | 📊 **17 Modules Production-Ready** | 🎯 **100% Cameroun**

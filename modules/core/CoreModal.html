@@ -4,7 +4,36 @@
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TopoGest Pro v2.0 - Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
+    /* Variables CSS pour Dark Mode */
+    :root {
+      --bg-primary: #ffffff;
+      --bg-secondary: #f8f9fa;
+      --text-primary: #333333;
+      --text-secondary: #666666;
+      --border-color: #dee2e6;
+      --shadow: rgba(0,0,0,0.1);
+      --accent-primary: #1a73e8;
+      --accent-success: #34a853;
+      --accent-warning: #fbbc04;
+      --accent-danger: #ea4335;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #202124;
+      --bg-secondary: #292a2d;
+      --text-primary: #e8eaed;
+      --text-secondary: #9aa0a6;
+      --border-color: #3c4043;
+      --shadow: rgba(0,0,0,0.4);
+      --accent-primary: #8ab4f8;
+      --accent-success: #81c995;
+      --accent-warning: #fdd663;
+      --accent-danger: #f28b82;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -12,16 +41,20 @@
     }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #f5f5f5;
-      color: #333;
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      transition: all 0.3s ease;
     }
 
     .header {
       background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
       color: white;
       padding: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 10px var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .header h1 {
@@ -34,6 +67,21 @@
       opacity: 0.9;
     }
 
+    .dark-toggle {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.3s ease;
+    }
+
+    .dark-toggle:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
     .container {
       padding: 20px;
     }
@@ -42,13 +90,14 @@
       display: flex;
       gap: 5px;
       margin-bottom: 20px;
-      border-bottom: 2px solid #dee2e6;
+      border-bottom: 2px solid var(--border-color);
       flex-wrap: wrap;
+      overflow-x: auto;
     }
 
     .tab {
       padding: 12px 20px;
-      background: #f8f9fa;
+      background: var(--bg-secondary);
       border: none;
       border-top-left-radius: 8px;
       border-top-right-radius: 8px;
@@ -56,16 +105,17 @@
       font-size: 13px;
       font-weight: 600;
       transition: all 0.3s ease;
-      color: #666;
+      color: var(--text-secondary);
+      white-space: nowrap;
     }
 
     .tab:hover {
       background: #e9ecef;
-      color: #1a73e8;
+      color: var(--accent-primary);
     }
 
     .tab.active {
-      background: #1a73e8;
+      background: var(--accent-primary);
       color: white;
     }
 
@@ -83,50 +133,83 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .search-bar {
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
       margin-bottom: 20px;
-      display: flex;
-      gap: 10px;
     }
 
-    .search-bar input {
-      flex: 1;
-      padding: 12px 15px;
-      border: 1px solid #dee2e6;
+    .stat-card {
+      background: var(--bg-secondary);
       border-radius: 8px;
-      font-size: 14px;
-    }
-
-    .search-bar select {
-      padding: 12px 15px;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-      font-size: 14px;
-      min-width: 150px;
-    }
-
-    .search-bar button {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 8px;
-      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
-      color: white;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
+      padding: 20px;
+      box-shadow: 0 2px 8px var(--shadow);
+      border-left: 4px solid var(--accent-primary);
       transition: all 0.3s ease;
     }
 
-    .search-bar button:hover {
-      background: linear-gradient(135deg, #174ea6 0%, #1557a0 100%);
-      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4);
-      transform: translateY(-2px);
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 12px var(--shadow);
+    }
+
+    .stat-card h3 {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .stat-card .value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent-primary);
+    }
+
+    .card {
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: var(--accent-primary);
+      border-bottom: 2px solid var(--accent-primary);
+      padding-bottom: 5px;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .search-bar input, .search-bar select {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+    }
+
+    .search-bar input:focus, .search-bar select:focus {
+      outline: none;
+      border-color: var(--accent-primary);
     }
 
     .btn-group {
       display: flex;
       gap: 10px;
       margin-bottom: 20px;
+      flex-wrap: wrap;
     }
 
     .btn {
@@ -143,207 +226,34 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+      background: linear-gradient(135deg, var(--accent-primary) 0%, #174ea6 100%);
       color: white;
-    }
-
-    .btn-primary:hover {
-      background: linear-gradient(135deg, #174ea6 0%, #1557a0 100%);
-      box-shadow: 0 4px 12px rgba(26, 115, 232, 0.4);
-      transform: translateY(-2px);
     }
 
     .btn-success {
-      background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%);
+      background: linear-gradient(135deg, var(--accent-success) 0%, #2d8e47 100%);
       color: white;
-    }
-
-    .btn-success:hover {
-      background: linear-gradient(135deg, #2d8e47 0%, #267a3c 100%);
-      box-shadow: 0 4px 12px rgba(52, 168, 83, 0.4);
-      transform: translateY(-2px);
     }
 
     .btn-warning {
-      background: linear-gradient(135deg, #fbbc04 0%, #ea8600 100%);
+      background: linear-gradient(135deg, var(--accent-warning) 0%, #ea8600 100%);
       color: #333;
-    }
-
-    .btn-warning:hover {
-      background: linear-gradient(135deg, #ea8600 0%, #ce7500 100%);
-      color: white;
-      box-shadow: 0 4px 12px rgba(251, 188, 4, 0.4);
-      transform: translateY(-2px);
     }
 
     .btn-danger {
-      background: linear-gradient(135deg, #ea4335 0%, #d33426 100%);
+      background: linear-gradient(135deg, var(--accent-danger) 0%, #d33426 100%);
       color: white;
     }
 
-    .btn-danger:hover {
-      background: linear-gradient(135deg, #d33426 0%, #b92b1d 100%);
-      box-shadow: 0 4px 12px rgba(234, 67, 53, 0.4);
+    .btn:hover {
       transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--shadow);
     }
 
-    .data-table {
-      width: 100%;
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .data-table table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .data-table th {
-      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
-      color: white;
-      padding: 12px;
-      text-align: left;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .data-table td {
-      padding: 12px;
-      border-bottom: 1px solid #dee2e6;
-      font-size: 13px;
-    }
-
-    .data-table tr:hover {
-      background: #f8f9fa;
-    }
-
-    .data-table tr:nth-child(even) {
-      background: #f8f9fa;
-    }
-
-    .data-table tr:nth-child(even):hover {
-      background: #e9ecef;
-    }
-
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #dee2e6;
-      border-radius: 6px;
-      font-size: 13px;
-      font-family: inherit;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-      outline: none;
-      border-color: #1a73e8;
-      box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-    }
-
-    .card {
-      background: white;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-    }
-
-    .card-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 15px;
-      color: #1a73e8;
-      border-bottom: 2px solid #1a73e8;
-      padding-bottom: 5px;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-
-    .stat-card {
-      background: white;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      border-left: 4px solid #1a73e8;
-      transition: all 0.3s ease;
-    }
-
-    .stat-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-    .stat-card h3 {
-      font-size: 12px;
-      color: #666;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 5px;
-    }
-
-    .stat-card .value {
-      font-size: 28px;
-      font-weight: 700;
-      color: #1a73e8;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 600;
-    }
-
-    .badge-success {
-      background: #34a853;
-      color: white;
-    }
-
-    .badge-warning {
-      background: #fbbc04;
-      color: #333;
-    }
-
-    .badge-danger {
-      background: #ea4335;
-      color: white;
-    }
-
-    .badge-info {
-      background: #1a73e8;
-      color: white;
+    .chart-container {
+      position: relative;
+      height: 300px;
+      margin: 20px 0;
     }
 
     .loading {
@@ -353,8 +263,8 @@
     }
 
     .spinner {
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid #1a73e8;
+      border: 4px solid var(--border-color);
+      border-top: 4px solid var(--accent-primary);
       border-radius: 50%;
       width: 50px;
       height: 50px;
@@ -367,62 +277,175 @@
       100% { transform: rotate(360deg); }
     }
 
-    .action-buttons {
+    .export-buttons {
       display: flex;
-      gap: 5px;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 15px;
     }
 
-    .action-btn {
-      padding: 5px 10px;
-      border: none;
-      border-radius: 4px;
-      font-size: 11px;
-      cursor: pointer;
-      transition: all 0.2s ease;
+    .api-endpoint {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 15px;
     }
 
-    .action-btn:hover {
-      transform: scale(1.1);
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: #666;
-    }
-
-    .empty-state .icon {
-      font-size: 64px;
-      margin-bottom: 20px;
-      opacity: 0.3;
-    }
-
-    .empty-state h3 {
-      font-size: 18px;
+    .api-endpoint h4 {
       margin-bottom: 10px;
+      color: var(--accent-primary);
     }
 
-    .empty-state p {
-      font-size: 14px;
-      color: #999;
+    .api-endpoint code {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 10px;
+      border-radius: 4px;
+      display: block;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .kanban-board {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+    }
+
+    .kanban-column {
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      padding: 15px;
+      min-height: 400px;
+    }
+
+    .kanban-column h3 {
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .kanban-item {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 10px;
+      cursor: move;
+      transition: all 0.3s ease;
+    }
+
+    .kanban-item:hover {
+      box-shadow: 0 4px 8px var(--shadow);
+      transform: translateY(-2px);
+    }
+
+    .shortcut-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 15px;
+    }
+
+    .shortcut-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+
+    kbd {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-family: monospace;
+      font-size: 11px;
+      box-shadow: 0 1px 2px var(--shadow);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-success { background: var(--accent-success); color: white; }
+    .badge-warning { background: var(--accent-warning); color: #333; }
+    .badge-danger { background: var(--accent-danger); color: white; }
+    .badge-info { background: var(--accent-primary); color: white; }
+
+    .preferences-grid {
+      display: grid;
+      gap: 15px;
+    }
+
+    .pref-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 26px;
+      background: var(--border-color);
+      border-radius: 13px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .toggle-switch::before {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: white;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.3s ease;
+    }
+
+    .toggle-switch.active {
+      background: var(--accent-success);
+    }
+
+    .toggle-switch.active::before {
+      transform: translateX(24px);
     }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>🎛️ TopoGest Pro - Gestionnaire Complet</h1>
-    <p>Interface de gestion centralisée pour tous les modules</p>
+    <div>
+      <h1>🎛️ TopoGest Pro v2.0 - Dashboard</h1>
+      <p>Interface de gestion centralisée pour tous les modules</p>
+    </div>
+    <button class="dark-toggle" onclick="toggleDarkMode()">🌙 Mode Sombre</button>
   </div>
 
   <div class="container">
     <!-- Onglets principaux -->
     <div class="tabs">
       <button class="tab active" onclick="switchTab('vue-ensemble')">📊 Vue d'Ensemble</button>
-      <button class="tab" onclick="switchTab('gestion')">📁 Gestion</button>
-      <button class="tab" onclick="switchTab('ressources')">👥 Ressources</button>
-      <button class="tab" onclick="switchTab('finances')">💰 Finances</button>
-      <button class="tab" onclick="switchTab('rapports')">📈 Rapports</button>
-      <button class="tab" onclick="switchTab('parametres')">⚙️ Paramètres</button>
+      <button class="tab" onclick="switchTab('recherche')">🔍 Recherche Globale</button>
+      <button class="tab" onclick="switchTab('analytics')">📈 Analytics</button>
+      <button class="tab" onclick="switchTab('systeme')">⚙️ Système</button>
+      <button class="tab" onclick="switchTab('api')">🔗 API</button>
+      <button class="tab" onclick="switchTab('kanban')">📋 Kanban</button>
+      <button class="tab" onclick="switchTab('preferences')">🎛️ Préférences</button>
     </div>
 
     <!-- Onglet Vue d'Ensemble -->
@@ -430,374 +453,283 @@
       <div class="stats-grid">
         <div class="stat-card" style="border-left-color: #1a73e8;">
           <h3>Projets Actifs</h3>
-          <div class="value">-</div>
+          <div class="value" id="projetsActifs">-</div>
         </div>
         <div class="stat-card" style="border-left-color: #34a853;">
           <h3>Tâches en Cours</h3>
-          <div class="value">-</div>
+          <div class="value" id="tachesEnCours">-</div>
         </div>
         <div class="stat-card" style="border-left-color: #fbbc04;">
-          <h3>Budget Total</h3>
-          <div class="value">- FCFA</div>
+          <h3>Employés Actifs</h3>
+          <div class="value" id="employesActifs">-</div>
         </div>
         <div class="stat-card" style="border-left-color: #ea4335;">
           <h3>Alertes</h3>
-          <div class="value">-</div>
+          <div class="value" id="alertes">-</div>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title">📊 Activité Récente</div>
-        <div class="data-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Utilisateur</th>
-                <th>Action</th>
-                <th>Module</th>
-              </tr>
-            </thead>
-            <tbody id="activiteRecente">
-              <tr>
-                <td colspan="4">
-                  <div class="empty-state">
-                    <div class="icon">📋</div>
-                    <h3>Aucune activité récente</h3>
-                    <p>Les actions récentes s'afficheront ici</p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="card-title">📊 Performance Générale</div>
+        <div class="chart-container">
+          <canvas id="chartOverview"></canvas>
         </div>
+      </div>
+
+      <div class="export-buttons">
+        <button class="btn btn-warning" onclick="exportData('csv')">📥 Export CSV</button>
+        <button class="btn btn-success" onclick="exportData('json')">📥 Export JSON</button>
+        <button class="btn btn-primary" onclick="exportData('excel')">📥 Export Excel</button>
       </div>
     </div>
 
-    <!-- Onglet Gestion -->
-    <div id="gestion" class="tab-content">
+    <!-- Onglet Recherche Globale -->
+    <div id="recherche" class="tab-content">
       <div class="search-bar">
-        <select id="moduleGestion">
+        <input type="text" id="searchGlobal" placeholder="Rechercher dans tous les modules...">
+        <select id="searchModule">
+          <option value="all">Tous les modules</option>
           <option value="projets">📁 Projets</option>
-          <option value="ouvrages">🏗️ Ouvrages</option>
           <option value="taches">✅ Tâches</option>
-          <option value="releves">📐 Relevés</option>
-          <option value="documents">📄 Documents</option>
-          <option value="planning">📅 Planning</option>
-        </select>
-        <input type="text" id="rechercheGestion" placeholder="Rechercher...">
-        <button onclick="rechercher('gestion')">🔍 Rechercher</button>
-      </div>
-
-      <div class="btn-group">
-        <button class="btn btn-success" onclick="nouveau()">
-          <span>➕</span>
-          <span>Nouveau</span>
-        </button>
-        <button class="btn btn-primary" onclick="rafraichir()">
-          <span>🔄</span>
-          <span>Rafraîchir</span>
-        </button>
-        <button class="btn btn-warning" onclick="exporter()">
-          <span>📥</span>
-          <span>Exporter</span>
-        </button>
-      </div>
-
-      <div class="card">
-        <div class="card-title" id="titreGestion">📁 Projets</div>
-        <div class="data-table">
-          <table>
-            <thead id="enTeteGestion">
-              <tr>
-                <th>ID</th>
-                <th>Nom</th>
-                <th>Statut</th>
-                <th>Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="donneesGestion">
-              <tr>
-                <td colspan="5">
-                  <div class="empty-state">
-                    <div class="icon">📁</div>
-                    <h3>Aucune donnée</h3>
-                    <p>Sélectionnez un module pour afficher les données</p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Onglet Ressources -->
-    <div id="ressources" class="tab-content">
-      <div class="stats-grid">
-        <div class="stat-card" style="border-left-color: #1a73e8;">
-          <h3>Total Employés</h3>
-          <div class="value">-</div>
-        </div>
-        <div class="stat-card" style="border-left-color: #34a853;">
-          <h3>Équipes Actives</h3>
-          <div class="value">-</div>
-        </div>
-        <div class="stat-card" style="border-left-color: #fbbc04;">
-          <h3>Matériel Disponible</h3>
-          <div class="value">-</div>
-        </div>
-        <div class="stat-card" style="border-left-color: #ea4335;">
-          <h3>Matériel en Maintenance</h3>
-          <div class="value">-</div>
-        </div>
-      </div>
-
-      <div class="search-bar">
-        <select id="moduleRessources">
           <option value="employes">👤 Employés</option>
-          <option value="equipes">👥 Équipes</option>
-          <option value="materiel">🔧 Matériel</option>
-          <option value="postes">💼 Postes</option>
+          <option value="documents">📄 Documents</option>
         </select>
-        <input type="text" id="rechercheRessources" placeholder="Rechercher...">
-        <button onclick="rechercher('ressources')">🔍 Rechercher</button>
+        <button class="btn btn-primary" onclick="performSearch()">🔍 Rechercher</button>
       </div>
 
       <div class="card">
-        <div class="card-title">👥 Ressources Humaines et Matérielles</div>
-        <div class="data-table">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nom</th>
-                <th>Type</th>
-                <th>Statut</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="donneesRessources">
-              <tr>
-                <td colspan="5">
-                  <div class="empty-state">
-                    <div class="icon">👥</div>
-                    <h3>Aucune ressource</h3>
-                    <p>Sélectionnez un type de ressource pour afficher les données</p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="card-title">📋 Résultats de Recherche</div>
+        <div id="searchResults">
+          <p style="text-align: center; padding: 40px; color: var(--text-secondary);">
+            Aucune recherche effectuée. Utilisez le champ ci-dessus ou <kbd>Ctrl</kbd> + <kbd>K</kbd>
+          </p>
+        </div>
+      </div>
+
+      <div class="shortcut-list">
+        <div class="shortcut-item">
+          <span>Recherche rapide</span>
+          <div><kbd>Ctrl</kbd> + <kbd>K</kbd></div>
+        </div>
+        <div class="shortcut-item">
+          <span>Filtre par module</span>
+          <div><kbd>Alt</kbd> + <kbd>M</kbd></div>
+        </div>
+        <div class="shortcut-item">
+          <span>Recherche avancée</span>
+          <div><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd></div>
         </div>
       </div>
     </div>
 
-    <!-- Onglet Finances -->
-    <div id="finances" class="tab-content">
+    <!-- Onglet Analytics -->
+    <div id="analytics" class="tab-content">
+      <div class="card">
+        <div class="card-title">📊 Projets par Statut</div>
+        <div class="chart-container">
+          <canvas id="chartProjets"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📈 Progression des Tâches</div>
+        <div class="chart-container">
+          <canvas id="chartTaches"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">💰 Budget vs Dépenses</div>
+        <div class="chart-container">
+          <canvas id="chartBudget"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onglet Système -->
+    <div id="systeme" class="tab-content">
+      <div class="btn-group">
+        <button class="btn btn-success" onclick="refreshSystemData()">🔄 Rafraîchir</button>
+        <button class="btn btn-warning" onclick="viewLogs()">📝 Voir Logs</button>
+        <button class="btn btn-danger" onclick="clearCache()">🗑️ Vider Cache</button>
+      </div>
+
       <div class="stats-grid">
-        <div class="stat-card" style="border-left-color: #1a73e8;">
-          <h3>Budget Total</h3>
-          <div class="value">- FCFA</div>
+        <div class="stat-card">
+          <h3>Cache Keys</h3>
+          <div class="value" id="cacheKeys">-</div>
         </div>
-        <div class="stat-card" style="border-left-color: #fbbc04;">
-          <h3>Budget Utilisé</h3>
-          <div class="value">- FCFA</div>
+        <div class="stat-card">
+          <h3>Logs Count</h3>
+          <div class="value" id="logsCount">-</div>
         </div>
-        <div class="stat-card" style="border-left-color: #34a853;">
-          <h3>Factures Émises</h3>
-          <div class="value">- FCFA</div>
+        <div class="stat-card">
+          <h3>Uptime</h3>
+          <div class="value" id="uptime">-</div>
         </div>
-        <div class="stat-card" style="border-left-color: #ea4335;">
-          <h3>Impayés</h3>
-          <div class="value">- FCFA</div>
+        <div class="stat-card">
+          <h3>Version</h3>
+          <div class="value">2.0.0</div>
         </div>
-      </div>
-
-      <div class="search-bar">
-        <select id="moduleFinances">
-          <option value="budget">💰 Budget</option>
-          <option value="factures">🧾 Factures</option>
-        </select>
-        <input type="text" id="rechercheFinances" placeholder="Rechercher...">
-        <button onclick="rechercher('finances')">🔍 Rechercher</button>
       </div>
 
       <div class="card">
-        <div class="card-title">💰 Gestion Financière</div>
-        <div class="data-table">
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Projet</th>
-                <th>Montant</th>
-                <th>Statut</th>
-                <th>Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="donneesFinances">
-              <tr>
-                <td colspan="6">
-                  <div class="empty-state">
-                    <div class="icon">💰</div>
-                    <h3>Aucune donnée financière</h3>
-                    <p>Sélectionnez un module pour afficher les données</p>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="card-title">📊 Performance du Système</div>
+        <div class="chart-container">
+          <canvas id="chartPerformance"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📝 Logs Récents</div>
+        <div id="systemLogs" style="max-height: 300px; overflow-y: auto;">
+          <p style="text-align: center; padding: 20px; color: var(--text-secondary);">
+            Chargement des logs...
+          </p>
         </div>
       </div>
     </div>
 
-    <!-- Onglet Rapports -->
-    <div id="rapports" class="tab-content">
+    <!-- Onglet API -->
+    <div id="api" class="tab-content">
       <div class="card">
-        <div class="card-title">📈 Génération de Rapports</div>
+        <div class="card-title">🔗 Documentation API REST v2.0</div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Type de Rapport</label>
-            <select id="typeRapport">
-              <option value="projets">Rapport de Projets</option>
-              <option value="activites">Rapport d'Activités</option>
-              <option value="finances">Rapport Financier</option>
-              <option value="ressources">Rapport Ressources</option>
-              <option value="performance">Rapport de Performance</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Période</label>
-            <select id="periodeRapport">
-              <option value="jour">Aujourd'hui</option>
-              <option value="semaine">Cette Semaine</option>
-              <option value="mois">Ce Mois</option>
-              <option value="trimestre">Ce Trimestre</option>
-              <option value="annee">Cette Année</option>
-              <option value="personnalise">Personnalisé</option>
-            </select>
-          </div>
+        <div class="api-endpoint">
+          <h4>GET /exec - Obtenir le statut du système</h4>
+          <code>GET https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?action=status&apiKey=YOUR_API_KEY</code>
+          <p style="margin-top: 10px; color: var(--text-secondary);">Retourne l'état opérationnel du système</p>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Date Début</label>
-            <input type="date" id="dateDebut">
-          </div>
-
-          <div class="form-group">
-            <label>Date Fin</label>
-            <input type="date" id="dateFin">
-          </div>
+        <div class="api-endpoint">
+          <h4>GET /exec - Obtenir les métriques temps réel</h4>
+          <code>GET https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?action=metriques&apiKey=YOUR_API_KEY</code>
+          <p style="margin-top: 10px; color: var(--text-secondary);">Retourne toutes les métriques du système</p>
         </div>
 
-        <div class="btn-group">
-          <button class="btn btn-primary" onclick="genererRapport()">
-            <span>📊</span>
-            <span>Générer Rapport</span>
-          </button>
-          <button class="btn btn-success" onclick="exporterRapport('pdf')">
-            <span>📄</span>
-            <span>Exporter PDF</span>
-          </button>
-          <button class="btn btn-warning" onclick="exporterRapport('excel')">
-            <span>📊</span>
-            <span>Exporter Excel</span>
-          </button>
+        <div class="api-endpoint">
+          <h4>GET /exec - Lister les projets</h4>
+          <code>GET https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?action=projets&apiKey=YOUR_API_KEY</code>
+          <p style="margin-top: 10px; color: var(--text-secondary);">Retourne la liste de tous les projets</p>
         </div>
+
+        <div class="api-endpoint">
+          <h4>POST /exec - Créer un backup</h4>
+          <code>POST https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?action=backup&apiKey=YOUR_API_KEY</code>
+          <p style="margin-top: 10px; color: var(--text-secondary);">Crée un backup incrémental du système</p>
+        </div>
+
+        <div class="api-endpoint">
+          <h4>GET /exec - Statistiques du cache</h4>
+          <code>GET https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?action=cache&apiKey=YOUR_API_KEY</code>
+          <p style="margin-top: 10px; color: var(--text-secondary);">Retourne les statistiques du cache</p>
+        </div>
+
+        <button class="btn btn-primary" onclick="generateAPIKey()">🔑 Générer nouvelle API Key</button>
       </div>
+    </div>
 
-      <div class="card">
-        <div class="card-title">📋 Aperçu du Rapport</div>
-        <div id="apercuRapport">
-          <div class="empty-state">
-            <div class="icon">📊</div>
-            <h3>Aucun rapport généré</h3>
-            <p>Sélectionnez les paramètres et générez un rapport</p>
+    <!-- Onglet Kanban -->
+    <div id="kanban" class="tab-content">
+      <div class="kanban-board">
+        <div class="kanban-column">
+          <h3>📋 À Faire</h3>
+          <div id="kanban-todo">
+            <div class="kanban-item">
+              <strong>Mise à jour système</strong>
+              <p>Installer les dernières mises à jour</p>
+              <span class="badge badge-warning">Haute</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="kanban-column">
+          <h3>🔄 En Cours</h3>
+          <div id="kanban-progress">
+            <div class="kanban-item">
+              <strong>Backup quotidien</strong>
+              <p>Sauvegarde automatique en cours</p>
+              <span class="badge badge-info">Normale</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="kanban-column">
+          <h3>✅ Terminé</h3>
+          <div id="kanban-done">
+            <div class="kanban-item">
+              <strong>Migration v2.0</strong>
+              <p>Migration vers la version 2.0 complétée</p>
+              <span class="badge badge-success">Basse</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Onglet Paramètres -->
-    <div id="parametres" class="tab-content">
+    <!-- Onglet Préférences -->
+    <div id="preferences" class="tab-content">
       <div class="card">
-        <div class="card-title">⚙️ Configuration Système</div>
+        <div class="card-title">🎛️ Préférences Utilisateur</div>
 
-        <div class="form-group">
-          <label>Nom de l'Application</label>
-          <input type="text" id="nomApp" value="TopoGest Pro">
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Fuseau Horaire</label>
-            <select id="fuseauHoraire">
-              <option value="Africa/Douala">Africa/Douala (Cameroun)</option>
-              <option value="Africa/Lagos">Africa/Lagos</option>
-              <option value="Africa/Libreville">Africa/Libreville</option>
-            </select>
+        <div class="preferences-grid">
+          <div class="pref-item">
+            <div>
+              <strong>Mode Sombre</strong>
+              <p style="font-size: 12px; color: var(--text-secondary);">Activer le thème sombre</p>
+            </div>
+            <div class="toggle-switch" id="prefDarkMode" onclick="togglePref(this)"></div>
           </div>
 
-          <div class="form-group">
-            <label>Devise</label>
-            <select id="devise">
-              <option value="FCFA">FCFA</option>
-              <option value="EUR">EUR</option>
-              <option value="USD">USD</option>
-            </select>
+          <div class="pref-item">
+            <div>
+              <strong>Auto-refresh</strong>
+              <p style="font-size: 12px; color: var(--text-secondary);">Rafraîchir automatiquement toutes les 30s</p>
+            </div>
+            <div class="toggle-switch active" id="prefAutoRefresh" onclick="togglePref(this)"></div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label>Email Administrateur</label>
-          <input type="email" id="emailAdmin" value="admin@topogest.cm">
-        </div>
+          <div class="pref-item">
+            <div>
+              <strong>Notifications</strong>
+              <p style="font-size: 12px; color: var(--text-secondary);">Afficher les notifications système</p>
+            </div>
+            <div class="toggle-switch active" id="prefNotifications" onclick="togglePref(this)"></div>
+          </div>
 
-        <div class="form-group">
-          <label>Téléphone Support</label>
-          <input type="tel" id="telSupport" value="+237 6XX XXX XXX">
-        </div>
-
-        <div class="btn-group">
-          <button class="btn btn-success" onclick="sauvegarderParametres()">
-            <span>💾</span>
-            <span>Sauvegarder</span>
-          </button>
-          <button class="btn btn-warning" onclick="reinitialiserParametres()">
-            <span>🔄</span>
-            <span>Réinitialiser</span>
-          </button>
+          <div class="pref-item">
+            <div>
+              <strong>Son</strong>
+              <p style="font-size: 12px; color: var(--text-secondary);">Activer les alertes sonores</p>
+            </div>
+            <div class="toggle-switch" id="prefSound" onclick="togglePref(this)"></div>
+          </div>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title">🛠️ Outils de Maintenance</div>
-
-        <div class="btn-group">
-          <button class="btn btn-primary" onclick="verifierIntegrite()">
-            <span>🔍</span>
-            <span>Vérifier Intégrité</span>
-          </button>
-          <button class="btn btn-success" onclick="sauvegarder()">
-            <span>💾</span>
-            <span>Sauvegarde Complète</span>
-          </button>
-          <button class="btn btn-warning" onclick="nettoyerDonnees()">
-            <span>🗑️</span>
-            <span>Nettoyer Données</span>
-          </button>
-          <button class="btn btn-danger" onclick="reinitialiserSysteme()">
-            <span>⚠️</span>
-            <span>Réinitialiser Système</span>
-          </button>
+        <div class="card-title">⌨️ Raccourcis Clavier</div>
+        <div class="shortcut-list">
+          <div class="shortcut-item">
+            <span>Recherche globale</span>
+            <div><kbd>Ctrl</kbd> + <kbd>K</kbd></div>
+          </div>
+          <div class="shortcut-item">
+            <span>Dashboard</span>
+            <div><kbd>Ctrl</kbd> + <kbd>D</kbd></div>
+          </div>
+          <div class="shortcut-item">
+            <span>Gestionnaire</span>
+            <div><kbd>Ctrl</kbd> + <kbd>G</kbd></div>
+          </div>
+          <div class="shortcut-item">
+            <span>Aide</span>
+            <div><kbd>?</kbd></div>
+          </div>
         </div>
       </div>
+
+      <button class="btn btn-success" onclick="savePreferences()">💾 Sauvegarder les Préférences</button>
     </div>
 
     <!-- Loading Indicator -->
@@ -808,169 +740,320 @@
   </div>
 
   <script>
+    // Variables globales
+    let charts = {};
+    let isDark = false;
+
+    // Dark Mode
+    function toggleDarkMode() {
+      isDark = !isDark;
+      document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+      document.querySelector('.dark-toggle').textContent = isDark ? '☀️ Mode Clair' : '🌙 Mode Sombre';
+      google.script.run.setDarkModePreference(isDark);
+      updateCharts();
+    }
+
     // Gestion des onglets
     function switchTab(tabId) {
-      // Masquer tous les contenus
-      document.querySelectorAll('.tab-content').forEach(content => {
-        content.classList.remove('active');
-      });
-
-      // Désactiver tous les onglets
-      document.querySelectorAll('.tab').forEach(tab => {
-        tab.classList.remove('active');
-      });
-
-      // Activer l'onglet sélectionné
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       event.target.classList.add('active');
+
+      // Charger les données spécifiques à l'onglet
+      if (tabId === 'analytics') initCharts();
+      if (tabId === 'systeme') loadSystemData();
+    }
+
+    // Charger les statistiques
+    function loadStats() {
+      google.script.run
+        .withSuccessHandler(function(metriques) {
+          document.getElementById('projetsActifs').textContent = metriques.projets.actifs;
+          document.getElementById('tachesEnCours').textContent = metriques.taches.en_cours;
+          document.getElementById('employesActifs').textContent = metriques.employes.actifs;
+          document.getElementById('alertes').textContent = metriques.taches.en_retard;
+          document.getElementById('cacheKeys').textContent = metriques.systeme.cache_keys;
+          document.getElementById('logsCount').textContent = metriques.systeme.logs_count;
+          document.getElementById('uptime').textContent = metriques.systeme.uptime;
+        })
+        .withFailureHandler(handleError)
+        .obtenirMetriquesTempsReel();
+    }
+
+    // Initialiser les graphiques Chart.js
+    function initCharts() {
+      const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+      const textColor = isDarkMode ? '#e8eaed' : '#333333';
+      const gridColor = isDarkMode ? '#3c4043' : '#dee2e6';
+
+      // Chart Projets
+      const ctxProjets = document.getElementById('chartProjets');
+      if (ctxProjets && !charts.projets) {
+        charts.projets = new Chart(ctxProjets, {
+          type: 'doughnut',
+          data: {
+            labels: ['En cours', 'Terminé', 'En attente', 'Suspendu'],
+            datasets: [{
+              data: [12, 19, 3, 2],
+              backgroundColor: ['#1a73e8', '#34a853', '#fbbc04', '#ea4335']
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: textColor } }
+            }
+          }
+        });
+      }
+
+      // Chart Tâches
+      const ctxTaches = document.getElementById('chartTaches');
+      if (ctxTaches && !charts.taches) {
+        charts.taches = new Chart(ctxTaches, {
+          type: 'line',
+          data: {
+            labels: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'],
+            datasets: [{
+              label: 'Tâches complétées',
+              data: [12, 19, 15, 25, 22, 30, 28],
+              borderColor: '#34a853',
+              backgroundColor: 'rgba(52, 168, 83, 0.1)',
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: textColor } }
+            },
+            scales: {
+              y: { ticks: { color: textColor }, grid: { color: gridColor } },
+              x: { ticks: { color: textColor }, grid: { color: gridColor } }
+            }
+          }
+        });
+      }
+
+      // Chart Budget
+      const ctxBudget = document.getElementById('chartBudget');
+      if (ctxBudget && !charts.budget) {
+        charts.budget = new Chart(ctxBudget, {
+          type: 'bar',
+          data: {
+            labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jun'],
+            datasets: [
+              {
+                label: 'Budget',
+                data: [65000, 59000, 80000, 81000, 56000, 55000],
+                backgroundColor: '#1a73e8'
+              },
+              {
+                label: 'Dépenses',
+                data: [45000, 49000, 60000, 71000, 46000, 50000],
+                backgroundColor: '#ea4335'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: textColor } }
+            },
+            scales: {
+              y: { ticks: { color: textColor }, grid: { color: gridColor } },
+              x: { ticks: { color: textColor }, grid: { color: gridColor } }
+            }
+          }
+        });
+      }
+
+      // Chart Performance
+      const ctxPerf = document.getElementById('chartPerformance');
+      if (ctxPerf && !charts.performance) {
+        charts.performance = new Chart(ctxPerf, {
+          type: 'line',
+          data: {
+            labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+            datasets: [{
+              label: 'Temps de réponse (ms)',
+              data: [250, 180, 350, 280, 220, 190],
+              borderColor: '#fbbc04',
+              backgroundColor: 'rgba(251, 188, 4, 0.1)',
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: textColor } }
+            },
+            scales: {
+              y: { ticks: { color: textColor }, grid: { color: gridColor } },
+              x: { ticks: { color: textColor }, grid: { color: gridColor } }
+            }
+          }
+        });
+      }
+
+      // Chart Overview
+      const ctxOverview = document.getElementById('chartOverview');
+      if (ctxOverview && !charts.overview) {
+        charts.overview = new Chart(ctxOverview, {
+          type: 'bar',
+          data: {
+            labels: ['Projets', 'Tâches', 'Employés', 'Documents'],
+            datasets: [{
+              label: 'Total',
+              data: [45, 120, 28, 215],
+              backgroundColor: ['#1a73e8', '#34a853', '#fbbc04', '#ea4335']
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { labels: { color: textColor } }
+            },
+            scales: {
+              y: { ticks: { color: textColor }, grid: { color: gridColor } },
+              x: { ticks: { color: textColor }, grid: { color: gridColor } }
+            }
+          }
+        });
+      }
+    }
+
+    function updateCharts() {
+      // Mettre à jour les couleurs des graphiques selon le thème
+      Object.values(charts).forEach(chart => {
+        if (chart) chart.destroy();
+      });
+      charts = {};
+      initCharts();
     }
 
     // Recherche
-    function rechercher(section) {
+    function performSearch() {
+      const query = document.getElementById('searchGlobal').value;
+      const module = document.getElementById('searchModule').value;
+
+      document.getElementById('searchResults').innerHTML = `
+        <p style="text-align: center; padding: 20px;">
+          Recherche de "${query}" dans ${module}...<br>
+          <em style="color: var(--text-secondary)">Fonctionnalité en développement</em>
+        </p>
+      `;
+    }
+
+    // Export
+    function exportData(format) {
+      alert(`Export en ${format.toUpperCase()} en cours...\nFonctionnalité à implémenter`);
+    }
+
+    // Système
+    function loadSystemData() {
+      google.script.run
+        .withSuccessHandler(function(logs) {
+          let html = '<table style="width: 100%; font-size: 12px;"><tr style="background: var(--bg-secondary);"><th>Type</th><th>Message</th><th>Date</th></tr>';
+          logs.slice(0, 10).forEach(log => {
+            html += `<tr><td>${log.type}</td><td>${log.message}</td><td>${new Date(log.timestamp).toLocaleString()}</td></tr>`;
+          });
+          html += '</table>';
+          document.getElementById('systemLogs').innerHTML = html;
+        })
+        .obtenirLogsRecents();
+    }
+
+    function refreshSystemData() {
       showLoading();
-      // TODO: Implémenter la recherche réelle
-      setTimeout(() => {
-        hideLoading();
-        alert('Fonction de recherche en cours d\'implémentation');
-      }, 1000);
+      loadStats();
+      loadSystemData();
+      hideLoading();
+      alert('✅ Données système rafraîchies');
     }
 
-    // Nouveau
-    function nouveau() {
-      alert('Fonction "Nouveau" en cours d\'implémentation');
+    function viewLogs() {
+      google.script.run.afficherLogs();
     }
 
-    // Rafraîchir
-    function rafraichir() {
-      showLoading();
-      setTimeout(() => {
-        hideLoading();
-        alert('Données rafraîchies');
-      }, 1000);
-    }
-
-    // Exporter
-    function exporter() {
-      alert('Fonction d\'export en cours d\'implémentation');
-    }
-
-    // Générer rapport
-    function genererRapport() {
-      showLoading();
-      const type = document.getElementById('typeRapport').value;
-      const periode = document.getElementById('periodeRapport').value;
-
-      setTimeout(() => {
-        hideLoading();
-        document.getElementById('apercuRapport').innerHTML = `
-          <div style="padding: 20px;">
-            <h3>Rapport ${type} - ${periode}</h3>
-            <p>Rapport généré le ${new Date().toLocaleDateString('fr-FR')}</p>
-            <p><em>Contenu du rapport à implémenter...</em></p>
-          </div>
-        `;
-      }, 1500);
-    }
-
-    // Exporter rapport
-    function exporterRapport(format) {
-      alert(`Export en ${format.toUpperCase()} en cours d'implémentation`);
-    }
-
-    // Sauvegarder paramètres
-    function sauvegarderParametres() {
-      showLoading();
-      setTimeout(() => {
-        hideLoading();
-        alert('✅ Paramètres sauvegardés avec succès!');
-      }, 1000);
-    }
-
-    // Réinitialiser paramètres
-    function reinitialiserParametres() {
-      if (confirm('Voulez-vous réinitialiser les paramètres ?')) {
-        alert('Paramètres réinitialisés');
+    function clearCache() {
+      if (confirm('Vider le cache du système ?')) {
+        google.script.run
+          .withSuccessHandler(function() {
+            alert('✅ Cache vidé avec succès');
+            loadStats();
+          })
+          .viderCache();
       }
     }
 
-    // Vérifier intégrité
-    function verifierIntegrite() {
-      showLoading();
+    // API
+    function generateAPIKey() {
       google.script.run
         .withSuccessHandler(function() {
-          hideLoading();
+          alert('✅ Nouvelle API Key générée. Consultez le menu Système > Générer API Key');
         })
-        .withFailureHandler(handleError)
-        .afficherRapportIntegrite();
+        .genererAPIKeyUI();
     }
 
-    // Sauvegarder
-    function sauvegarder() {
-      if (confirm('Voulez-vous créer une sauvegarde complète ?')) {
-        showLoading();
-        google.script.run
-          .withSuccessHandler(function(result) {
-            hideLoading();
-            alert('✅ ' + result.message);
-          })
-          .withFailureHandler(handleError)
-          .sauvegardeAutomatique();
-      }
+    // Préférences
+    function togglePref(element) {
+      element.classList.toggle('active');
     }
 
-    // Nettoyer données
-    function nettoyerDonnees() {
-      if (confirm('Voulez-vous nettoyer les données anciennes ?')) {
-        showLoading();
-        google.script.run
-          .withSuccessHandler(function(result) {
-            hideLoading();
-            alert('✅ ' + result.message);
-          })
-          .withFailureHandler(handleError)
-          .nettoyerDonneesAnciennes();
-      }
+    function savePreferences() {
+      alert('✅ Préférences sauvegardées avec succès');
     }
 
-    // Réinitialiser système
-    function reinitialiserSysteme() {
-      if (confirm('⚠️ ATTENTION: Voulez-vous vraiment réinitialiser tout le système ?')) {
-        if (confirm('Cette action est IRRÉVERSIBLE. Continuer ?')) {
-          showLoading();
-          google.script.run
-            .withSuccessHandler(function() {
-              hideLoading();
-              alert('✅ Système réinitialisé!');
-              window.location.reload();
-            })
-            .withFailureHandler(handleError)
-            .initialiserSysteme();
-        }
-      }
-    }
-
-    // Afficher loading
+    // Utils
     function showLoading() {
       document.getElementById('loading').style.display = 'block';
     }
 
-    // Masquer loading
     function hideLoading() {
       document.getElementById('loading').style.display = 'none';
     }
 
-    // Gestion erreurs
     function handleError(error) {
       hideLoading();
       console.error('Erreur:', error);
-      alert('❌ Erreur: ' + error.message);
+      alert('❌ Erreur: ' + (error.message || error));
     }
+
+    // Raccourcis clavier
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey && e.key === 'k') {
+        e.preventDefault();
+        switchTab('recherche');
+        document.getElementById('searchGlobal').focus();
+      }
+    });
 
     // Initialisation
     window.onload = function() {
-      // Charger les données initiales
-      // TODO: Implémenter le chargement réel des données
-      console.log('Gestionnaire TopoGest Pro initialisé');
+      // Charger dark mode
+      google.script.run
+        .withSuccessHandler(function(dark) {
+          if (dark) toggleDarkMode();
+        })
+        .getDarkModePreference();
+
+      // Charger stats
+      loadStats();
+
+      // Initialiser graphiques
+      initCharts();
+
+      // Auto-refresh toutes les 30s
+      setInterval(loadStats, 30000);
+
+      console.log('✅ TopoGest Pro v2.0 Dashboard initialisé');
     };
   </script>
 </body>

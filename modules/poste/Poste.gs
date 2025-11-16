@@ -1,17 +1,17 @@
 /**
- * MODULE POSTE - Référentiel des Postes RH
- * Gestion des postes et grille salariale pour projets d'aménagement
- * Version: Production Ready 1.0
+ * MODULE POSTE v2.0 - Référentiel des Postes RH
+ * Gestion des postes, grilles salariales, organigramme et compétences
+ * Version: 2.0 Production Ready
  */
 
-// ==================== INITIALISATION DU MODULE POSTE ====================
+// ==================== INITIALISATION DU MODULE POSTE v2.0 ====================
 
 /**
- * Initialise le module POSTE avec toutes les fonctionnalités
+ * Initialise le module POSTE v2.0 avec toutes les fonctionnalités
  */
 function initialiserPoste() {
   try {
-    Logger.log("💼 Initialisation du module POSTE...");
+    Logger.log("💼 Initialisation du module POSTE v2.0...");
 
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = ss.getSheetByName("💼 Postes");
@@ -29,8 +29,8 @@ function initialiserPoste() {
     sheet.setFrozenColumns(1);
 
     // ===== EN-TÊTE PRINCIPAL =====
-    sheet.getRange("A1:L1").merge()
-      .setValue("💼 RÉFÉRENTIEL DES POSTES - GRILLE SALARIALE ET COMPÉTENCES")
+    sheet.getRange("A1:N1").merge()
+      .setValue("💼 RÉFÉRENTIEL DES POSTES v2.0 - GRILLE SALARIALE & ORGANIGRAMME")
       .setFontSize(14)
       .setFontWeight("bold")
       .setHorizontalAlignment("center")
@@ -42,15 +42,17 @@ function initialiserPoste() {
     // ===== COLONNES DE DONNÉES =====
     const headers = [
       "PosteID",
-      "Intitulé",
-      "Catégorie",
+      "Titre",
+      "Département",
+      "NiveauHiérarchique",
+      "CompétencesRequises",
+      "SalaireMin (FCFA)",
+      "SalaireMax (FCFA)",
+      "NbPostes",
+      "NbPourvus",
+      "NbVacants",
       "Description",
-      "Salaire Min (FCFA)",
-      "Salaire Max (FCFA)",
-      "Compétences Requises",
-      "Niveau Étude",
-      "Expérience Min (années)",
-      "Responsabilités",
+      "ResponsableID",
       "Statut",
       "Observations"
     ];
@@ -66,7 +68,7 @@ function initialiserPoste() {
     sheet.setRowHeight(2, 35);
 
     // ===== LARGEURS DE COLONNES =====
-    const columnWidths = [100, 200, 150, 300, 150, 150, 250, 150, 120, 250, 120, 250];
+    const columnWidths = [100, 200, 150, 120, 250, 150, 150, 100, 100, 100, 300, 120, 100, 250];
     columnWidths.forEach((width, index) => {
       sheet.setColumnWidth(index + 1, width);
     });
@@ -75,115 +77,99 @@ function initialiserPoste() {
     const donneesExemple = [
       [
         "POST001",
-        "Topographe Principal",
-        "Topographe",
-        "Responsable des levés topographiques et implantation des ouvrages",
-        800000,
-        1500000,
-        "Topographie, GPS RTK, Station totale, Logiciels CAO/DAO",
-        "Licence en Géomatique",
-        5,
-        "Supervision équipe terrain, Contrôle qualité relevés, Rapports techniques",
+        "Directeur Général",
+        "Direction",
+        "Directeur",
+        "Leadership, Gestion stratégique, Vision d'entreprise",
+        3500000,
+        5000000,
+        1,
+        1,
+        0,
+        "Direction générale de TopoGest Pro",
+        "",
         "Actif",
-        "Expertise réseau gravitaire requise"
+        "Poste de direction stratégique"
       ],
       [
         "POST002",
+        "Chef de Projet Senior",
+        "Projets",
+        "Manager",
+        "Gestion projet, EVM, Gantt, Leadership",
+        1800000,
+        2800000,
+        3,
+        2,
+        1,
+        "Pilotage projets d'aménagement majeurs",
+        "POST001",
+        "Actif",
+        "Recrutement en cours"
+      ],
+      [
+        "POST003",
+        "Topographe Principal",
+        "Topographie",
+        "Senior",
+        "GPS RTK, Station totale, CAO/DAO",
+        1000000,
+        1800000,
+        5,
+        4,
+        1,
+        "Levés topographiques et supervision terrain",
+        "POST002",
+        "Actif",
+        "Expertise périmètres irrigués requise"
+      ],
+      [
+        "POST004",
+        "Technicien Topographe",
+        "Topographie",
+        "Junior",
+        "GPS, Niveau, Théodolite, Calculs topo",
+        500000,
+        900000,
+        8,
+        6,
+        2,
+        "Exécution levés terrain",
+        "POST003",
+        "Actif",
+        "Formation continue assurée"
+      ],
+      [
+        "POST005",
         "Ingénieur Hydraulicien",
-        "Ingénieur",
-        "Conception et dimensionnement des ouvrages hydrauliques",
-        1200000,
+        "Ingénierie",
+        "Senior",
+        "Hydraulique, CAO, Dimensionnement ouvrages",
+        1500000,
         2500000,
-        "Hydraulique, CAO, Calcul structures, Gestion projets",
-        "Master en Génie Civil/Hydraulique",
-        7,
-        "Études techniques, Supervision travaux, Validation ouvrages",
+        2,
+        2,
+        0,
+        "Conception ouvrages hydrauliques",
+        "POST001",
         "Actif",
         "Spécialisation irrigation gravitaire"
       ],
       [
-        "POST003",
-        "Technicien Topographe",
-        "Technicien",
-        "Exécution des levés topographiques terrain",
-        400000,
-        750000,
-        "GPS, Niveau, Théodolite, Calculs topographiques",
-        "BTS/DUT Géomètre-Topographe",
-        2,
-        "Levés terrain, Implantation, Carnets de terrain",
-        "Actif",
-        "Travail terrain intensif"
-      ],
-      [
-        "POST004",
-        "Ouvrier Qualifié",
-        "Ouvrier",
-        "Exécution travaux d'aménagement hydraulique",
-        150000,
-        300000,
-        "Maçonnerie, Terrassement, Lecture plans",
-        "CAP/CEPE",
-        1,
-        "Réalisation ouvrages, Entretien canaux, Travaux terrain",
-        "Actif",
-        "Conditions terrain difficiles"
-      ],
-      [
-        "POST005",
-        "Chef d'Équipe Terrain",
-        "Technicien",
-        "Coordination équipe terrain et supervision chantiers",
-        600000,
-        1000000,
-        "Leadership, Topographie, Organisation, Sécurité",
-        "BTS Génie Civil",
-        4,
-        "Animation équipe, Planning travaux, Reporting quotidien",
-        "Actif",
-        "Mobilité géographique requise"
-      ],
-      [
         "POST006",
         "Gestionnaire RH",
-        "Administratif",
+        "Administration",
+        "Manager",
+        "Paie, Législation, GRH, Excel avancé",
+        800000,
+        1200000,
+        1,
+        1,
+        0,
         "Gestion administrative du personnel",
-        500000,
-        900000,
-        "Gestion RH, Paie, Législation travail, Excel avancé",
-        "Licence en Gestion RH",
-        3,
-        "Paie, Contrats, Suivi carrières, Formation",
+        "POST001",
         "Actif",
-        "Maîtrise législation camerounaise"
-      ],
-      [
-        "POST007",
-        "Conducteur d'Engins",
-        "Technicien",
-        "Conduite engins de terrassement et nivellement",
-        350000,
-        600000,
-        "Conduite pelle, bulldozer, niveleuse, Mécanique de base",
-        "Formation professionnelle",
-        3,
-        "Terrassement, Nivellement, Entretien matériel",
-        "Actif",
-        "Permis engins obligatoire"
-      ],
-      [
-        "POST008",
-        "Pilote de Drone",
-        "Topographe",
-        "Levés aériens par drone et photogrammétrie",
-        550000,
-        1100000,
-        "Pilotage drone, Photogrammétrie, Traitement images, SIG",
-        "Licence Géomatique + Certification drone",
-        2,
-        "Levés aériens, Modélisation 3D, Orthophotos",
-        "Actif",
-        "Certification DSAC requise"
+        "Maîtrise OHADA et Code du Travail CM"
       ]
     ];
 
@@ -193,165 +179,113 @@ function initialiserPoste() {
 
     // PosteID (colonne A) - Auto-incrémentation
     const derniereLigne = sheet.getMaxRows();
-    for (let i = 11; i <= Math.min(derniereLigne, 100); i++) {
+    for (let i = 9; i <= Math.min(derniereLigne, 100); i++) {
       sheet.getRange(`A${i}`).setFormula(
         `=SI(NBVAL(B${i})>0;"POST"&TEXTE(LIGNE()-2;"000");"")`
       );
     }
 
-    // Salaires (colonnes E et F)
-    sheet.getRange("E3:F100")
+    // Salaires (colonnes F et G)
+    sheet.getRange("F3:G100")
       .setNumberFormat('#,##0" FCFA"')
       .setHorizontalAlignment("right");
 
-    // Expérience (colonne I)
-    sheet.getRange("I3:I100")
-      .setNumberFormat('0" ans"')
+    // Nombres (colonnes H, I, J)
+    sheet.getRange("H3:J100")
+      .setNumberFormat('0')
       .setHorizontalAlignment("center");
 
-    // ===== FORMULES AVANCÉES =====
-
-    // Salaire Moyen (colonne cachée)
-    sheet.insertColumnAfter(6);
-    sheet.getRange("G2").setValue("Salaire Moyen");
+    // Formule NbVacants (colonne J) = NbPostes - NbPourvus
     for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`G${i}`).setFormula(`=SI(ET(E${i}>0;F${i}>0);(E${i}+F${i})/2;0)`);
+      sheet.getRange(`J${i}`).setFormula(`=SI(H${i}>0;H${i}-I${i};0)`);
     }
-    sheet.getRange("G3:G100").setNumberFormat('#,##0" FCFA"');
-    sheet.hideColumns(7);
-
-    // Écart Salarial (colonne cachée)
-    sheet.insertColumnAfter(7);
-    sheet.getRange("H2").setValue("Écart Salarial");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`H${i}`).setFormula(`=SI(ET(E${i}>0;F${i}>0);F${i}-E${i};0)`);
-    }
-    sheet.getRange("H3:H100").setNumberFormat('#,##0" FCFA"');
-    sheet.hideColumns(8);
-
-    // Taux écart (%)
-    sheet.insertColumnAfter(8);
-    sheet.getRange("I2").setValue("Taux Écart");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`I${i}`).setFormula(`=SI(E${i}>0;(F${i}-E${i})/E${i};0)`);
-    }
-    sheet.getRange("I3:I100").setNumberFormat("0.0%");
-    sheet.hideColumns(9);
-
-    // Niveau expérience (colonne cachée)
-    sheet.insertColumnAfter(9);
-    sheet.getRange("J2").setValue("Niveau Exp");
-    for (let i = 3; i <= 100; i++) {
-      sheet.getRange(`J${i}`).setFormula(
-        `=SI(L${i}="";""`;SI(L${i}<2;"Junior";SI(L${i}<5;"Confirmé";SI(L${i}<10;"Senior";"Expert"))))`
-      );
-    }
-    sheet.hideColumns(10);
 
     // ===== VALIDATION DES DONNÉES =====
 
-    // Catégorie
-    const regleCategorie = SpreadsheetApp.newDataValidation()
-      .requireValueInList(["Topographe", "Ingénieur", "Technicien", "Ouvrier", "Administratif"], true)
+    // Département
+    const regleDepartement = SpreadsheetApp.newDataValidation()
+      .requireValueInList(["Direction", "Projets", "Topographie", "Ingénierie", "Administration", "Terrain"], true)
       .setAllowInvalid(false)
-      .setHelpText("Sélectionnez la catégorie professionnelle")
+      .setHelpText("Sélectionnez le département")
       .build();
-    sheet.getRange("C3:C100").setDataValidation(regleCategorie);
+    sheet.getRange("C3:C100").setDataValidation(regleDepartement);
+
+    // NiveauHiérarchique
+    const regleNiveau = SpreadsheetApp.newDataValidation()
+      .requireValueInList(["Junior", "Senior", "Manager", "Directeur"], true)
+      .setAllowInvalid(false)
+      .setHelpText("Niveau hiérarchique du poste")
+      .build();
+    sheet.getRange("D3:D100").setDataValidation(regleNiveau);
 
     // Statut
     const regleStatut = SpreadsheetApp.newDataValidation()
       .requireValueInList(["Actif", "Inactif", "En révision"], true)
       .setAllowInvalid(false)
-      .setHelpText("Statut du poste dans le référentiel")
+      .setHelpText("Statut du poste")
       .build();
-    sheet.getRange("K3:K100").setDataValidation(regleStatut);
+    sheet.getRange("M3:M100").setDataValidation(regleStatut);
 
-    // Salaires (nombres positifs uniquement)
+    // Salaires (nombres positifs)
     const regleSalaire = SpreadsheetApp.newDataValidation()
       .requireNumberGreaterThan(0)
       .setAllowInvalid(false)
-      .setHelpText("Entrez un montant positif en FCFA")
+      .setHelpText("Salaire en FCFA (> 0)")
       .build();
-    sheet.getRange("E3:F100").setDataValidation(regleSalaire);
+    sheet.getRange("F3:G100").setDataValidation(regleSalaire);
 
-    // Expérience (nombre entier positif)
-    const regleExperience = SpreadsheetApp.newDataValidation()
+    // Nombres de postes
+    const regleNombre = SpreadsheetApp.newDataValidation()
       .requireNumberGreaterThanOrEqualTo(0)
       .setAllowInvalid(false)
-      .setHelpText("Nombre d'années d'expérience minimum")
+      .setHelpText("Nombre entier >= 0")
       .build();
-    sheet.getRange("L3:L100").setDataValidation(regleExperience);
-
-    // Niveau d'étude
-    const regleNiveau = SpreadsheetApp.newDataValidation()
-      .requireValueInList([
-        "CEPE",
-        "CAP",
-        "BEPC",
-        "Probatoire",
-        "Baccalauréat",
-        "BTS/DUT",
-        "Licence",
-        "Master",
-        "Doctorat",
-        "Formation professionnelle"
-      ], true)
-      .setAllowInvalid(false)
-      .setHelpText("Sélectionnez le niveau d'étude requis")
-      .build();
-    sheet.getRange("H3:H100").setDataValidation(regleNiveau);
-
-    // Validation Salaire Max > Salaire Min
-    const regleSalaireMax = SpreadsheetApp.newDataValidation()
-      .requireFormulaSatisfied('=F3>E3')
-      .setAllowInvalid(false)
-      .setHelpText("Le salaire maximum doit être supérieur au salaire minimum")
-      .build();
-    sheet.getRange("F3:F100").setDataValidation(regleSalaireMax);
+    sheet.getRange("H3:I100").setDataValidation(regleNombre);
 
     // ===== MISE EN FORME CONDITIONNELLE =====
 
     const rules = sheet.getConditionalFormatRules();
 
-    // Catégories - Couleurs différenciées
+    // NiveauHiérarchique - Couleurs différenciées
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Ingénieur")
-      .setBackground("#e8f0fe")
-      .setFontColor("#1a73e8")
+      .whenTextEqualTo("Directeur")
+      .setBackground("#ea4335")
+      .setFontColor("#ffffff")
       .setBold(true)
-      .setRanges([sheet.getRange("C3:C100")])
+      .setRanges([sheet.getRange("D3:D100")])
       .build());
 
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Topographe")
-      .setBackground("#e6f4ea")
-      .setFontColor("#137333")
+      .whenTextEqualTo("Manager")
+      .setBackground("#fbbc04")
+      .setFontColor("#000000")
       .setBold(true)
-      .setRanges([sheet.getRange("C3:C100")])
+      .setRanges([sheet.getRange("D3:D100")])
       .build());
 
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Technicien")
-      .setBackground("#fef7e0")
-      .setFontColor("#b45309")
+      .whenTextEqualTo("Senior")
+      .setBackground("#34a853")
+      .setFontColor("#ffffff")
       .setBold(true)
-      .setRanges([sheet.getRange("C3:C100")])
+      .setRanges([sheet.getRange("D3:D100")])
       .build());
 
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Ouvrier")
-      .setBackground("#fce8e6")
-      .setFontColor("#c5221f")
+      .whenTextEqualTo("Junior")
+      .setBackground("#1a73e8")
+      .setFontColor("#ffffff")
       .setBold(true)
-      .setRanges([sheet.getRange("C3:C100")])
+      .setRanges([sheet.getRange("D3:D100")])
       .build());
 
+    // Postes vacants - Alerte si > 0
     rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("Administratif")
-      .setBackground("#f3e8fd")
-      .setFontColor("#9c27b0")
+      .whenNumberGreaterThan(0)
+      .setBackground("#fff3e0")
+      .setFontColor("#e65100")
       .setBold(true)
-      .setRanges([sheet.getRange("C3:C100")])
+      .setRanges([sheet.getRange("J3:J100")])
       .build());
 
     // Statut
@@ -360,7 +294,7 @@ function initialiserPoste() {
       .setBackground("#34a853")
       .setFontColor("#ffffff")
       .setBold(true)
-      .setRanges([sheet.getRange("K3:K100")])
+      .setRanges([sheet.getRange("M3:M100")])
       .build());
 
     rules.push(SpreadsheetApp.newConditionalFormatRule()
@@ -368,34 +302,7 @@ function initialiserPoste() {
       .setBackground("#9aa0a6")
       .setFontColor("#ffffff")
       .setBold(true)
-      .setRanges([sheet.getRange("K3:K100")])
-      .build());
-
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenTextEqualTo("En révision")
-      .setBackground("#fbbc04")
-      .setFontColor("#000000")
-      .setBold(true)
-      .setRanges([sheet.getRange("K3:K100")])
-      .build());
-
-    // Salaires - Échelle de couleurs
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenNumberBetween(0, 500000)
-      .setBackground("#e6f4ea")
-      .setRanges([sheet.getRange("E3:F100")])
-      .build());
-
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenNumberBetween(500001, 1000000)
-      .setBackground("#fef7e0")
-      .setRanges([sheet.getRange("E3:F100")])
-      .build());
-
-    rules.push(SpreadsheetApp.newConditionalFormatRule()
-      .whenNumberGreaterThan(1000000)
-      .setBackground("#fce8e6")
-      .setRanges([sheet.getRange("E3:F100")])
+      .setRanges([sheet.getRange("M3:M100")])
       .build());
 
     sheet.setConditionalFormatRules(rules);
@@ -403,9 +310,8 @@ function initialiserPoste() {
     // ===== SECTION STATISTIQUES =====
     const statsRow = 105;
 
-    // Titre de la section
-    sheet.getRange(`A${statsRow}:L${statsRow}`).merge()
-      .setValue("📊 GRILLE SALARIALE ET ANALYSES RH")
+    sheet.getRange(`A${statsRow}:N${statsRow}`).merge()
+      .setValue("📊 STATISTIQUES RH ET GRILLE SALARIALE")
       .setFontSize(13)
       .setFontWeight("bold")
       .setHorizontalAlignment("center")
@@ -414,23 +320,21 @@ function initialiserPoste() {
 
     sheet.setRowHeight(statsRow, 35);
 
-    // KPIs
     const kpis = [
       ["Indicateur", "Valeur", "Commentaire"],
-      ["Nombre total de postes", '=NB.SI(B3:B100;"<>"")', "Postes au référentiel"],
-      ["Postes actifs", '=NB.SI(K3:K100;"Actif")', "Postes disponibles au recrutement"],
-      ["Postes ingénieurs", '=NB.SI(C3:C100;"Ingénieur")', "Postes cadres supérieurs"],
-      ["Postes topographes", '=NB.SI(C3:C100;"Topographe")', "Postes techniques spécialisés"],
-      ["Postes techniciens", '=NB.SI(C3:C100;"Technicien")', "Postes techniques"],
-      ["Postes ouvriers", '=NB.SI(C3:C100;"Ouvrier")', "Postes exécution"],
-      ["Postes administratifs", '=NB.SI(C3:C100;"Administratif")', "Postes support"],
-      ["Salaire moyen min", '=MOYENNE(E3:E100)', "Moyenne salaires minimums"],
-      ["Salaire moyen max", '=MOYENNE(F3:F100)', "Moyenne salaires maximums"],
-      ["Salaire global moyen", '=MOYENNE(G3:G100)', "Moyenne générale"],
-      ["Écart salarial moyen", '=MOYENNE(H3:H100)', "Écart moyen min-max"],
-      ["Expérience moyenne requise", '=MOYENNE(L3:L100)', "Années d'expérience moyennes"],
-      ["Masse salariale min totale", '=SOMME(E3:E100)', "Si tous postes au minimum"],
-      ["Masse salariale max totale", '=SOMME(F3:F100)', "Si tous postes au maximum"]
+      ["Total postes", '=NB.SI(B3:B100;"<>"")', "Postes au référentiel"],
+      ["Postes actifs", '=NB.SI(M3:M100;"Actif")', "Disponibles"],
+      ["Total employés théorique", '=SOMME(H3:H100)', "Si tous postes pourvus"],
+      ["Employés actuels", '=SOMME(I3:I100)', "Postes pourvus"],
+      ["Postes vacants", '=SOMME(J3:J100)', "À pourvoir"],
+      ["Taux de pourvoi", '=SI(B${statsRow+3}>0;B${statsRow+4}/B${statsRow+3};0)', "% postes pourvus"],
+      ["Salaire moyen min", '=MOYENNE(F3:F100)', "Moyenne minimums"],
+      ["Salaire moyen max", '=MOYENNE(G3:G100)', "Moyenne maximums"],
+      ["Salaire moyen global", '=MOYENNE(F3:G100)', "Moyenne générale"],
+      ["Postes Junior", '=NB.SI(D3:D100;"Junior")', "Niveau débutant"],
+      ["Postes Senior", '=NB.SI(D3:D100;"Senior")', "Niveau confirmé"],
+      ["Postes Manager", '=NB.SI(D3:D100;"Manager")', "Management"],
+      ["Postes Directeur", '=NB.SI(D3:D100;"Directeur")', "Direction"]
     ];
 
     sheet.getRange(statsRow + 1, 1, kpis.length, 3).setValues(kpis);
@@ -442,156 +346,13 @@ function initialiserPoste() {
       .setFontColor("#ffffff")
       .setHorizontalAlignment("center");
 
-    // Format des valeurs
-    sheet.getRange(statsRow + 9, 2, 6, 1).setNumberFormat('#,##0" FCFA"');
-    sheet.getRange(statsRow + 13, 2).setNumberFormat('0.0" ans"');
+    sheet.getRange(statsRow + 7, 2).setNumberFormat("0.0%");
+    sheet.getRange(statsRow + 8, 2, 3, 1).setNumberFormat('#,##0" FCFA"');
 
-    // Bordures pour les KPIs
-    sheet.getRange(statsRow + 1, 1, kpis.length, 3).setBorder(
-      true, true, true, true, true, true,
-      "#000000", SpreadsheetApp.BorderStyle.SOLID
-    );
-
-    // Alternance de couleurs pour les lignes
-    for (let i = 0; i < kpis.length; i++) {
-      if (i > 0 && i % 2 === 0) {
-        sheet.getRange(statsRow + 1 + i, 1, 1, 3).setBackground("#f8f9fa");
-      }
-    }
-
-    // ===== GRAPHIQUES ET ANALYSES =====
-
-    // Graphique 1: Répartition par catégorie
-    const chartCategorie = sheet.newChart()
-      .setChartType(Charts.ChartType.PIE)
-      .addRange(sheet.getRange("C2:C100"))
-      .setPosition(statsRow + kpis.length + 2, 1, 0, 0)
-      .setOption('title', 'Répartition des Postes par Catégorie')
-      .setOption('width', 500)
-      .setOption('height', 300)
-      .setOption('is3D', true)
-      .setOption('colors', ['#1a73e8', '#34a853', '#fbbc04', '#ea4335', '#9c27b0'])
-      .setOption('pieSliceText', 'value')
-      .setOption('legend', {position: 'right', textStyle: {fontSize: 11}})
-      .build();
-
-    sheet.insertChart(chartCategorie);
-
-    // Graphique 2: Grille salariale par poste
-    const chartSalaires = sheet.newChart()
-      .setChartType(Charts.ChartType.COLUMN)
-      .addRange(sheet.getRange("B2:B100"))
-      .addRange(sheet.getRange("E2:F100"))
-      .setPosition(statsRow + kpis.length + 2, 7, 0, 0)
-      .setOption('title', 'Grille Salariale: Min vs Max par Poste')
-      .setOption('width', 700)
-      .setOption('height', 300)
-      .setOption('colors', ['#34a853', '#ea4335'])
-      .setOption('legend', {position: 'top'})
-      .setOption('vAxis', {title: 'Salaire (FCFA)', format: 'short'})
-      .setOption('hAxis', {title: 'Postes', slantedText: true, slantedTextAngle: 45})
-      .setOption('chartArea', {width: '75%', height: '65%'})
-      .build();
-
-    sheet.insertChart(chartSalaires);
-
-    // Graphique 3: Expérience requise par poste
-    const chartExperience = sheet.newChart()
-      .setChartType(Charts.ChartType.BAR)
-      .addRange(sheet.getRange("B2:B100"))
-      .addRange(sheet.getRange("L2:L100"))
-      .setPosition(statsRow + kpis.length + 17, 1, 0, 0)
-      .setOption('title', 'Expérience Minimale Requise (années)')
-      .setOption('width', 600)
-      .setOption('height', 400)
-      .setOption('colors', ['#fbbc04'])
-      .setOption('legend', {position: 'none'})
-      .setOption('hAxis', {title: 'Années', format: '0'})
-      .setOption('vAxis', {title: 'Postes'})
-      .setOption('chartArea', {width: '60%', height: '80%'})
-      .build();
-
-    sheet.insertChart(chartExperience);
-
-    // Graphique 4: Salaire moyen par catégorie
-    const chartMoyenne = sheet.newChart()
-      .setChartType(Charts.ChartType.COLUMN)
-      .addRange(sheet.getRange("C2:C100"))
-      .addRange(sheet.getRange("G2:G100"))
-      .setPosition(statsRow + kpis.length + 17, 8, 0, 0)
-      .setOption('title', 'Salaire Moyen par Catégorie')
-      .setOption('width', 600)
-      .setOption('height', 400)
-      .setOption('colors', ['#1a73e8'])
-      .setOption('legend', {position: 'none'})
-      .setOption('vAxis', {title: 'Salaire (FCFA)', format: 'short'})
-      .setOption('hAxis', {title: 'Catégorie'})
-      .setOption('chartArea', {width: '75%', height: '70%'})
-      .build();
-
-    sheet.insertChart(chartMoyenne);
-
-    // ===== TABLEAU RÉCAPITULATIF PAR CATÉGORIE =====
-    const recapRow = statsRow + kpis.length + 35;
-
-    sheet.getRange(`A${recapRow}:F${recapRow}`).merge()
-      .setValue("📋 RÉCAPITULATIF PAR CATÉGORIE PROFESSIONNELLE")
-      .setFontSize(12)
-      .setFontWeight("bold")
-      .setHorizontalAlignment("center")
-      .setBackground("#174ea6")
-      .setFontColor("#ffffff");
-
-    const headersRecap = ["Catégorie", "Nb Postes", "Sal. Min Moyen", "Sal. Max Moyen", "Exp. Moyenne", "Postes Actifs"];
-    sheet.getRange(recapRow + 1, 1, 1, 6).setValues([headersRecap])
-      .setFontWeight("bold")
-      .setBackground("#4285f4")
-      .setFontColor("#ffffff")
-      .setHorizontalAlignment("center");
-
-    // Données récapitulatives
-    const categories = ["Ingénieur", "Topographe", "Technicien", "Ouvrier", "Administratif"];
-    const recapData = [];
-
-    categories.forEach((cat, idx) => {
-      const row = recapRow + 2 + idx;
-      recapData.push([
-        cat,
-        `=NB.SI(C3:C100;"${cat}")`,
-        `=MOYENNE.SI(C3:C100;"${cat}";E3:E100)`,
-        `=MOYENNE.SI(C3:C100;"${cat}";F3:F100)`,
-        `=MOYENNE.SI(C3:C100;"${cat}";L3:L100)`,
-        `=NB.SI.ENS(C3:C100;"${cat}";K3:K100;"Actif")`
-      ]);
-    });
-
-    sheet.getRange(recapRow + 2, 1, categories.length, 6).setValues(recapData);
-
-    // Formatage du récapitulatif
-    sheet.getRange(recapRow + 2, 3, categories.length, 2).setNumberFormat('#,##0" FCFA"');
-    sheet.getRange(recapRow + 2, 5, categories.length, 1).setNumberFormat('0.0" ans"');
-
-    // Bordures
-    sheet.getRange(recapRow + 1, 1, categories.length + 1, 6).setBorder(
-      true, true, true, true, true, true,
-      "#000000", SpreadsheetApp.BorderStyle.SOLID
-    );
-
-    // ===== PROTECTION DE LA FEUILLE =====
-    const protection = sheet.protect().setDescription("Feuille Postes protégée");
-
-    // Déprotéger les plages de saisie
-    const plagesSaisie = [
-      sheet.getRange("B3:L100")  // Zone de saisie principale
-    ];
-
-    protection.setUnprotectedRanges(plagesSaisie);
-    protection.setWarningOnly(true);
-
-    Logger.log("✅ Module POSTE initialisé avec succès!");
+    Logger.log("✅ Module POSTE v2.0 initialisé avec succès!");
 
   } catch (error) {
-    Logger.log("❌ Erreur lors de l'initialisation du module POSTE: " + error);
+    Logger.log("❌ Erreur lors de l'initialisation du module POSTE v2.0: " + error);
     throw error;
   }
 }
@@ -601,7 +362,7 @@ function initialiserPoste() {
 /**
  * Ajoute un nouveau poste
  */
-function ajouterPoste(intitule, categorie, description, salaireMin, salaireMax, competences, niveauEtude, experience, responsabilites) {
+function ajouterPoste(titre, departement, niveau, competences, salaireMin, salaireMax, nbPostes, description, responsableId) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = ss.getSheetByName("💼 Postes");
@@ -610,31 +371,32 @@ function ajouterPoste(intitule, categorie, description, salaireMin, salaireMax, 
       throw new Error("La feuille Postes n'existe pas");
     }
 
-    // Validation salaire max > salaire min
+    // Validation
     if (parseFloat(salaireMax) <= parseFloat(salaireMin)) {
       throw new Error("Le salaire maximum doit être supérieur au salaire minimum");
     }
 
     const nouvelleLigne = [
       "",  // PosteID auto-généré
-      intitule,
-      categorie,
-      description,
+      titre,
+      departement,
+      niveau,
+      competences,
       parseFloat(salaireMin),
       parseFloat(salaireMax),
-      competences,
-      niveauEtude,
-      parseInt(experience),
-      responsabilites,
+      parseInt(nbPostes),
+      0,  // NbPourvus initial
+      "",  // NbVacants (formule)
+      description,
+      responsableId || "",
       "Actif",
-      ""  // Observations
+      ""
     ];
 
     sheet.appendRow(nouvelleLigne);
 
-    // Journaliser l'action
     if (typeof journaliserAction === 'function') {
-      journaliserAction("POSTE", `Nouveau poste créé: ${intitule}`);
+      journaliserAction("POSTE", `Nouveau poste créé: ${titre}`);
     }
 
     return {success: true, message: "Poste ajouté avec succès"};
@@ -660,7 +422,6 @@ function modifierPoste(posteId, champAModifier, nouvelleValeur) {
     const data = sheet.getDataRange().getValues();
     let ligneModifiee = -1;
 
-    // Trouver le poste
     for (let i = 2; i < data.length; i++) {
       if (data[i][0] === posteId) {
         ligneModifiee = i + 1;
@@ -672,19 +433,10 @@ function modifierPoste(posteId, champAModifier, nouvelleValeur) {
       throw new Error("Poste non trouvé: " + posteId);
     }
 
-    // Mapper les champs aux colonnes
     const colonnes = {
-      "intitule": 2,
-      "categorie": 3,
-      "description": 4,
-      "salaireMin": 5,
-      "salaireMax": 6,
-      "competences": 7,
-      "niveauEtude": 8,
-      "experience": 9,
-      "responsabilites": 10,
-      "statut": 11,
-      "observations": 12
+      "titre": 2, "departement": 3, "niveau": 4, "competences": 5,
+      "salaireMin": 6, "salaireMax": 7, "nbPostes": 8, "nbPourvus": 9,
+      "description": 11, "responsableId": 12, "statut": 13, "observations": 14
     };
 
     const colonne = colonnes[champAModifier];
@@ -707,54 +459,16 @@ function modifierPoste(posteId, champAModifier, nouvelleValeur) {
 }
 
 /**
- * Supprime un poste (désactivation recommandée plutôt que suppression)
+ * Supprime (désactive) un poste
  */
-function desactiverPoste(posteId) {
+function supprimerPoste(posteId) {
   return modifierPoste(posteId, "statut", "Inactif");
 }
 
 /**
- * Recherche des postes selon critères
+ * Obtient tous les postes
  */
-function rechercherPostes(critere, valeur) {
-  try {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetByName("💼 Postes");
-
-    if (!sheet) {
-      throw new Error("La feuille Postes n'existe pas");
-    }
-
-    const data = sheet.getDataRange().getValues();
-    const resultats = [];
-
-    const colonnes = {
-      "intitule": 1,
-      "categorie": 2,
-      "niveauEtude": 7,
-      "statut": 10
-    };
-
-    const colonne = colonnes[critere];
-
-    for (let i = 2; i < data.length; i++) {
-      if (data[i][colonne] && data[i][colonne].toString().toLowerCase().includes(valeur.toLowerCase())) {
-        resultats.push(data[i]);
-      }
-    }
-
-    return {success: true, resultats: resultats};
-
-  } catch (error) {
-    Logger.log("Erreur recherche postes: " + error);
-    return {success: false, message: error.message};
-  }
-}
-
-/**
- * Obtient tous les postes actifs
- */
-function obtenirPostesActifs() {
+function obtenirTousPostes() {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = ss.getSheetByName("💼 Postes");
@@ -767,19 +481,21 @@ function obtenirPostesActifs() {
     const postes = [];
 
     for (let i = 2; i < data.length; i++) {
-      if (data[i][1] && data[i][10] === "Actif") {
+      if (data[i][1]) {
         postes.push({
           id: data[i][0],
-          intitule: data[i][1],
-          categorie: data[i][2],
-          description: data[i][3],
-          salaireMin: data[i][4],
-          salaireMax: data[i][5],
-          competences: data[i][6],
-          niveauEtude: data[i][7],
-          experience: data[i][8],
-          responsabilites: data[i][9],
-          statut: data[i][10]
+          titre: data[i][1],
+          departement: data[i][2],
+          niveau: data[i][3],
+          competences: data[i][4],
+          salaireMin: data[i][5],
+          salaireMax: data[i][6],
+          nbPostes: data[i][7],
+          nbPourvus: data[i][8],
+          nbVacants: data[i][9],
+          description: data[i][10],
+          responsableId: data[i][11],
+          statut: data[i][12]
         });
       }
     }
@@ -793,9 +509,9 @@ function obtenirPostesActifs() {
 }
 
 /**
- * Obtient les postes par catégorie
+ * Obtient les KPIs des postes
  */
-function obtenirPostesParCategorie(categorie) {
+function obtenirKPIsPostes() {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = ss.getSheetByName("💼 Postes");
@@ -805,32 +521,139 @@ function obtenirPostesParCategorie(categorie) {
     }
 
     const data = sheet.getDataRange().getValues();
-    const postes = [];
+    
+    let totalPostes = 0;
+    let totalPourvus = 0;
+    let totalVacants = 0;
+    let sommeSalairesMoyens = 0;
+    let count = 0;
 
     for (let i = 2; i < data.length; i++) {
-      if (data[i][2] === categorie && data[i][1]) {
-        postes.push({
-          id: data[i][0],
-          intitule: data[i][1],
-          salaireMin: data[i][4],
-          salaireMax: data[i][5],
-          experience: data[i][8]
-        });
+      if (data[i][1] && data[i][12] === "Actif") {
+        totalPostes += data[i][7] || 0;
+        totalPourvus += data[i][8] || 0;
+        totalVacants += data[i][9] || 0;
+        sommeSalairesMoyens += ((data[i][5] + data[i][6]) / 2) || 0;
+        count++;
       }
     }
 
-    return {success: true, postes: postes, count: postes.length};
+    const salaireMoyen = count > 0 ? sommeSalairesMoyens / count : 0;
+
+    return {
+      success: true,
+      kpis: {
+        total: totalPostes,
+        pourvus: totalPourvus,
+        vacants: totalVacants,
+        salaireMoyen: Math.round(salaireMoyen)
+      }
+    };
 
   } catch (error) {
-    Logger.log("Erreur obtention postes par catégorie: " + error);
+    Logger.log("Erreur calcul KPIs: " + error);
     return {success: false, message: error.message};
   }
 }
 
 /**
- * Vérifie si un salaire est dans la fourchette du poste
+ * Génère l'organigramme hiérarchique
  */
-function verifierSalaire(posteId, salaire) {
+function genererOrganigramme() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName("💼 Postes");
+
+    if (!sheet) {
+      throw new Error("La feuille Postes n'existe pas");
+    }
+
+    const data = sheet.getDataRange().getValues();
+    const organigramme = {
+      directeurs: [],
+      managers: [],
+      seniors: [],
+      juniors: []
+    };
+
+    for (let i = 2; i < data.length; i++) {
+      if (data[i][1] && data[i][12] === "Actif") {
+        const poste = {
+          id: data[i][0],
+          titre: data[i][1],
+          departement: data[i][2],
+          niveau: data[i][3],
+          nbPostes: data[i][7],
+          nbPourvus: data[i][8],
+          responsableId: data[i][11]
+        };
+
+        switch (data[i][3]) {
+          case "Directeur":
+            organigramme.directeurs.push(poste);
+            break;
+          case "Manager":
+            organigramme.managers.push(poste);
+            break;
+          case "Senior":
+            organigramme.seniors.push(poste);
+            break;
+          case "Junior":
+            organigramme.juniors.push(poste);
+            break;
+        }
+      }
+    }
+
+    return {success: true, organigramme: organigramme};
+
+  } catch (error) {
+    Logger.log("Erreur génération organigramme: " + error);
+    return {success: false, message: error.message};
+  }
+}
+
+/**
+ * Obtient les postes vacants
+ */
+function obtenirPostesVacants() {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName("💼 Postes");
+
+    if (!sheet) {
+      throw new Error("La feuille Postes n'existe pas");
+    }
+
+    const data = sheet.getDataRange().getValues();
+    const postesVacants = [];
+
+    for (let i = 2; i < data.length; i++) {
+      if (data[i][1] && data[i][12] === "Actif" && data[i][9] > 0) {
+        postesVacants.push({
+          id: data[i][0],
+          titre: data[i][1],
+          departement: data[i][2],
+          niveau: data[i][3],
+          nbVacants: data[i][9],
+          salaireMin: data[i][5],
+          salaireMax: data[i][6]
+        });
+      }
+    }
+
+    return {success: true, postes: postesVacants, count: postesVacants.length};
+
+  } catch (error) {
+    Logger.log("Erreur obtention postes vacants: " + error);
+    return {success: false, message: error.message};
+  }
+}
+
+/**
+ * Affecte un employé à un poste
+ */
+function affecterEmployePoste(posteId, employeId) {
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = ss.getSheetByName("💼 Postes");
@@ -843,27 +666,83 @@ function verifierSalaire(posteId, salaire) {
 
     for (let i = 2; i < data.length; i++) {
       if (data[i][0] === posteId) {
-        const salaireMin = data[i][4];
-        const salaireMax = data[i][5];
-        const estDansForchette = salaire >= salaireMin && salaire <= salaireMax;
+        const nbPostes = data[i][7];
+        const nbPourvus = data[i][8];
 
-        return {
-          success: true,
-          estDansForchette: estDansForchette,
-          salaireMin: salaireMin,
-          salaireMax: salaireMax,
-          salaire: salaire,
-          message: estDansForchette
-            ? "Salaire conforme à la grille"
-            : `Salaire hors fourchette (${salaireMin} - ${salaireMax} FCFA)`
-        };
+        if (nbPourvus >= nbPostes) {
+          throw new Error("Tous les postes sont déjà pourvus");
+        }
+
+        sheet.getRange(i + 1, 9).setValue(nbPourvus + 1);
+
+        if (typeof journaliserAction === 'function') {
+          journaliserAction("POSTE", `Employé ${employeId} affecté au poste ${posteId}`);
+        }
+
+        return {success: true, message: "Employé affecté avec succès"};
       }
     }
 
     throw new Error("Poste non trouvé");
 
   } catch (error) {
-    Logger.log("Erreur vérification salaire: " + error);
+    Logger.log("Erreur affectation employé: " + error);
     return {success: false, message: error.message};
   }
+}
+
+/**
+ * Libère un poste (employé quittant)
+ */
+function libererPoste(posteId) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheetByName("💼 Postes");
+
+    if (!sheet) {
+      throw new Error("La feuille Postes n'existe pas");
+    }
+
+    const data = sheet.getDataRange().getValues();
+
+    for (let i = 2; i < data.length; i++) {
+      if (data[i][0] === posteId) {
+        const nbPourvus = data[i][8];
+
+        if (nbPourvus <= 0) {
+          throw new Error("Aucun poste n'est pourvu");
+        }
+
+        sheet.getRange(i + 1, 9).setValue(nbPourvus - 1);
+
+        if (typeof journaliserAction === 'function') {
+          journaliserAction("POSTE", `Poste libéré: ${posteId}`);
+        }
+
+        return {success: true, message: "Poste libéré avec succès"};
+      }
+    }
+
+    throw new Error("Poste non trouvé");
+
+  } catch (error) {
+    Logger.log("Erreur libération poste: " + error);
+    return {success: false, message: error.message};
+  }
+}
+
+// ==================== FONCTIONS INTERFACE ====================
+
+function afficherSidebarPoste() {
+  const html = HtmlService.createHtmlOutputFromFile('modules/poste/PosteSidebar')
+    .setTitle('Gestion Postes v2.0')
+    .setWidth(350);
+  SpreadsheetApp.getUi().showSidebar(html);
+}
+
+function afficherModalPoste() {
+  const html = HtmlService.createHtmlOutputFromFile('modules/poste/PosteModal')
+    .setWidth(1100)
+    .setHeight(750);
+  SpreadsheetApp.getUi().showModalDialog(html, 'Gestionnaire de Postes v2.0 - Organigramme & Grille Salariale');
 }

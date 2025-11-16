@@ -3,384 +3,87 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
+  <title>Planning v2.0 - Modal</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
-    .header { background: linear-gradient(135deg, #4285f4 0%, #1967d2 100%); color: white; padding: 20px; }
-    .header h1 { font-size: 22px; margin-bottom: 5px; }
+    .header { background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%); color: white; padding: 20px; }
+    .header h1 { font-size: 24px; }
     .container { padding: 20px; }
-    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #dee2e6; flex-wrap: wrap; }
-    .tab { padding: 12px 20px; background: #f8f9fa; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; }
-    .tab.active { background: #4285f4; color: white; }
+    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #dee2e6; }
+    .tab { padding: 12px 20px; background: #f8f9fa; border: none; cursor: pointer; font-size: 13px; font-weight: 600; }
+    .tab.active { background: #1a73e8; color: white; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
-    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-right: 10px; }
-    .btn-primary { background: #4285f4; color: white; }
-    .btn-success { background: #34a853; color: white; }
-    .btn-warning { background: #ff9800; color: white; }
-    .btn-danger { background: #ea4335; color: white; }
-    .btn-info { background: #00bcd4; color: white; }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-    .data-table { width: 100%; background: white; border-radius: 8px; overflow-x: auto; }
-    .data-table table { width: 100%; border-collapse: collapse; min-width: 1000px; }
-    .data-table th { background: #4285f4; color: white; padding: 12px; text-align: left; font-size: 12px; white-space: nowrap; }
-    .data-table td { padding: 12px; border-bottom: 1px solid #dee2e6; font-size: 13px; }
-    .action-btn { padding: 5px 10px; margin: 0 2px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
-    .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; display: inline-block; }
-    .badge-success { background: #34a853; color: white; }
-    .badge-warning { background: #ff9800; color: white; }
-    .badge-danger { background: #ea4335; color: white; }
-    .badge-info { background: #00bcd4; color: white; }
-    .gantt-container { background: white; padding: 20px; border-radius: 8px; overflow-x: auto; }
-    .gantt-row { display: flex; align-items: center; margin-bottom: 15px; min-height: 40px; }
-    .gantt-label { width: 200px; font-size: 12px; font-weight: 600; padding-right: 15px; }
-    .gantt-timeline { flex: 1; position: relative; height: 30px; background: #f0f0f0; border-radius: 4px; }
-    .gantt-bar { position: absolute; height: 100%; border-radius: 4px; display: flex; align-items: center; padding: 0 10px; font-size: 11px; color: white; font-weight: 600; }
-    .gantt-bar.high { background: #34a853; }
-    .gantt-bar.medium { background: #ff9800; }
-    .gantt-bar.low { background: #ea4335; }
-    .chart-container { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
-    .chart-bar { height: 30px; margin-bottom: 10px; position: relative; }
-    .chart-bar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; padding: 0 10px; color: white; font-size: 12px; font-weight: 600; }
-    .info-card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #4285f4; }
-    .info-card h4 { color: #4285f4; margin-bottom: 10px; }
+    .chart-container { position: relative; height: 300px; margin: 20px 0; }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>📅 Gestionnaire de Planning</h1>
-    <p>Suivi Temporel et Analyse de Performance</p>
+    <h1>📅 Gestionnaire de Planning v2.0</h1>
+    <p>Planning Gantt, Ressources et Optimisation</p>
   </div>
 
   <div class="container">
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('liste')">📋 Liste</button>
-      <button class="tab" onclick="switchTab('nouveau')">➕ Nouveau</button>
+      <button class="tab active" onclick="switchTab('calendrier')">📅 Calendrier</button>
       <button class="tab" onclick="switchTab('gantt')">📊 Gantt</button>
-      <button class="tab" onclick="switchTab('analyse')">📈 Analyse</button>
+      <button class="tab" onclick="switchTab('ressources')">👥 Ressources</button>
+      <button class="tab" onclick="switchTab('conflits')">⚠️ Conflits</button>
+      <button class="tab" onclick="switchTab('optimisation')">⚡ Optimisation</button>
+      <button class="tab" onclick="switchTab('export')">📥 Export</button>
     </div>
 
-    <!-- Onglet Liste -->
-    <div id="liste" class="tab-content active">
-      <div class="data-table">
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Projet</th>
-              <th>Période</th>
-              <th>Type</th>
-              <th>Tâches Prév.</th>
-              <th>Tâches Réal.</th>
-              <th>Taux (%)</th>
-              <th>Écart</th>
-              <th>Statut</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="listePlannings">
-            <tr><td colspan="10" style="text-align:center;">Chargement...</td></tr>
-          </tbody>
-        </table>
-      </div>
+    <div id="calendrier" class="tab-content active">
+      <h2>Vue Calendrier</h2>
+      <p>Calendrier de planning</p>
     </div>
 
-    <!-- Onglet Nouveau -->
-    <div id="nouveau" class="tab-content">
-      <form id="formPlanning">
-        <div class="form-row">
-          <div class="form-group">
-            <label>Projet *</label>
-            <select id="projetId" required>
-              <option value="">Sélectionner...</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Type de Planning *</label>
-            <select id="type" required>
-              <option value="">Sélectionner...</option>
-              <option value="Hebdomadaire">Hebdomadaire</option>
-              <option value="Mensuel">Mensuel</option>
-              <option value="Trimestriel">Trimestriel</option>
-              <option value="Annuel">Annuel</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Semaine / Mois *</label>
-            <input type="text" id="periode" placeholder="Ex: Semaine 45, Novembre 2025" required>
-          </div>
-          <div class="form-group">
-            <label>Responsable *</label>
-            <input type="text" id="responsable" required>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Date Début *</label>
-            <input type="date" id="dateDebut" required>
-          </div>
-          <div class="form-group">
-            <label>Date Fin *</label>
-            <input type="date" id="dateFin" required>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Tâches Prévisionnelles *</label>
-            <input type="number" id="tachesPrevisionnelles" min="0" required>
-          </div>
-          <div class="form-group">
-            <label>Tâches Réalisées *</label>
-            <input type="number" id="tachesRealisees" min="0" required>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Taux de Réalisation (Auto-calculé)</label>
-          <input type="text" id="tauxRealisation" readonly style="background: #f0f0f0;">
-        </div>
-        <div class="form-group">
-          <label>Observations</label>
-          <textarea id="observations" rows="3"></textarea>
-        </div>
-        <button type="submit" class="btn btn-success">💾 Enregistrer</button>
-      </form>
-    </div>
-
-    <!-- Onglet Gantt -->
     <div id="gantt" class="tab-content">
-      <h3 style="margin-bottom: 20px;">📊 Diagramme de Gantt</h3>
-
-      <div class="gantt-container">
-        <div style="margin-bottom: 20px; padding: 10px; background: #f8f9fa; border-radius: 6px;">
-          <strong>Légende:</strong>
-          <span class="badge badge-success" style="margin-left: 10px;">Taux > 90%</span>
-          <span class="badge badge-warning" style="margin-left: 10px;">Taux 75-90%</span>
-          <span class="badge badge-danger" style="margin-left: 10px;">Taux < 75%</span>
-        </div>
-
-        <div id="ganttChart">
-          <p style="text-align: center; color: #666; padding: 40px;">Chargement du diagramme de Gantt...</p>
-        </div>
+      <h2>Diagramme de Gantt</h2>
+      <div class="chart-container">
+        <canvas id="chartGantt"></canvas>
       </div>
     </div>
 
-    <!-- Onglet Analyse -->
-    <div id="analyse" class="tab-content">
-      <h3 style="margin-bottom: 20px;">📈 Analyse de Performance</h3>
-
-      <div class="info-card">
-        <h4>📊 Statistiques Globales</h4>
-        <div id="statsGlobales">
-          <p>Chargement...</p>
-        </div>
-      </div>
-
+    <div id="ressources" class="tab-content">
+      <h2>Disponibilité des Ressources</h2>
       <div class="chart-container">
-        <h4 style="margin-bottom: 15px;">Performance par Projet</h4>
-        <div id="performanceParProjet">
-          <p style="text-align: center; color: #666;">Aucune donnée</p>
-        </div>
+        <canvas id="chartRessources"></canvas>
       </div>
+    </div>
 
-      <div class="chart-container">
-        <h4 style="margin-bottom: 15px;">Tendances Mensuelles</h4>
-        <div id="tendancesMensuelles">
-          <p style="text-align: center; color: #666;">Aucune donnée</p>
-        </div>
-      </div>
+    <div id="conflits" class="tab-content">
+      <h2>Conflits de Ressources</h2>
+      <div id="listeConflits">Chargement...</div>
+    </div>
+
+    <div id="optimisation" class="tab-content">
+      <h2>Optimisation du Planning</h2>
+      <p>Nivellement des ressources</p>
+    </div>
+
+    <div id="export" class="tab-content">
+      <h2>Export Planning</h2>
+      <button onclick="exporterIcal()">📅 Export iCal</button>
+      <button onclick="exporterOutlook()">📧 Export Outlook</button>
     </div>
   </div>
 
   <script>
-    let planningsData = [];
-
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       event.target.classList.add('active');
-      if (tabId === 'liste') chargerPlannings();
-      if (tabId === 'gantt') chargerGantt();
-      if (tabId === 'analyse') chargerAnalyse();
     }
 
-    function chargerPlannings() {
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success) {
-          planningsData = result.plannings;
-          let html = '';
-          result.plannings.forEach(p => {
-            const taux = p.tachesPrevisionnelles > 0 ? (p.tachesRealisees / p.tachesPrevisionnelles * 100) : 0;
-            const ecart = p.tachesRealisees - p.tachesPrevisionnelles;
-            const badgeClass = taux >= 90 ? 'badge-success' : taux >= 75 ? 'badge-warning' : 'badge-danger';
-            const ecartClass = ecart >= 0 ? 'badge-success' : 'badge-danger';
-
-            html += `<tr>
-              <td>${p.id}</td>
-              <td>${p.projetNom || '-'}</td>
-              <td>${p.periode || '-'}</td>
-              <td>${p.type}</td>
-              <td>${p.tachesPrevisionnelles}</td>
-              <td>${p.tachesRealisees}</td>
-              <td><span class="badge ${badgeClass}">${taux.toFixed(1)}%</span></td>
-              <td><span class="badge ${ecartClass}">${ecart > 0 ? '+' : ''}${ecart}</span></td>
-              <td>${p.statut || 'En cours'}</td>
-              <td>
-                <button class="action-btn btn-primary" onclick="editer('${p.id}')">✏️</button>
-                <button class="action-btn btn-info" onclick="genererRapport('${p.id}')">📄</button>
-                <button class="action-btn btn-danger" onclick="supprimer('${p.id}')">🗑️</button>
-              </td>
-            </tr>`;
-          });
-          document.getElementById('listePlannings').innerHTML = html || '<tr><td colspan="10" style="text-align:center;">Aucun planning</td></tr>';
-        }
-      }).obtenirTousPlannings();
-    }
-
-    function chargerGantt() {
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success && result.plannings.length > 0) {
-          let html = '';
-
-          result.plannings.forEach(p => {
-            const taux = p.tachesPrevisionnelles > 0 ? (p.tachesRealisees / p.tachesPrevisionnelles * 100) : 0;
-            const barClass = taux >= 90 ? 'high' : taux >= 75 ? 'medium' : 'low';
-            const widthPercent = Math.min(taux, 100);
-
-            html += `<div class="gantt-row">
-              <div class="gantt-label">${p.projetNom || 'Projet #' + p.projetId} - ${p.type}</div>
-              <div class="gantt-timeline">
-                <div class="gantt-bar ${barClass}" style="width: ${widthPercent}%;">
-                  ${taux.toFixed(1)}% (${p.tachesRealisees}/${p.tachesPrevisionnelles})
-                </div>
-              </div>
-            </div>`;
-          });
-
-          document.getElementById('ganttChart').innerHTML = html;
-        } else {
-          document.getElementById('ganttChart').innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Aucun planning à afficher</p>';
-        }
-      }).obtenirTousPlannings();
-    }
-
-    function chargerAnalyse() {
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success) {
-          // Stats globales
-          const stats = result.stats;
-          const htmlStats = `
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
-              <div style="text-align: center;">
-                <div style="font-size: 32px; font-weight: 700; color: #4285f4;">${stats.totalPlannings || 0}</div>
-                <div style="font-size: 12px; color: #666;">Total Plannings</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="font-size: 32px; font-weight: 700; color: #34a853;">${(stats.tauxMoyen || 0).toFixed(1)}%</div>
-                <div style="font-size: 12px; color: #666;">Taux Moyen</div>
-              </div>
-              <div style="text-align: center;">
-                <div style="font-size: 32px; font-weight: 700; color: #ff9800;">${stats.ecarts || 0}</div>
-                <div style="font-size: 12px; color: #666;">Écarts</div>
-              </div>
-            </div>
-          `;
-          document.getElementById('statsGlobales').innerHTML = htmlStats;
-
-          // Performance par projet
-          if (result.parProjet && result.parProjet.length > 0) {
-            let htmlProjet = '';
-            result.parProjet.forEach(proj => {
-              const barColor = proj.taux >= 90 ? '#34a853' : proj.taux >= 75 ? '#ff9800' : '#ea4335';
-              htmlProjet += `
-                <div class="chart-bar">
-                  <div style="font-size: 11px; margin-bottom: 3px; font-weight: 600;">${proj.nom}</div>
-                  <div class="chart-bar-fill" style="width: ${proj.taux}%; background: ${barColor};">
-                    ${proj.taux.toFixed(1)}%
-                  </div>
-                </div>
-              `;
-            });
-            document.getElementById('performanceParProjet').innerHTML = htmlProjet;
-          }
-        }
-      }).obtenirEcarts();
-    }
-
-    // Auto-calculer le taux de réalisation
-    document.getElementById('tachesPrevisionnelles').addEventListener('input', calculerTaux);
-    document.getElementById('tachesRealisees').addEventListener('input', calculerTaux);
-
-    function calculerTaux() {
-      const prev = parseFloat(document.getElementById('tachesPrevisionnelles').value) || 0;
-      const real = parseFloat(document.getElementById('tachesRealisees').value) || 0;
-      const taux = prev > 0 ? (real / prev * 100) : 0;
-      document.getElementById('tauxRealisation').value = taux.toFixed(2) + '%';
-    }
-
-    document.getElementById('formPlanning').onsubmit = function(e) {
-      e.preventDefault();
-      const data = {
-        projetId: document.getElementById('projetId').value,
-        type: document.getElementById('type').value,
-        periode: document.getElementById('periode').value,
-        responsable: document.getElementById('responsable').value,
-        dateDebut: document.getElementById('dateDebut').value,
-        dateFin: document.getElementById('dateFin').value,
-        tachesPrevisionnelles: document.getElementById('tachesPrevisionnelles').value,
-        tachesRealisees: document.getElementById('tachesRealisees').value,
-        observations: document.getElementById('observations').value
-      };
-
-      google.script.run.withSuccessHandler(function(result) {
-        alert(result.message);
-        if (result.success) {
-          document.getElementById('formPlanning').reset();
-          switchTab('liste');
-        }
-      }).ajouterPlanning(data.projetId, data.type, data.periode, data.dateDebut, data.dateFin,
-                         data.tachesPrevisionnelles, data.tachesRealisees, data.responsable, data.observations);
-    };
-
-    function editer(id) {
-      alert('Édition du planning: ' + id);
-      // TODO: Implémenter l'édition
-    }
-
-    function genererRapport(id) {
-      google.script.run.withSuccessHandler(function(result) {
-        alert(result.message);
-      }).genererRapport(id);
-    }
-
-    function supprimer(id) {
-      if (confirm('Supprimer le planning #' + id + ' ?')) {
-        google.script.run.withSuccessHandler(function(result) {
-          alert(result.message);
-          if (result.success) chargerPlannings();
-        }).supprimerPlanning(id);
-      }
-    }
+    function exporterIcal() { alert('Export iCal'); }
+    function exporterOutlook() { alert('Export Outlook'); }
 
     window.onload = function() {
-      chargerPlannings();
-
-      // Charger les projets
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success) {
-          let html = '<option value="">Sélectionner...</option>';
-          result.projets.forEach(p => {
-            html += `<option value="${p.id}">${p.nom}</option>`;
-          });
-          document.getElementById('projetId').innerHTML = html;
-        }
-      }).obtenirTousProjets();
+      console.log('Planning Modal v2.0 chargé');
     };
   </script>
 </body>

@@ -3,182 +3,710 @@
 <head>
   <base target="_top">
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestionnaire Tâches v2.0 - CPM & Gantt</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; }
-    .header { background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%); color: white; padding: 20px; }
-    .header h1 { font-size: 22px; margin-bottom: 5px; }
-    .container { padding: 20px; }
-    .tabs { display: flex; gap: 5px; margin-bottom: 20px; border-bottom: 2px solid #dee2e6; }
-    .tab { padding: 12px 20px; background: #f8f9fa; border: none; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.3s; }
-    .tab.active { background: #34a853; color: white; }
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    .form-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px; }
-    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
-    .btn-primary { background: #34a853; color: white; }
-    .btn-success { background: #1a73e8; color: white; }
-    .btn-danger { background: #ea4335; color: white; }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
-    .data-table { width: 100%; background: white; border-radius: 8px; overflow: hidden; overflow-x: auto; }
-    .data-table table { width: 100%; border-collapse: collapse; min-width: 1200px; }
-    .data-table th { background: #34a853; color: white; padding: 12px; text-align: left; font-size: 12px; }
-    .data-table td { padding: 12px; border-bottom: 1px solid #dee2e6; font-size: 13px; }
-    .action-btn { padding: 5px 10px; margin: 0 2px; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
-    .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+
+    body {
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%);
+      color: white;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .header h1 {
+      font-size: 22px;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .container {
+      padding: 20px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #dee2e6;
+      overflow-x: auto;
+    }
+
+    .tab {
+      padding: 12px 20px;
+      background: #f8f9fa;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.3s;
+      color: #666;
+      white-space: nowrap;
+    }
+
+    .tab:hover {
+      background: #e9ecef;
+      color: #34a853;
+    }
+
+    .tab.active {
+      background: #34a853;
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #34a853 0%, #2d8e47 100%);
+      color: white;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #1a73e8 0%, #174ea6 100%);
+      color: white;
+    }
+
+    .btn-warning {
+      background: #fbbc04;
+      color: #000;
+    }
+
+    .btn-danger {
+      background: #ea4335;
+      color: white;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .data-table {
+      width: 100%;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      overflow-x: auto;
+      margin-top: 15px;
+    }
+
+    .data-table table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1400px;
+    }
+
+    .data-table th {
+      background: #34a853;
+      color: white;
+      padding: 12px;
+      text-align: left;
+      font-size: 12px;
+    }
+
+    .data-table td {
+      padding: 12px;
+      border-bottom: 1px solid #dee2e6;
+      font-size: 13px;
+    }
+
+    .data-table tr:hover {
+      background: #f8f9fa;
+    }
+
+    .action-btn {
+      padding: 5px 10px;
+      margin: 0 2px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .badge {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
     .badge-success { background: #d4edda; color: #155724; }
     .badge-warning { background: #fff3cd; color: #856404; }
     .badge-danger { background: #f8d7da; color: #721c24; }
     .badge-info { background: #d1ecf1; color: #0c5460; }
-    .priority-high { color: #ea4335; font-weight: 700; }
-    .priority-medium { color: #fbbc04; font-weight: 600; }
-    .priority-low { color: #34a853; font-weight: 500; }
+    .badge-critical { background: #ea4335; color: white; }
+
+    .chart-container {
+      position: relative;
+      height: 400px;
+      margin: 20px 0;
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .gantt-chart {
+      width: 100%;
+      overflow-x: auto;
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .gantt-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 8px;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .gantt-row:hover {
+      background: #f8f9fa;
+    }
+
+    .gantt-label {
+      width: 200px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .gantt-bar-container {
+      flex: 1;
+      height: 24px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gantt-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #34a853 0%, #2d8e47 100%);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+      transition: width 0.3s;
+    }
+
+    .gantt-bar.critique {
+      background: linear-gradient(90deg, #ea4335 0%, #d33426 100%);
+    }
+
+    .gantt-bar.en-cours {
+      background: linear-gradient(90deg, #fbbc04 0%, #ea8600 100%);
+    }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .template-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: all 0.3s;
+      border-left: 4px solid #34a853;
+    }
+
+    .template-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+
+    .template-card h3 {
+      color: #34a853;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .template-card p {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .template-meta {
+      display: flex;
+      gap: 15px;
+      font-size: 11px;
+      color: #999;
+    }
+
+    .dependency-graph {
+      width: 100%;
+      min-height: 400px;
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      position: relative;
+    }
+
+    .node {
+      position: absolute;
+      background: white;
+      border: 2px solid #34a853;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 11px;
+      cursor: move;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      min-width: 120px;
+      text-align: center;
+    }
+
+    .node.critique {
+      border-color: #ea4335;
+      background: #fff5f5;
+    }
+
+    .ressource-grid {
+      display: grid;
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .ressource-item {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .ressource-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .ressource-name {
+      font-weight: 600;
+      color: #34a853;
+    }
+
+    .ressource-charge {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .search-bar input,
+    .search-bar select {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .export-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .spinner {
+      border: 4px solid rgba(0,0,0,0.1);
+      border-top: 4px solid #34a853;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>✅ Gestionnaire de Tâches</h1>
-    <p>Planning et Organisation des Tâches Terrain</p>
+    <h1>✅ Gestionnaire de Tâches v2.0 - CPM & Gantt</h1>
+    <p>Gestion avancée avec chemin critique, dépendances et templates</p>
   </div>
 
   <div class="container">
+    <!-- Onglets principaux -->
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('liste')">📋 Liste</button>
-      <button class="tab" onclick="switchTab('nouvelle')">➕ Nouvelle</button>
+      <button class="tab active" onclick="switchTab('liste')">📋 Liste Tâches</button>
+      <button class="tab" onclick="switchTab('gantt')">📊 Gantt</button>
+      <button class="tab" onclick="switchTab('dependances')">🔗 Dépendances</button>
+      <button class="tab" onclick="switchTab('ressources')">👥 Ressources</button>
+      <button class="tab" onclick="switchTab('templates')">🎨 Templates</button>
       <button class="tab" onclick="switchTab('planning')">📅 Planning</button>
-      <button class="tab" onclick="switchTab('retards')">⚠️ Retards</button>
     </div>
 
-    <!-- Onglet Liste -->
+    <!-- Onglet Liste Tâches -->
     <div id="liste" class="tab-content active">
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Rechercher une tâche...">
+        <select id="filterProjet">
+          <option value="">Tous les projets</option>
+          <option value="PROJ001">PROJ001</option>
+          <option value="PROJ002">PROJ002</option>
+        </select>
+        <select id="filterStatut">
+          <option value="">Tous les statuts</option>
+          <option value="Planifié">Planifié</option>
+          <option value="En cours">En cours</option>
+          <option value="Terminé">Terminé</option>
+          <option value="Bloqué">Bloqué</option>
+        </select>
+        <button class="btn btn-primary" onclick="nouvelleTache()">➕ Nouvelle Tâche</button>
+      </div>
+
       <div class="data-table">
         <table>
           <thead>
             <tr>
               <th>ID</th>
-              <th>Description</th>
+              <th>Nom</th>
+              <th>Projet</th>
               <th>Ouvrage</th>
-              <th>Équipe</th>
-              <th>Statut</th>
+              <th>Type</th>
               <th>Début</th>
               <th>Fin</th>
-              <th>Priorité</th>
+              <th>Durée</th>
+              <th>Prédécesseurs</th>
               <th>Progression</th>
-              <th>Alertes</th>
+              <th>Marge</th>
+              <th>Critique</th>
+              <th>Statut</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody id="listeTaches">
-            <tr><td colspan="11" style="text-align:center;">Chargement...</td></tr>
+            <tr><td colspan="14" style="text-align:center;">Chargement...</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Onglet Nouvelle -->
-    <div id="nouvelle" class="tab-content">
-      <form id="formTache">
-        <div class="form-row">
-          <div class="form-group">
-            <label>Description de la Tâche *</label>
-            <input type="text" id="description" required>
+    <!-- Onglet Gantt -->
+    <div id="gantt" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3>📊 Diagramme de Gantt</h3>
+        <select id="ganttProjet" onchange="chargerGantt()">
+          <option value="PROJ001">PROJ001</option>
+          <option value="PROJ002">PROJ002</option>
+        </select>
+      </div>
+
+      <div class="gantt-chart" id="ganttChart">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Chargement du diagramme de Gantt...</p>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <canvas id="ganttChartCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Onglet Dépendances -->
+    <div id="dependances" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3>🔗 Graphe des Dépendances</h3>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-success" onclick="ajouterDependance()">➕ Ajouter Dépendance</button>
+          <button class="btn btn-warning" onclick="calculerCPM()">🎯 Calculer CPM</button>
+        </div>
+      </div>
+
+      <div class="dependency-graph" id="dependencyGraph">
+        <div class="loading">
+          <div class="spinner"></div>
+          <p>Génération du graphe de dépendances...</p>
+        </div>
+      </div>
+
+      <div class="data-table" style="margin-top: 20px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Tâche</th>
+              <th>Prédécesseurs</th>
+              <th>Successeurs</th>
+              <th>Chemin Critique</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="listeDependances">
+            <tr><td colspan="5" style="text-align:center;">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Onglet Ressources -->
+    <div id="ressources" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3>👥 Affectation des Ressources</h3>
+        <button class="btn btn-primary" onclick="affecterRessource()">➕ Affecter Ressource</button>
+      </div>
+
+      <div class="ressource-grid" id="ressourceGrid">
+        <div class="ressource-item">
+          <div class="ressource-header">
+            <div class="ressource-name">Mbarga Jean</div>
+            <div class="ressource-charge">Charge: 18h/j</div>
           </div>
-          <div class="form-group">
-            <label>Ouvrage ID *</label>
-            <input type="number" id="ouvrageId" min="1" required>
+          <div style="font-size: 12px; color: #666;">
+            <div>TACH001 - Terrassement principal (8h/j)</div>
+            <div>TACH004 - Installation vannes (5h/j)</div>
+            <div>TACH007 - Contrôle qualité (5h/j)</div>
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Équipe ID</label>
-            <input type="number" id="equipeId" min="1">
+
+        <div class="ressource-item">
+          <div class="ressource-header">
+            <div class="ressource-name">Nkolo Marie</div>
+            <div class="ressource-charge">Charge: 13h/j</div>
           </div>
-          <div class="form-group">
-            <label>Matériel ID</label>
-            <input type="number" id="materielId" min="1">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Date Début *</label>
-            <input type="date" id="dateDebut" required>
-          </div>
-          <div class="form-group">
-            <label>Date Fin Prévue *</label>
-            <input type="date" id="dateFin" required>
+          <div style="font-size: 12px; color: #666;">
+            <div>TACH002 - Coffrage canal (6h/j)</div>
+            <div>TACH005 - Remblai périmètre (7h/j)</div>
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Statut *</label>
-            <select id="statut" required>
-              <option value="">Sélectionner...</option>
-              <option value="Non commencée">Non commencée</option>
-              <option value="En cours">En cours</option>
-              <option value="En attente">En attente</option>
-              <option value="Terminée">Terminée</option>
-            </select>
+
+        <div class="ressource-item">
+          <div class="ressource-header">
+            <div class="ressource-name">Tchokothe Paul</div>
+            <div class="ressource-charge">Charge: 10h/j</div>
           </div>
-          <div class="form-group">
-            <label>Priorité *</label>
-            <select id="priorite" required>
-              <option value="">Sélectionner...</option>
-              <option value="Haute">Haute</option>
-              <option value="Moyenne">Moyenne</option>
-              <option value="Basse">Basse</option>
-            </select>
+          <div style="font-size: 12px; color: #666;">
+            <div>TACH003 - Bétonnage canal (10h/j)</div>
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Progression (%) *</label>
-            <input type="number" id="progression" min="0" max="100" value="0" required>
-          </div>
-          <div class="form-group">
-            <label>Durée Estimée (jours)</label>
-            <input type="number" id="dureeEstimee" min="0" step="0.5">
+      </div>
+    </div>
+
+    <!-- Onglet Templates -->
+    <div id="templates" class="tab-content">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3>🎨 Templates de Tâches</h3>
+        <button class="btn btn-success" onclick="creerTemplateCustom()">➕ Créer Template</button>
+      </div>
+
+      <div class="template-grid" id="templateGrid">
+        <div class="template-card" onclick="appliquerTemplate('TPL_EXCAVATION')">
+          <h3>Excavation Standard</h3>
+          <p>Terrassement et excavation de terre</p>
+          <div class="template-meta">
+            <span>⏱️ 10 jours</span>
+            <span>👥 8 h/j</span>
+            <span>📋 3 sous-tâches</span>
           </div>
         </div>
-        <div class="form-group">
-          <label>Remarques</label>
-          <textarea id="remarques" rows="3"></textarea>
+
+        <div class="template-card" onclick="appliquerTemplate('TPL_COFFRAGE')">
+          <h3>Coffrage Béton</h3>
+          <p>Mise en place coffrage métallique ou bois</p>
+          <div class="template-meta">
+            <span>⏱️ 8 jours</span>
+            <span>👥 7 h/j</span>
+            <span>📋 3 sous-tâches</span>
+          </div>
         </div>
-        <button type="submit" class="btn btn-primary">💾 Enregistrer la Tâche</button>
-      </form>
+
+        <div class="template-card" onclick="appliquerTemplate('TPL_BETONNAGE')">
+          <h3>Bétonnage Standard</h3>
+          <p>Coulage et vibration béton</p>
+          <div class="template-meta">
+            <span>⏱️ 5 jours</span>
+            <span>👥 10 h/j</span>
+            <span>📋 3 sous-tâches</span>
+          </div>
+        </div>
+
+        <div class="template-card" onclick="appliquerTemplate('TPL_REMBLAI')">
+          <h3>Remblaiement Compacté</h3>
+          <p>Remblai par couches compactées</p>
+          <div class="template-meta">
+            <span>⏱️ 12 jours</span>
+            <span>👥 8 h/j</span>
+            <span>📋 3 sous-tâches</span>
+          </div>
+        </div>
+
+        <div class="template-card" onclick="appliquerTemplate('TPL_INSTALLATION')">
+          <h3>Installation Équipements</h3>
+          <p>Pose et raccordement équipements</p>
+          <div class="template-meta">
+            <span>⏱️ 7 jours</span>
+            <span>👥 6 h/j</span>
+            <span>📋 3 sous-tâches</span>
+          </div>
+        </div>
+
+        <div class="template-card" onclick="appliquerTemplate('TPL_CONTROLE')">
+          <h3>Contrôle Qualité</h3>
+          <p>Inspection et tests qualité</p>
+          <div class="template-meta">
+            <span>⏱️ 3 jours</span>
+            <span>👥 4 h/j</span>
+            <span>📋 3 sous-tâches</span>
+          </div>
+        </div>
+
+        <div class="template-card" onclick="appliquerTemplate('TPL_REVETEMENT')">
+          <h3>Revêtement Surface</h3>
+          <p>Application revêtement de protection</p>
+          <div class="template-meta">
+            <span>⏱️ 6 jours</span>
+            <span>👥 6 h/j</span>
+            <span>📋 3 sous-tâches</span>
+          </div>
+        </div>
+
+        <div class="template-card" onclick="appliquerTemplate('TPL_DRAINAGE')">
+          <h3>Système Drainage</h3>
+          <p>Installation réseau de drainage</p>
+          <div class="template-meta">
+            <span>⏱️ 9 jours</span>
+            <span>👥 7 h/j</span>
+            <span>📋 3 sous-tâches</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Onglet Planning -->
     <div id="planning" class="tab-content">
-      <h3>📅 Planning des Tâches</h3>
-      <div id="planningContent" style="margin-top: 20px;">
-        <p style="text-align: center; color: #666; padding: 40px;">
-          Visualisation du planning Gantt à venir...<br>
-          <small>Affichera toutes les tâches avec leurs dates et dépendances</small>
-        </p>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3>📅 Export Planning</h3>
+        <div class="export-buttons">
+          <button class="btn btn-success" onclick="exporterMSProject()">📥 MS Project XML</button>
+          <button class="btn btn-warning" onclick="exporterPDF()">📄 PDF</button>
+          <button class="btn btn-primary" onclick="exporterExcel()">📊 Excel</button>
+        </div>
       </div>
-    </div>
 
-    <!-- Onglet Retards -->
-    <div id="retards" class="tab-content">
-      <h3 style="color: #ea4335; margin-bottom: 20px;">⚠️ Tâches en Retard</h3>
-      <div class="data-table">
+      <div class="chart-container">
+        <canvas id="planningChart"></canvas>
+      </div>
+
+      <div class="data-table" style="margin-top: 20px;">
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Description</th>
-              <th>Ouvrage</th>
-              <th>Fin Prévue</th>
-              <th>Retard (jours)</th>
-              <th>Priorité</th>
-              <th>Actions</th>
+              <th>Mois</th>
+              <th>Semaine</th>
+              <th>Tâches Planifiées</th>
+              <th>Charge Totale</th>
+              <th>Ressources</th>
             </tr>
           </thead>
-          <tbody id="listeTachesRetard">
-            <tr><td colspan="7" style="text-align:center;">Chargement...</td></tr>
+          <tbody id="calendrier">
+            <tr>
+              <td>Janvier 2024</td>
+              <td>S1-S4</td>
+              <td>TACH001, TACH002</td>
+              <td>112 h/semaine</td>
+              <td>3 personnes</td>
+            </tr>
+            <tr>
+              <td>Février 2024</td>
+              <td>S5-S8</td>
+              <td>TACH002, TACH003, TACH004</td>
+              <td>168 h/semaine</td>
+              <td>4 personnes</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -186,117 +714,315 @@
   </div>
 
   <script>
+    let charts = {};
+
+    // Gestion des onglets
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
       event.target.classList.add('active');
+
       if (tabId === 'liste') chargerTaches();
-      if (tabId === 'retards') chargerTachesEnRetard();
+      if (tabId === 'gantt') chargerGantt();
+      if (tabId === 'dependances') chargerDependances();
+      if (tabId === 'templates') chargerTemplates();
+      if (tabId === 'planning') initPlanningChart();
     }
 
+    // Charger les tâches
     function chargerTaches() {
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success) {
-          let html = '';
-          result.taches.forEach(t => {
-            let statutClass = t.statut === 'Terminée' ? 'badge-success' :
-                             t.statut === 'En cours' ? 'badge-warning' :
-                             t.statut === 'En attente' ? 'badge-info' : 'badge-danger';
-            let priorityClass = t.priorite === 'Haute' ? 'priority-high' :
-                               t.priorite === 'Moyenne' ? 'priority-medium' : 'priority-low';
-            let alerte = '';
-            if (t.enRetard) alerte = '<span style="color: #ea4335;">⚠️ RETARD</span>';
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            let html = '';
+            result.taches.forEach(t => {
+              const statutClass = t.statut === 'Terminé' ? 'badge-success' :
+                                 t.statut === 'En cours' ? 'badge-warning' :
+                                 t.statut === 'Bloqué' ? 'badge-danger' : 'badge-info';
 
-            html += `<tr>
-              <td>${t.id}</td>
-              <td>${t.description}</td>
-              <td>Ouvrage #${t.ouvrageId}</td>
-              <td>Équipe #${t.equipeId || '-'}</td>
-              <td><span class="badge ${statutClass}">${t.statut}</span></td>
-              <td>${t.dateDebut || '-'}</td>
-              <td>${t.dateFin || '-'}</td>
-              <td><span class="${priorityClass}">${t.priorite}</span></td>
-              <td>${t.progression || 0}%</td>
-              <td>${alerte}</td>
-              <td>
-                <button class="action-btn btn-success" onclick="editer(${t.id})">✏️</button>
-                <button class="action-btn btn-danger" onclick="supprimer(${t.id})">🗑️</button>
-              </td>
-            </tr>`;
-          });
-          document.getElementById('listeTaches').innerHTML = html || '<tr><td colspan="11" style="text-align:center;">Aucune tâche</td></tr>';
-        }
-      }).withFailureHandler(function(error) {
-        document.getElementById('listeTaches').innerHTML = '<tr><td colspan="11" style="text-align:center; color: #ea4335;">Erreur: ' + error.message + '</td></tr>';
-      }).obtenirToutestaches();
+              const critiqueClass = t.critique ? 'badge-critical' : 'badge-success';
+
+              html += `<tr>
+                <td>${t.id}</td>
+                <td>${t.nom}</td>
+                <td>${t.projetId}</td>
+                <td>${t.ouvrageId}</td>
+                <td>${t.type}</td>
+                <td>${formatDate(t.dateDebut)}</td>
+                <td>${formatDate(t.dateFin)}</td>
+                <td>${t.duree} j</td>
+                <td>${t.predecesseurs || '-'}</td>
+                <td>${(t.progression * 100).toFixed(0)}%</td>
+                <td>${t.marge} j</td>
+                <td><span class="badge ${critiqueClass}">${t.critique ? 'OUI' : 'NON'}</span></td>
+                <td><span class="badge ${statutClass}">${t.statut}</span></td>
+                <td>
+                  <button class="action-btn btn-success" onclick="editer('${t.id}')">✏️</button>
+                  <button class="action-btn btn-danger" onclick="supprimer('${t.id}')">🗑️</button>
+                </td>
+              </tr>`;
+            });
+            document.getElementById('listeTaches').innerHTML = html || '<tr><td colspan="14" style="text-align:center;">Aucune tâche</td></tr>';
+          }
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('listeTaches').innerHTML = '<tr><td colspan="14" style="text-align:center; color: #ea4335;">Erreur: ' + error.message + '</td></tr>';
+        })
+        .obtenirToutesTaches();
     }
 
-    function chargerTachesEnRetard() {
-      google.script.run.withSuccessHandler(function(result) {
-        if (result.success) {
-          let html = '';
-          result.taches.forEach(t => {
-            let priorityClass = t.priorite === 'Haute' ? 'priority-high' :
-                               t.priorite === 'Moyenne' ? 'priority-medium' : 'priority-low';
-            html += `<tr style="background: #fff5f5;">
-              <td>${t.id}</td>
-              <td>${t.description}</td>
-              <td>Ouvrage #${t.ouvrageId}</td>
-              <td>${t.dateFin}</td>
-              <td style="color: #ea4335; font-weight: 700;">${t.joursRetard} jours</td>
-              <td><span class="${priorityClass}">${t.priorite}</span></td>
-              <td>
-                <button class="action-btn btn-success" onclick="editer(${t.id})">✏️</button>
-                <button class="action-btn btn-danger" onclick="supprimer(${t.id})">🗑️</button>
-              </td>
-            </tr>`;
-          });
-          document.getElementById('listeTachesRetard').innerHTML = html || '<tr><td colspan="7" style="text-align:center; color: #34a853;">✅ Aucune tâche en retard!</td></tr>';
-        }
-      }).obtenirTachesEnRetard();
+    // Charger le Gantt
+    function chargerGantt() {
+      const projetId = document.getElementById('ganttProjet').value;
+
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            const container = document.getElementById('ganttChart');
+            container.innerHTML = '';
+
+            result.taches.forEach(t => {
+              const row = document.createElement('div');
+              row.className = 'gantt-row';
+
+              const progression = (t.progression || 0) * 100;
+              const barClass = t.critique ? 'critique' : t.statut === 'En cours' ? 'en-cours' : '';
+
+              row.innerHTML = `
+                <div class="gantt-label">${t.nom.substring(0, 25)}...</div>
+                <div class="gantt-bar-container">
+                  <div class="gantt-bar ${barClass}" style="width: ${progression}%;">
+                    ${progression > 15 ? progression.toFixed(0) + '%' : ''}
+                  </div>
+                </div>
+              `;
+              container.appendChild(row);
+            });
+
+            // Créer le graphique Chart.js
+            initGanttChart(result.taches);
+          }
+        })
+        .obtenirToutesTaches();
     }
 
-    document.getElementById('formTache').onsubmit = function(e) {
-      e.preventDefault();
-      const data = {
-        description: document.getElementById('description').value,
-        ouvrageId: parseInt(document.getElementById('ouvrageId').value),
-        equipeId: document.getElementById('equipeId').value ? parseInt(document.getElementById('equipeId').value) : null,
-        materielId: document.getElementById('materielId').value ? parseInt(document.getElementById('materielId').value) : null,
-        dateDebut: document.getElementById('dateDebut').value,
-        dateFin: document.getElementById('dateFin').value,
-        statut: document.getElementById('statut').value,
-        priorite: document.getElementById('priorite').value,
-        progression: parseInt(document.getElementById('progression').value) / 100,
-        dureeEstimee: document.getElementById('dureeEstimee').value ? parseFloat(document.getElementById('dureeEstimee').value) : null,
-        remarques: document.getElementById('remarques').value
-      };
+    // Initialiser le graphique Gantt
+    function initGanttChart(taches) {
+      const ctx = document.getElementById('ganttChartCanvas');
+      if (!ctx) return;
 
-      google.script.run.withSuccessHandler(function(result) {
-        alert(result.message);
-        if (result.success) {
-          document.getElementById('formTache').reset();
-          switchTab('liste');
+      if (charts.gantt) charts.gantt.destroy();
+
+      charts.gantt = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: taches.map(t => t.nom.substring(0, 20)),
+          datasets: [{
+            label: 'Progression (%)',
+            data: taches.map(t => (t.progression || 0) * 100),
+            backgroundColor: taches.map(t => t.critique ? '#ea4335' : '#34a853')
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: {
+              max: 100,
+              title: { display: true, text: 'Progression (%)' }
+            }
+          }
         }
-      }).withFailureHandler(function(error) {
-        alert('Erreur: ' + error.message);
-      }).ajouterTache(data.description, data.ouvrageId, data.equipeId, data.materielId, data.dateDebut, data.dateFin, data.statut, data.priorite, data.progression, data.dureeEstimee, data.remarques);
-    };
+      });
+    }
+
+    // Charger les dépendances
+    function chargerDependances() {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            let html = '';
+            result.taches.forEach(t => {
+              // Trouver les successeurs
+              const successeurs = result.taches
+                .filter(s => s.predecesseurs && s.predecesseurs.includes(t.id))
+                .map(s => s.id)
+                .join(', ') || '-';
+
+              const critiqueClass = t.critique ? 'badge-critical' : 'badge-success';
+
+              html += `<tr>
+                <td>${t.nom}</td>
+                <td>${t.predecesseurs || '-'}</td>
+                <td>${successeurs}</td>
+                <td><span class="badge ${critiqueClass}">${t.critique ? 'CRITIQUE' : 'Normal'}</span></td>
+                <td>
+                  <button class="action-btn btn-success" onclick="modifierDep('${t.id}')">✏️</button>
+                  <button class="action-btn btn-danger" onclick="supprimerDep('${t.id}')">🗑️</button>
+                </td>
+              </tr>`;
+            });
+            document.getElementById('listeDependances').innerHTML = html;
+          }
+        })
+        .obtenirToutesTaches();
+    }
+
+    // Charger les templates
+    function chargerTemplates() {
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            console.log('Templates chargés:', result.templates.length);
+          }
+        })
+        .obtenirTemplatesTaches();
+    }
+
+    // Initialiser le graphique de planning
+    function initPlanningChart() {
+      const ctx = document.getElementById('planningChart');
+      if (!ctx) return;
+
+      if (charts.planning) charts.planning.destroy();
+
+      charts.planning = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5', 'Sem 6'],
+          datasets: [{
+            label: 'Charge planifiée (h)',
+            data: [112, 140, 168, 160, 120, 100],
+            borderColor: '#34a853',
+            backgroundColor: 'rgba(52, 168, 83, 0.1)',
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: true }
+          }
+        }
+      });
+    }
+
+    // Fonctions d'action
+    function nouvelleTache() {
+      alert('Fonction nouvelle tâche - À implémenter via formulaire');
+    }
 
     function editer(id) {
-      alert('Édition de la tâche: ' + id);
+      alert('Éditer tâche: ' + id);
     }
 
     function supprimer(id) {
-      if (confirm('Supprimer la tâche #' + id + ' ?')) {
-        google.script.run.withSuccessHandler(function(result) {
-          alert(result.message);
-          if (result.success) chargerTaches();
-        }).supprimerTache(id);
+      if (confirm('Supprimer la tâche ' + id + ' ?')) {
+        google.script.run
+          .withSuccessHandler(function(result) {
+            alert(result.message);
+            if (result.success) chargerTaches();
+          })
+          .supprimerTache(id);
       }
     }
 
+    function calculerCPM() {
+      const projetId = 'PROJ001';
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            alert(`✅ Chemin Critique Calculé\n\nDurée totale: ${result.dureeTotale} jours\nTâches critiques: ${result.nombreCritiques}/${result.nombreTaches}`);
+            chargerTaches();
+            chargerDependances();
+          } else {
+            alert('❌ Erreur: ' + result.message);
+          }
+        })
+        .calculerCheminCritiqueCPM(projetId);
+    }
+
+    function ajouterDependance() {
+      const tacheId = prompt('ID de la tâche:');
+      const predId = prompt('ID du prédécesseur:');
+      if (tacheId && predId) {
+        google.script.run
+          .withSuccessHandler(function(result) {
+            alert(result.message);
+            if (result.success) chargerDependances();
+          })
+          .ajouterDependance(tacheId, predId);
+      }
+    }
+
+    function modifierDep(id) {
+      alert('Modifier dépendances de: ' + id);
+    }
+
+    function supprimerDep(id) {
+      alert('Supprimer dépendances de: ' + id);
+    }
+
+    function affecterRessource() {
+      alert('Affecter ressource - À implémenter');
+    }
+
+    function appliquerTemplate(templateId) {
+      const projetId = prompt('ID du projet:') || 'PROJ001';
+      const ouvrageId = prompt('ID de l\'ouvrage:') || 'OUV001';
+      const responsableId = prompt('ID du responsable:') || 'Mbarga Jean';
+
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            alert('✅ Tâche créée depuis template avec succès !');
+            switchTab('liste');
+          } else {
+            alert('❌ Erreur: ' + result.message);
+          }
+        })
+        .creerTacheDepuisTemplate(templateId, projetId, ouvrageId, responsableId);
+    }
+
+    function creerTemplateCustom() {
+      alert('Créer template personnalisé - À implémenter');
+    }
+
+    function exporterMSProject() {
+      const projetId = prompt('ID du projet à exporter:') || 'PROJ001';
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            alert(`✅ Export MS Project XML créé !\n\nFichier: ${result.fileName}\n\nURL: ${result.fileUrl}`);
+          } else {
+            alert('❌ Erreur: ' + result.message);
+          }
+        })
+        .exporterMSProjectXML(projetId);
+    }
+
+    function exporterPDF() {
+      alert('Export PDF - À implémenter');
+    }
+
+    function exporterExcel() {
+      alert('Export Excel - À implémenter');
+    }
+
+    // Utilitaires
+    function formatDate(date) {
+      if (!date) return '-';
+      const d = new Date(date);
+      return d.toLocaleDateString('fr-FR');
+    }
+
+    // Initialisation
     window.onload = function() {
       chargerTaches();
     };
