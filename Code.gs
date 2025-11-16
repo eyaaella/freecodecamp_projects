@@ -1,12 +1,12 @@
 /**
  * ===============================================================================
- * TOPOGEST PRO v5.0 - QUANTUM NEXUS EDITION
- * 🌐 UNIVERSEL: FR 🇫🇷 + CN 🇨🇳 + EN 🇬🇧 + ES 🇪🇸 + AR 🇸🇦
+ * TOPOGEST PRO v6.0 - SINGULARITY EDITION 🚀
+ * 🌐 HYPERSCALE: FR 🇫🇷 + CN 🇨🇳 + EN 🇬🇧 + ES 🇪🇸 + AR 🇸🇦 + JP 🇯🇵 + DE 🇩🇪
  * Aménagement des Périmètres Agricoles en Réseau Gravitaire
  * ===============================================================================
  *
- * Version: 5.0.0 - QUANTUM PRODUCTION-READY
- * Quantum Computing, IA Générative, Metaverse, Web3, Robotique, 5 Langues
+ * Version: 6.0.0 - SINGULARITY PRODUCTION-READY
+ * AGI, Quantum 2.0, Metaverse 2.0, Web3 2.0, Robotique Swarms, 7 Langues
  * Date: 2025-11-16
  *
  * DESCRIPTION:
@@ -836,13 +836,15 @@ const SYSTEM_INFO = {
   NAME_EN: 'TopoGest Pro',
   NAME_ES: 'TopoGest Pro',
   NAME_AR: 'توبوجست برو',
-  VERSION: '5.0.0',
-  BUILD: 'QUANTUM Production-Ready - Quantum Computing, IA Générative, Metaverse, Web3, Robotique, 5 Langues',
-  CODENAME: 'QUANTUM NEXUS',
+  NAME_JP: 'トポゲスト プロ',
+  NAME_DE: 'TopoGest Pro',
+  VERSION: '6.0.0',
+  BUILD: 'SINGULARITY Production-Ready - AGI, Quantum 2.0, Metaverse 2.0, Web3 2.0, Robotique Swarms, 7 Langues',
+  CODENAME: 'SINGULARITY',
   DATE: '2025-11-16',
 
-  // Multilingue Support (5 langues)
-  LANGUAGES: ['fr', 'zh', 'en', 'es', 'ar'], // Français, 中文, English, Español, العربية
+  // Multilingue Support (7 langues) - HYPERSCALE
+  LANGUAGES: ['fr', 'zh', 'en', 'es', 'ar', 'ja', 'de'], // Français, 中文, English, Español, العربية, 日本語, Deutsch
   DEFAULT_LANGUAGE: 'fr',
 
   // Localisation
@@ -851,7 +853,9 @@ const SYSTEM_INFO = {
     CN: 'zh-CN',
     EN: 'en-US',
     ES: 'es-ES',
-    AR: 'ar-SA'
+    AR: 'ar-SA',
+    JP: 'ja-JP',
+    DE: 'de-DE'
   },
 
   TIMEZONE: 'Africa/Douala',
