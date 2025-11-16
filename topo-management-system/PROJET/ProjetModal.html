@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+      background: #f8f9fa;
+      padding: 20px;
+      color: #202124;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%);
+      color: white;
+      padding: 25px;
+      border-radius: 12px 12px 0 0;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .tabs {
+      display: flex;
+      background: white;
+      border-bottom: 2px solid #e8eaed;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: #5f6368;
+      transition: all 0.2s;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab:hover {
+      background: #f8f9fa;
+      color: #1a73e8;
+    }
+
+    .tab.active {
+      color: #1a73e8;
+      border-bottom-color: #1a73e8;
+    }
+
+    .tab-content {
+      display: none;
+      background: white;
+      padding: 25px;
+      border-radius: 0 0 12px 12px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #202124;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e8eaed;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #1a73e8;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+      margin: 5px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%);
+      color: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #34a853 0%, #5cb85c 100%);
+      color: white;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ea4335 0%, #d9534f 100%);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #f8f9fa;
+      color: #202124;
+      border: 1px solid #dadce0;
+    }
+
+    .btn-secondary:hover {
+      background: #e8eaed;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 2px solid #e8eaed;
+    }
+
+    .search-section {
+      margin-bottom: 25px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+    }
+
+    .search-box input {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #e8eaed;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .projects-list {
+      max-height: 500px;
+      overflow-y: auto;
+      margin-top: 20px;
+    }
+
+    .project-card {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      border-left: 4px solid #1a73e8;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .project-card:hover {
+      background: #e8f0fe;
+      transform: translateX(4px);
+    }
+
+    .project-card h3 {
+      font-size: 16px;
+      color: #202124;
+      margin-bottom: 8px;
+    }
+
+    .project-card p {
+      font-size: 13px;
+      color: #5f6368;
+      margin: 4px 0;
+    }
+
+    .project-card .badges {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .badge-status {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    .badge-budget {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .badge-progress {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #5f6368;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+
+    .stat-box {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-box h3 {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .stat-box p {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .required::after {
+      content: " *";
+      color: #ea4335;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📁 Gestion des Projets</h1>
+      <p>Créer, modifier, rechercher et gérer vos projets topographiques</p>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('create')">➕ Nouveau Projet</button>
+      <button class="tab" onclick="showTab('search')">🔍 Rechercher</button>
+      <button class="tab" onclick="showTab('list')">📋 Liste</button>
+      <button class="tab" onclick="showTab('stats')">📊 Statistiques</button>
+    </div>
+
+    <!-- Onglet Créer -->
+    <div id="createTab" class="tab-content active">
+      <div id="alertCreate" class="alert"></div>
+
+      <form id="projectForm" onsubmit="saveProject(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="required">Nom du Projet</label>
+            <input type="text" id="nomProjet" required>
+          </div>
+
+          <div class="form-group">
+            <label class="required">Chef de Projet</label>
+            <input type="text" id="chefProjet" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="required">Date de Début</label>
+            <input type="date" id="dateDebut" required>
+          </div>
+
+          <div class="form-group">
+            <label class="required">Date de Fin Prévue</label>
+            <input type="date" id="dateFin" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="required">Statut</label>
+            <select id="statut" required>
+              <option value="">Sélectionner un statut</option>
+              <option value="En Préparation">En Préparation</option>
+              <option value="En Cours">En Cours</option>
+              <option value="En Pause">En Pause</option>
+              <option value="Terminé">Terminé</option>
+              <option value="Annulé">Annulé</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="required">Budget Total (FCFA)</label>
+            <input type="number" id="budgetTotal" step="0.01" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Localisation</label>
+            <input type="text" id="localisation">
+          </div>
+
+          <div class="form-group">
+            <label>Client</label>
+            <input type="text" id="client">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="description" rows="4"></textarea>
+        </div>
+
+        <div class="button-group">
+          <button type="button" class="btn btn-secondary" onclick="resetForm()">🔄 Réinitialiser</button>
+          <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Onglet Rechercher -->
+    <div id="searchTab" class="tab-content">
+      <div class="search-section">
+        <h3>🔍 Rechercher un Projet</h3>
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Nom du projet, chef de projet, client, localisation...">
+          <button class="btn btn-primary" onclick="searchProjects()">Rechercher</button>
+        </div>
+      </div>
+
+      <div id="searchResults">
+        <p class="loading">Entrez un terme de recherche pour commencer</p>
+      </div>
+    </div>
+
+    <!-- Onglet Liste -->
+    <div id="listTab" class="tab-content">
+      <div class="button-group" style="justify-content: space-between; margin-top: 0; padding-top: 0; border-top: none;">
+        <h3>📋 Tous les Projets</h3>
+        <button class="btn btn-primary" onclick="loadAllProjects()">🔄 Actualiser</button>
+      </div>
+
+      <div id="projectsList" class="projects-list">
+        <div class="loading">Chargement...</div>
+      </div>
+    </div>
+
+    <!-- Onglet Statistiques -->
+    <div id="statsTab" class="tab-content">
+      <h3>📊 Statistiques Globales</h3>
+
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-box">
+          <h3 id="statTotal">0</h3>
+          <p>Total Projets</p>
+        </div>
+        <div class="stat-box">
+          <h3 id="statActifs">0</h3>
+          <p>Projets Actifs</p>
+        </div>
+        <div class="stat-box">
+          <h3 id="statBudget">0</h3>
+          <p>Budget Total (MFCFA)</p>
+        </div>
+        <div class="stat-box">
+          <h3 id="statAvancement">0%</h3>
+          <p>Avancement Moyen</p>
+        </div>
+      </div>
+
+      <div id="statsDetails" style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+        <h3>Répartition par Statut</h3>
+        <div id="statusBreakdown"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentProjectId = null;
+
+    // Basculer entre les onglets
+    function showTab(tabName) {
+      // Masquer tous les contenus
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+
+      // Désactiver tous les onglets
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      // Activer l'onglet sélectionné
+      const tabs = document.querySelectorAll('.tab');
+      if (tabName === 'create') {
+        tabs[0].classList.add('active');
+        document.getElementById('createTab').classList.add('active');
+      } else if (tabName === 'search') {
+        tabs[1].classList.add('active');
+        document.getElementById('searchTab').classList.add('active');
+      } else if (tabName === 'list') {
+        tabs[2].classList.add('active');
+        document.getElementById('listTab').classList.add('active');
+        loadAllProjects();
+      } else if (tabName === 'stats') {
+        tabs[3].classList.add('active');
+        document.getElementById('statsTab').classList.add('active');
+        loadStats();
+      }
+    }
+
+    // Enregistrer un projet
+    function saveProject(event) {
+      event.preventDefault();
+
+      const data = {
+        nomProjet: document.getElementById('nomProjet').value,
+        chefProjet: document.getElementById('chefProjet').value,
+        dateDebut: document.getElementById('dateDebut').value,
+        dateFin: document.getElementById('dateFin').value,
+        statut: document.getElementById('statut').value,
+        budgetTotal: document.getElementById('budgetTotal').value,
+        localisation: document.getElementById('localisation').value,
+        client: document.getElementById('client').value,
+        description: document.getElementById('description').value
+      };
+
+      showAlert('alertCreate', 'Enregistrement en cours...', 'info');
+
+      if (currentProjectId) {
+        // Mise à jour
+        google.script.run
+          .withSuccessHandler(handleSaveSuccess)
+          .withFailureHandler(handleSaveError)
+          .updateProjet(currentProjectId, data);
+      } else {
+        // Création
+        google.script.run
+          .withSuccessHandler(handleSaveSuccess)
+          .withFailureHandler(handleSaveError)
+          .createProjet(data);
+      }
+    }
+
+    // Gérer le succès de l'enregistrement
+    function handleSaveSuccess(result) {
+      if (result.success) {
+        showAlert('alertCreate', result.message, 'success');
+        resetForm();
+        currentProjectId = null;
+      } else {
+        showAlert('alertCreate', result.message, 'error');
+      }
+    }
+
+    // Gérer l'erreur d'enregistrement
+    function handleSaveError(error) {
+      showAlert('alertCreate', 'Erreur: ' + error.message, 'error');
+    }
+
+    // Réinitialiser le formulaire
+    function resetForm() {
+      document.getElementById('projectForm').reset();
+      currentProjectId = null;
+      hideAlert('alertCreate');
+    }
+
+    // Rechercher des projets
+    function searchProjects() {
+      const searchTerm = document.getElementById('searchInput').value;
+
+      if (!searchTerm || searchTerm.trim() === '') {
+        document.getElementById('searchResults').innerHTML = '<p class="loading">Entrez un terme de recherche</p>';
+        return;
+      }
+
+      document.getElementById('searchResults').innerHTML = '<div class="loading">Recherche en cours...</div>';
+
+      google.script.run
+        .withSuccessHandler(function(projets) {
+          displayProjectsInSearch(projets);
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('searchResults').innerHTML = '<div class="loading">Erreur de recherche</div>';
+        })
+        .searchProjets(searchTerm);
+    }
+
+    // Afficher les résultats de recherche
+    function displayProjectsInSearch(projets) {
+      const container = document.getElementById('searchResults');
+
+      if (!projets || projets.length === 0) {
+        container.innerHTML = '<p class="loading">Aucun projet trouvé</p>';
+        return;
+      }
+
+      let html = '<div class="projects-list">';
+      projets.forEach(projet => {
+        html += createProjectCard(projet);
+      });
+      html += '</div>';
+
+      container.innerHTML = html;
+    }
+
+    // Charger tous les projets
+    function loadAllProjects() {
+      document.getElementById('projectsList').innerHTML = '<div class="loading">Chargement...</div>';
+
+      google.script.run
+        .withSuccessHandler(function(projets) {
+          displayAllProjects(projets);
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('projectsList').innerHTML = '<div class="loading">Erreur de chargement</div>';
+        })
+        .getAllProjets();
+    }
+
+    // Afficher tous les projets
+    function displayAllProjects(projets) {
+      const container = document.getElementById('projectsList');
+
+      if (!projets || projets.length === 0) {
+        container.innerHTML = '<p class="loading">Aucun projet disponible</p>';
+        return;
+      }
+
+      let html = '';
+      projets.forEach(projet => {
+        html += createProjectCard(projet);
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Créer une carte de projet
+    function createProjectCard(projet) {
+      return `
+        <div class="project-card" onclick="editProject(${projet.id})">
+          <h3>${projet.nom}</h3>
+          <p><strong>Chef de Projet:</strong> ${projet.chefProjet}</p>
+          <p><strong>Client:</strong> ${projet.client || 'N/A'}</p>
+          <p><strong>Période:</strong> ${formatDate(projet.dateDebut)} - ${formatDate(projet.dateFin)}</p>
+          <div class="badges">
+            <span class="badge badge-status">${projet.statut}</span>
+            <span class="badge badge-budget">${formatCurrency(projet.budgetTotal)} FCFA</span>
+            <span class="badge badge-progress">Avancement: ${formatPercent(projet.pctAvancement)}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    // Éditer un projet
+    function editProject(id) {
+      // TODO: Charger les données du projet et remplir le formulaire
+      alert('Édition du projet #' + id + ' - Fonctionnalité en cours de développement');
+    }
+
+    // Charger les statistiques
+    function loadStats() {
+      google.script.run
+        .withSuccessHandler(function(stats) {
+          if (stats) {
+            document.getElementById('statTotal').textContent = stats.total;
+            document.getElementById('statActifs').textContent = stats.parStatut['En Cours'] || 0;
+            document.getElementById('statBudget').textContent = (stats.budgetTotal / 1000000).toFixed(2);
+            document.getElementById('statAvancement').textContent = (stats.avancementMoyen * 100).toFixed(1) + '%';
+
+            // Afficher la répartition par statut
+            let statusHtml = '<ul style="list-style: none; padding: 0;">';
+            for (const statut in stats.parStatut) {
+              statusHtml += `<li style="padding: 8px 0; border-bottom: 1px solid #e8eaed;">
+                <strong>${statut}:</strong> ${stats.parStatut[statut]} projet(s)
+              </li>`;
+            }
+            statusHtml += '</ul>';
+            document.getElementById('statusBreakdown').innerHTML = statusHtml;
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Erreur de chargement des stats:', error);
+        })
+        .getProjetStats();
+    }
+
+    // Afficher une alerte
+    function showAlert(id, message, type) {
+      const alert = document.getElementById(id);
+      alert.className = 'alert alert-' + type;
+      alert.textContent = message;
+      alert.style.display = 'block';
+    }
+
+    // Masquer une alerte
+    function hideAlert(id) {
+      const alert = document.getElementById(id);
+      alert.style.display = 'none';
+    }
+
+    // Formater une date
+    function formatDate(date) {
+      if (!date) return 'N/A';
+      const d = new Date(date);
+      return d.toLocaleDateString('fr-FR');
+    }
+
+    // Formater une devise
+    function formatCurrency(value) {
+      if (!value) return '0';
+      return parseFloat(value).toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    // Formater un pourcentage
+    function formatPercent(value) {
+      if (!value) return '0%';
+      return (parseFloat(value) * 100).toFixed(1) + '%';
+    }
+
+    // Initialisation
+    window.onload = function() {
+      // Définir la date du jour par défaut
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('dateDebut').value = today;
+    };
+  </script>
+</body>
+</html>

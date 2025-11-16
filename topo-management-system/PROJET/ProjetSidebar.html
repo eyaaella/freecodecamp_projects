@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 15px;
+      color: #202124;
+    }
+
+    .header {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .header h2 {
+      font-size: 20px;
+      color: #1a73e8;
+      margin-bottom: 5px;
+    }
+
+    .stats-container {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-card h3 {
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+
+    .stat-card p {
+      font-size: 11px;
+      opacity: 0.9;
+    }
+
+    .search-container {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e8eaed;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .search-box:focus {
+      outline: none;
+      border-color: #1a73e8;
+    }
+
+    .actions-container {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      margin: 5px 0;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%);
+      color: white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .btn-secondary {
+      background: #f8f9fa;
+      color: #202124;
+      border: 1px solid #dadce0;
+    }
+
+    .btn-secondary:hover {
+      background: #e8eaed;
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #34a853 0%, #5cb85c 100%);
+      color: white;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #ea4335 0%, #d9534f 100%);
+      color: white;
+    }
+
+    .btn span {
+      margin-right: 8px;
+      font-size: 16px;
+    }
+
+    .results-container {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .project-item {
+      padding: 12px;
+      margin: 8px 0;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #1a73e8;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .project-item:hover {
+      background: #e8f0fe;
+      transform: translateX(4px);
+    }
+
+    .project-item h4 {
+      font-size: 14px;
+      color: #202124;
+      margin-bottom: 4px;
+    }
+
+    .project-item p {
+      font-size: 12px;
+      color: #5f6368;
+      margin: 2px 0;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      margin-top: 4px;
+    }
+
+    .status-en-cours {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    .status-termine {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-pause {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-annule {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #5f6368;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 10px;
+      background: white;
+      border-radius: 12px;
+      font-size: 11px;
+      color: #5f6368;
+    }
+
+    h3 {
+      font-size: 14px;
+      color: #1a73e8;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h2>📁 Gestion des Projets</h2>
+    <p>Créer, modifier et suivre les projets</p>
+  </div>
+
+  <div class="stats-container">
+    <h3>📊 Statistiques</h3>
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <h3 id="totalProjets">-</h3>
+        <p>Total Projets</p>
+      </div>
+      <div class="stat-card">
+        <h3 id="projetsActifs">-</h3>
+        <p>Projets Actifs</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-container">
+    <h3>🔍 Rechercher</h3>
+    <input type="text" id="searchInput" class="search-box" placeholder="Rechercher un projet...">
+    <button class="btn btn-primary" onclick="searchProjects()">
+      <span>🔍</span> Rechercher
+    </button>
+  </div>
+
+  <div class="actions-container">
+    <h3>⚡ Actions Rapides</h3>
+    <button class="btn btn-primary" onclick="openNewProject()">
+      <span>➕</span> Nouveau Projet
+    </button>
+    <button class="btn btn-secondary" onclick="refreshData()">
+      <span>🔄</span> Actualiser
+    </button>
+    <button class="btn btn-secondary" onclick="google.script.run.showProjetSheet()">
+      <span>📋</span> Voir la Feuille
+    </button>
+    <button class="btn btn-success" onclick="exportData()">
+      <span>📤</span> Exporter
+    </button>
+  </div>
+
+  <div class="results-container" id="resultsContainer">
+    <h3>📁 Projets Récents</h3>
+    <div id="projectsList">
+      <div class="loading">Chargement...</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>© 2024 Gestion Topographique</p>
+  </div>
+
+  <script>
+    // Charger les données au démarrage
+    window.onload = function() {
+      loadStats();
+      loadRecentProjects();
+    };
+
+    // Charger les statistiques
+    function loadStats() {
+      google.script.run
+        .withSuccessHandler(function(stats) {
+          if (stats) {
+            document.getElementById('totalProjets').textContent = stats.total || 0;
+            document.getElementById('projetsActifs').textContent = stats.parStatut['En Cours'] || 0;
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Erreur:', error);
+        })
+        .getProjetStats();
+    }
+
+    // Charger les projets récents
+    function loadRecentProjects() {
+      google.script.run
+        .withSuccessHandler(function(projets) {
+          displayProjects(projets.slice(0, 10)); // Afficher les 10 derniers
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('projectsList').innerHTML = '<div class="loading">Erreur de chargement</div>';
+        })
+        .getAllProjets();
+    }
+
+    // Afficher les projets
+    function displayProjects(projets) {
+      const container = document.getElementById('projectsList');
+
+      if (!projets || projets.length === 0) {
+        container.innerHTML = '<div class="loading">Aucun projet trouvé</div>';
+        return;
+      }
+
+      let html = '';
+      projets.forEach(function(projet) {
+        const statusClass = 'status-' + projet.statut.toLowerCase().replace(/ /g, '-');
+        html += `
+          <div class="project-item" onclick="viewProject(${projet.id})">
+            <h4>${projet.nom}</h4>
+            <p>Chef: ${projet.chefProjet}</p>
+            <p>Budget: ${formatCurrency(projet.budgetTotal)} FCFA</p>
+            <p>Avancement: ${formatPercent(projet.pctAvancement)}</p>
+            <span class="status-badge ${statusClass}">${projet.statut}</span>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Rechercher des projets
+    function searchProjects() {
+      const searchTerm = document.getElementById('searchInput').value;
+
+      if (!searchTerm || searchTerm.trim() === '') {
+        loadRecentProjects();
+        return;
+      }
+
+      document.getElementById('projectsList').innerHTML = '<div class="loading">Recherche en cours...</div>';
+
+      google.script.run
+        .withSuccessHandler(function(projets) {
+          displayProjects(projets);
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('projectsList').innerHTML = '<div class="loading">Erreur de recherche</div>';
+        })
+        .searchProjets(searchTerm);
+    }
+
+    // Ouvrir le modal de création de projet
+    function openNewProject() {
+      google.script.run.openProjetModal();
+    }
+
+    // Voir un projet
+    function viewProject(id) {
+      // TODO: Implémenter l'affichage des détails du projet
+      alert('Affichage du projet #' + id);
+    }
+
+    // Actualiser les données
+    function refreshData() {
+      loadStats();
+      loadRecentProjects();
+      document.getElementById('searchInput').value = '';
+    }
+
+    // Exporter les données
+    function exportData() {
+      alert('Fonctionnalité d\'export en cours de développement');
+    }
+
+    // Formater la devise
+    function formatCurrency(value) {
+      if (!value) return '0';
+      return parseFloat(value).toLocaleString('fr-FR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    // Formater le pourcentage
+    function formatPercent(value) {
+      if (!value) return '0%';
+      return (parseFloat(value) * 100).toFixed(1) + '%';
+    }
+
+    // Recherche en temps réel
+    document.addEventListener('DOMContentLoaded', function() {
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) {
+        searchInput.addEventListener('keyup', function(e) {
+          if (e.key === 'Enter') {
+            searchProjects();
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

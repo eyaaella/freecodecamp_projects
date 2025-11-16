@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 15px;
+      color: #202124;
+    }
+
+    .header {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .header h1 {
+      font-size: 24px;
+      color: #1a73e8;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      font-size: 12px;
+      color: #5f6368;
+    }
+
+    .menu-section {
+      background: white;
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .menu-section h3 {
+      font-size: 14px;
+      color: #1a73e8;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #e8eaed;
+      display: flex;
+      align-items: center;
+    }
+
+    .menu-section h3 span {
+      margin-right: 8px;
+      font-size: 18px;
+    }
+
+    .menu-item {
+      padding: 10px 12px;
+      margin: 5px 0;
+      background: #f8f9fa;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      font-size: 13px;
+      color: #202124;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+    }
+
+    .menu-item:hover {
+      background: #e8f0fe;
+      transform: translateX(4px);
+    }
+
+    .menu-item span {
+      margin-right: 8px;
+      font-size: 16px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1a73e8 0%, #4285f4 100%);
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 14px;
+      font-weight: 500;
+      margin: 5px 0;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-card h4 {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .stat-card p {
+      font-size: 11px;
+      opacity: 0.9;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 20px;
+      padding: 15px;
+      background: white;
+      border-radius: 12px;
+      font-size: 11px;
+      color: #5f6368;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🏗️ GESTION TOPO</h1>
+    <p>Système de Gestion Topographique v1.0</p>
+  </div>
+
+  <div class="menu-section">
+    <h3><span>📊</span> Tableau de Bord</h3>
+    <button class="menu-item" onclick="google.script.run.showDashboard()">
+      <span>📈</span> Afficher le Dashboard
+    </button>
+    <button class="menu-item" onclick="google.script.run.refreshDashboard()">
+      <span>🔄</span> Actualiser les Données
+    </button>
+  </div>
+
+  <div class="menu-section">
+    <h3><span>📁</span> Gestion de Projet</h3>
+    <button class="menu-item" onclick="google.script.run.openProjetModal()">
+      <span>📁</span> Projets
+    </button>
+    <button class="menu-item" onclick="google.script.run.openOuvrageModal()">
+      <span>🏗️</span> Ouvrages
+    </button>
+    <button class="menu-item" onclick="google.script.run.openTacheModal()">
+      <span>✓</span> Tâches
+    </button>
+    <button class="menu-item" onclick="google.script.run.openReleveModal()">
+      <span>📍</span> Relevés Topo
+    </button>
+  </div>
+
+  <div class="menu-section">
+    <h3><span>👥</span> Ressources</h3>
+    <button class="menu-item" onclick="google.script.run.openEmployeSidebar()">
+      <span>👤</span> Employés
+    </button>
+    <button class="menu-item" onclick="google.script.run.openEquipeSidebar()">
+      <span>👥</span> Équipes
+    </button>
+    <button class="menu-item" onclick="google.script.run.openMaterielModal()">
+      <span>🔧</span> Matériel
+    </button>
+  </div>
+
+  <div class="menu-section">
+    <h3><span>💰</span> Finance</h3>
+    <button class="menu-item" onclick="google.script.run.openBudgetSidebar()">
+      <span>💰</span> Budget
+    </button>
+    <button class="menu-item" onclick="google.script.run.openFactureSidebar()">
+      <span>🧾</span> Factures
+    </button>
+  </div>
+
+  <div class="menu-section">
+    <h3><span>🔧</span> Administration</h3>
+    <button class="menu-item" onclick="google.script.run.openUtilisateurSidebar()">
+      <span>🔐</span> Utilisateurs
+    </button>
+    <button class="menu-item" onclick="google.script.run.openDocumentSidebar()">
+      <span>📄</span> Documents
+    </button>
+    <button class="menu-item" onclick="google.script.run.openNotificationSidebar()">
+      <span>🔔</span> Notifications
+    </button>
+  </div>
+
+  <div class="footer">
+    <p>© 2024 Système de Gestion Topographique</p>
+    <p>Cameroun - Réseau Gravitaire</p>
+  </div>
+
+  <script>
+    // Fonctions utilitaires
+    function showMessage(msg) {
+      alert(msg);
+    }
+
+    function showError(error) {
+      alert('Erreur: ' + error);
+    }
+  </script>
+</body>
+</html>
