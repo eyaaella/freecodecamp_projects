@@ -1,0 +1,35 @@
+# TopoGest Pro v2.0 - Git Ignore File
+
+# Temporary development scripts
+create_modules_script.sh
+
+# Temporary files
+*_temp.txt
+*.tmp
+*.bak
+*.swp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+
+# Logs
+*.log
+logs/
+
+# Node modules (if any)
+node_modules/
+
+# Environment files
+.env
+.env.local
+
+# Build outputs
+dist/
+build/
