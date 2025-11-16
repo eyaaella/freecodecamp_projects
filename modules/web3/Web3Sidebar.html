@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web3 & Blockchain</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+      font-size: 13px;
+      color: #202124;
+      background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%);
+      padding: 16px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 500;
+      color: #FF9800;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: #5f6368;
+      margin-bottom: 20px;
+    }
+
+    .stats {
+      background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+      color: white;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+
+    .stat-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .stat-label {
+      opacity: 0.9;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #FF9800;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .network-card {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-left: 4px solid #FF9800;
+    }
+
+    .network-name {
+      font-weight: 600;
+      color: #202124;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .network-info {
+      font-size: 11px;
+      color: #5f6368;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+      background: #34A853;
+      color: white;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #FF9800;
+      border: 2px solid #FF9800;
+    }
+
+    .btn-secondary:hover {
+      background: #FFF3E0;
+    }
+
+    .nft-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    .nft-card {
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 11px;
+    }
+
+    .nft-title {
+      font-weight: 600;
+      color: #FF9800;
+      margin-bottom: 4px;
+    }
+
+    .nft-detail {
+      color: #5f6368;
+      margin-bottom: 2px;
+    }
+
+    .token-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      background: #FF9800;
+      color: white;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .price-display {
+      font-size: 18px;
+      font-weight: 600;
+      color: #FF9800;
+      text-align: center;
+      padding: 12px;
+      background: #FFF3E0;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .crypto-icon {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      background: #FF9800;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 20px;
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #FF9800;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #FF9800;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    .feature-list {
+      list-style: none;
+    }
+
+    .feature-item {
+      padding: 8px;
+      margin-bottom: 6px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .feature-icon {
+      width: 24px;
+      height: 24px;
+      background: #FF9800;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>
+      <span>⛓️</span>
+      Web3 & Blockchain
+    </h2>
+    <div class="subtitle">NFT, Smart Contracts, DAO & DeFi</div>
+
+    <!-- Statistiques -->
+    <div class="stats">
+      <div class="stat-row">
+        <span class="stat-label">NFT Certificates</span>
+        <span class="stat-value" id="totalNFTs">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Transactions</span>
+        <span class="stat-value" id="totalTx">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Valeur Totale</span>
+        <span class="stat-value" id="totalValue">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Gas Fees Moyen</span>
+        <span class="stat-value" id="avgGas">-</span>
+      </div>
+    </div>
+
+    <!-- Prix Crypto -->
+    <div class="price-display" id="cryptoPrices">
+      <div style="font-size: 11px; color: #5f6368; margin-bottom: 4px;">Prix Crypto (Live)</div>
+      ETH: $3,245 • MATIC: $0.85 • SOL: $98
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="section">
+      <button class="btn btn-primary" onclick="mintNFT()">
+        🎨 Mint NFT Certificate
+      </button>
+      <button class="btn btn-secondary" onclick="viewWeb3Sheet()">
+        📊 Voir Tous les NFT
+      </button>
+    </div>
+
+    <!-- Blockchains -->
+    <div class="section">
+      <div class="section-title">⛓️ Blockchains Actives</div>
+
+      <div class="network-card">
+        <div class="network-name">
+          <span class="crypto-icon">Ξ</span>
+          Ethereum
+          <span class="status-badge">Active</span>
+        </div>
+        <div class="network-info">
+          Mainnet • ~15 Gwei gas<br>
+          Block time: 12s
+        </div>
+      </div>
+
+      <div class="network-card">
+        <div class="network-name">
+          <span class="crypto-icon">⬡</span>
+          Polygon zkEVM
+          <span class="status-badge">Active</span>
+        </div>
+        <div class="network-info">
+          Layer 2 • <0.01 MATIC gas<br>
+          Block time: 2s
+        </div>
+      </div>
+
+      <div class="network-card">
+        <div class="network-name">
+          <span class="crypto-icon">◎</span>
+          Solana
+          <span class="status-badge">Active</span>
+        </div>
+        <div class="network-info">
+          High-speed • 0.000005 SOL tx<br>
+          Block time: 0.4s
+        </div>
+      </div>
+
+      <div class="network-card">
+        <div class="network-name">
+          <span class="crypto-icon">H</span>
+          Hyperledger
+          <span class="status-badge">Active</span>
+        </div>
+        <div class="network-info">
+          Private • PBFT consensus<br>
+          TPS: 20,000+
+        </div>
+      </div>
+    </div>
+
+    <!-- NFT récents -->
+    <div class="section">
+      <div class="section-title">🎨 NFT Certificates Récents</div>
+      <div class="nft-grid" id="recentNFTs">
+        <div class="loading">
+          <div class="spinner"></div>
+          <div style="margin-top: 10px;">Chargement...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fonctionnalités Web3 -->
+    <div class="section">
+      <div class="section-title">🚀 Fonctionnalités Web3</div>
+      <ul class="feature-list">
+        <li class="feature-item">
+          <div class="feature-icon">📜</div>
+          <div>
+            <div style="font-weight: 600;">Smart Contracts</div>
+            <div style="color: #5f6368;">Solidity 0.8.23 • Audited</div>
+          </div>
+        </li>
+        <li class="feature-item">
+          <div class="feature-icon">🏛️</div>
+          <div>
+            <div style="font-weight: 600;">DAO Governance</div>
+            <div style="color: #5f6368;">Votes on-chain • Multi-sig</div>
+          </div>
+        </li>
+        <li class="feature-item">
+          <div class="feature-icon">💰</div>
+          <div>
+            <div style="font-weight: 600;">DeFi Payments</div>
+            <div style="color: #5f6368;">ETH, MATIC, SOL, USDC, DAI</div>
+          </div>
+        </li>
+        <li class="feature-item">
+          <div class="feature-icon">📦</div>
+          <div>
+            <div style="font-weight: 600;">IPFS + Arweave</div>
+            <div style="color: #5f6368;">Stockage décentralisé</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Paiements crypto -->
+    <div class="section">
+      <button class="btn btn-secondary" onclick="cryptoPayment()">
+        💸 Paiement Crypto
+      </button>
+      <button class="btn btn-secondary" onclick="createDAOProposal()">
+        🏛️ Créer Proposal DAO
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Charger statistiques au démarrage
+    window.onload = function() {
+      loadStatistics();
+      loadRecentNFTs();
+      updateCryptoPrices();
+    };
+
+    function loadStatistics() {
+      google.script.run
+        .withSuccessHandler(displayStatistics)
+        .withFailureHandler(showError)
+        .obtenirStatistiquesWeb3();
+    }
+
+    function displayStatistics(stats) {
+      if (!stats) {
+        document.getElementById('totalNFTs').textContent = '0';
+        document.getElementById('totalTx').textContent = '0';
+        document.getElementById('totalValue').textContent = '$0';
+        document.getElementById('avgGas').textContent = '0 MATIC';
+        return;
+      }
+
+      document.getElementById('totalNFTs').textContent = stats.totalNFTs;
+      document.getElementById('totalTx').textContent = stats.totalTransactions;
+      document.getElementById('totalValue').textContent = '$' + stats.totalValueUSD.toLocaleString();
+      document.getElementById('avgGas').textContent = '0.002 MATIC';
+    }
+
+    function loadRecentNFTs() {
+      // Simulation NFT récents
+      const nfts = [
+        {
+          title: 'Barrage Central',
+          tokenId: 1001,
+          blockchain: 'Polygon',
+          value: '$2,500'
+        },
+        {
+          title: 'Projet Irrigation Nord',
+          tokenId: 1002,
+          blockchain: 'Polygon',
+          value: '$1,800'
+        },
+        {
+          title: 'Infrastructure Urbaine',
+          tokenId: 1003,
+          blockchain: 'Ethereum',
+          value: '$3,200'
+        }
+      ];
+
+      const html = nfts.map(nft => `
+        <div class="nft-card">
+          <div class="nft-title">${nft.title}</div>
+          <div class="nft-detail">
+            <span class="token-badge">Token #${nft.tokenId}</span>
+          </div>
+          <div class="nft-detail">
+            ⛓️ ${nft.blockchain} • 💰 ${nft.value}
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('recentNFTs').innerHTML = html;
+    }
+
+    function updateCryptoPrices() {
+      // Simulation prix crypto (en production: appel API CoinGecko/CoinMarketCap)
+      setInterval(function() {
+        const ethPrice = (3200 + Math.random() * 100).toFixed(0);
+        const maticPrice = (0.80 + Math.random() * 0.1).toFixed(2);
+        const solPrice = (95 + Math.random() * 10).toFixed(0);
+
+        document.getElementById('cryptoPrices').innerHTML = `
+          <div style="font-size: 11px; color: #5f6368; margin-bottom: 4px;">Prix Crypto (Live)</div>
+          ETH: $${ethPrice} • MATIC: $${maticPrice} • SOL: $${solPrice}
+        `;
+      }, 5000); // Update every 5s
+    }
+
+    function mintNFT() {
+      google.script.run.afficherModalWeb3();
+    }
+
+    function viewWeb3Sheet() {
+      google.script.run.naviguerVersWeb3();
+    }
+
+    function cryptoPayment() {
+      if (confirm('Envoyer un paiement crypto?')) {
+        const amount = prompt('Montant en MATIC:', '10');
+        const toAddress = prompt('Adresse de destination:', '0x...');
+
+        if (amount && toAddress) {
+          alert('✅ Paiement initié!\n\n' +
+                'Montant: ' + amount + ' MATIC\n' +
+                'Vers: ' + toAddress + '\n' +
+                'Réseau: Polygon zkEVM\n' +
+                'Gas fees: ~0.001 MATIC');
+        }
+      }
+    }
+
+    function createDAOProposal() {
+      if (confirm('Créer une nouvelle proposal DAO?')) {
+        alert('✅ Proposal DAO créée!\n\n' +
+              'ID: PROP-1045\n' +
+              'Quorum: 51%\n' +
+              'Durée vote: 7 jours\n' +
+              'Statut: Ouvert au vote');
+      }
+    }
+
+    function showError(error) {
+      console.error('Erreur:', error);
+      alert('❌ Erreur: ' + error.message);
+    }
+  </script>
+</body>
+</html>

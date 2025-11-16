@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robotique - Nouvelle Mission</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+      font-size: 14px;
+      color: #202124;
+      background: white;
+      padding: 24px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 500;
+      color: #2196F3;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #5f6368;
+      margin-bottom: 24px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .tab {
+      padding: 12px 24px;
+      background: none;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: #5f6368;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .tab:hover {
+      color: #2196F3;
+      background: #E3F2FD;
+    }
+
+    .tab.active {
+      color: #2196F3;
+      border-bottom-color: #2196F3;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .form-section {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .form-section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #2196F3;
+      margin-bottom: 16px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-row.full {
+      grid-template-columns: 1fr;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #202124;
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+      padding: 10px 12px;
+      border: 1px solid #dadce0;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #2196F3;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .robot-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .robot-card {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .robot-card:hover {
+      border-color: #2196F3;
+      box-shadow: 0 4px 12px rgba(33, 150, 243, 0.2);
+    }
+
+    .robot-card.selected {
+      border-color: #2196F3;
+      background: #E3F2FD;
+    }
+
+    .robot-card.unavailable {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .robot-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .robot-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #202124;
+      margin-bottom: 4px;
+    }
+
+    .robot-model {
+      font-size: 11px;
+      color: #5f6368;
+      margin-bottom: 8px;
+    }
+
+    .robot-status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .status-available {
+      background: #C8E6C9;
+      color: #1B5E20;
+    }
+
+    .status-busy {
+      background: #FFE0B2;
+      color: #E65100;
+    }
+
+    .mission-types {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .mission-type {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .mission-type:hover {
+      border-color: #2196F3;
+    }
+
+    .mission-type.selected {
+      border-color: #2196F3;
+      background: #E3F2FD;
+    }
+
+    .mission-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .mission-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #202124;
+      margin-bottom: 4px;
+    }
+
+    .mission-desc {
+      font-size: 11px;
+      color: #5f6368;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #2196F3;
+      border: 2px solid #2196F3;
+    }
+
+    .btn-secondary:hover {
+      background: #E3F2FD;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+      border-radius: 12px;
+      padding: 20px;
+      color: white;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .fleet-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    .fleet-table th {
+      background: #f8f9fa;
+      padding: 12px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: #5f6368;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .fleet-table td {
+      padding: 12px;
+      border-bottom: 1px solid #e0e0e0;
+      font-size: 13px;
+    }
+
+    .fleet-table tr:hover {
+      background: #f8f9fa;
+    }
+
+    .battery-indicator {
+      display: inline-block;
+      width: 60px;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      overflow: hidden;
+      vertical-align: middle;
+    }
+
+    .battery-fill {
+      height: 100%;
+      background: #34A853;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loading-content {
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #2196F3;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .map-preview {
+      width: 100%;
+      height: 200px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      color: #5f6368;
+      margin-top: 12px;
+    }
+
+    .sensor-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .sensor-card {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .sensor-name {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .sensor-spec {
+      font-size: 11px;
+      color: #5f6368;
+    }
+  </style>
+</head>
+<body>
+  <h1>
+    <span>🤖</span>
+    Robotique & Drones - Gestion Fleet
+  </h1>
+  <div class="subtitle">Assignez missions, gérez flotte 500+ robots autonomes</div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab(0)">🚀 Nouvelle Mission</button>
+    <button class="tab" onclick="switchTab(1)">📊 Statistiques Fleet</button>
+    <button class="tab" onclick="switchTab(2)">🤖 Flotte Disponible</button>
+    <button class="tab" onclick="switchTab(3)">🔧 Capteurs & Tech</button>
+  </div>
+
+  <!-- Tab 1: Nouvelle Mission -->
+  <div class="tab-content active" id="tab0">
+    <form id="missionForm">
+      <div class="form-section">
+        <div class="form-section-title">📋 Type de Mission</div>
+
+        <div class="mission-types">
+          <div class="mission-type" onclick="selectMissionType(this, 'SURVEY')">
+            <div class="mission-icon">🗺️</div>
+            <div class="mission-title">Relevé Topographique</div>
+            <div class="mission-desc">Drone survey • Précision ±2cm</div>
+          </div>
+
+          <div class="mission-type" onclick="selectMissionType(this, 'INSPECTION')">
+            <div class="mission-icon">🔍</div>
+            <div class="mission-title">Inspection Infrastructure</div>
+            <div class="mission-desc">Robot terrestre • Vision 360°</div>
+          </div>
+
+          <div class="mission-type" onclick="selectMissionType(this, 'EXCAVATION')">
+            <div class="mission-icon">🚜</div>
+            <div class="mission-title">Excavation Autonome</div>
+            <div class="mission-desc">Bulldozer robotisé • +30% productivité</div>
+          </div>
+
+          <div class="mission-type" onclick="selectMissionType(this, 'CONSTRUCTION')">
+            <div class="mission-icon">🏗️</div>
+            <div class="mission-title">Impression 3D Béton</div>
+            <div class="mission-desc">Maison 24h • Précision ±2mm</div>
+          </div>
+
+          <div class="mission-type" onclick="selectMissionType(this, 'DELIVERY')">
+            <div class="mission-icon">📦</div>
+            <div class="mission-title">Livraison Matériaux</div>
+            <div class="mission-desc">Drone delivery • 10km range</div>
+          </div>
+
+          <div class="mission-type" onclick="selectMissionType(this, 'MONITORING')">
+            <div class="mission-icon">👁️</div>
+            <div class="mission-title">Surveillance 24/7</div>
+            <div class="mission-desc">Monitoring continu chantier</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">🤖 Sélection Robot</div>
+
+        <div class="robot-grid">
+          <div class="robot-card" onclick="selectRobot(this, 'DRONE-001')">
+            <div class="robot-icon">🚁</div>
+            <div class="robot-name">Survey Eagle 1</div>
+            <div class="robot-model">DJI Matrice 350 RTK</div>
+            <div class="robot-status status-busy">En mission</div>
+          </div>
+
+          <div class="robot-card" onclick="selectRobot(this, 'DRONE-002')">
+            <div class="robot-icon">🚁</div>
+            <div class="robot-name">Survey Eagle 2</div>
+            <div class="robot-model">DJI Matrice 350 RTK</div>
+            <div class="robot-status status-available">Disponible</div>
+          </div>
+
+          <div class="robot-card" onclick="selectRobot(this, 'SPOT-001')">
+            <div class="robot-icon">🐕</div>
+            <div class="robot-name">Inspector Alpha</div>
+            <div class="robot-model">Boston Dynamics Spot</div>
+            <div class="robot-status status-available">Disponible</div>
+          </div>
+
+          <div class="robot-card" onclick="selectRobot(this, 'EXCAV-001')">
+            <div class="robot-icon">🚜</div>
+            <div class="robot-name">Digger Pro</div>
+            <div class="robot-model">Caterpillar 336 Auto</div>
+            <div class="robot-status status-busy">En mission</div>
+          </div>
+
+          <div class="robot-card" onclick="selectRobot(this, 'PRINT-001')">
+            <div class="robot-icon">🏗️</div>
+            <div class="robot-name">Builder Vulcan</div>
+            <div class="robot-model">ICON Vulcan</div>
+            <div class="robot-status status-available">Disponible</div>
+          </div>
+
+          <div class="robot-card" onclick="selectRobot(this, 'DELIVERY-001')">
+            <div class="robot-icon">📦</div>
+            <div class="robot-name">Wing Carrier 1</div>
+            <div class="robot-model">Wing Delivery Drone</div>
+            <div class="robot-status status-available">Disponible</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">📍 Paramètres Mission</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Zone GPS *</label>
+            <input type="text" id="zone" placeholder="48.8566, 2.3522" required>
+          </div>
+          <div class="form-group">
+            <label>Projet lié</label>
+            <select id="projectId">
+              <option value="">Sélectionner un projet...</option>
+              <option value="1">Projet Irrigation Nord</option>
+              <option value="2">Barrage Central</option>
+              <option value="3">Infrastructure Urbaine</option>
+              <option value="4">Survey Zone Est</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Altitude (m)</label>
+            <input type="number" id="altitude" placeholder="100" min="0" max="500">
+          </div>
+          <div class="form-group">
+            <label>Vitesse (km/h)</label>
+            <input type="number" id="speed" placeholder="30" min="5" max="100">
+          </div>
+        </div>
+
+        <div class="form-row full">
+          <div class="form-group">
+            <label>Waypoints (optionnel)</label>
+            <textarea id="waypoints" placeholder="Point 1: 48.8566, 2.3522&#10;Point 2: 48.8578, 2.3545&#10;..."></textarea>
+          </div>
+        </div>
+
+        <div class="map-preview">
+          🗺️
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn btn-secondary" onclick="google.script.host.close()">
+          Annuler
+        </button>
+        <button type="submit" class="btn btn-primary">
+          🚀 Lancer Mission
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Tab 2: Statistiques -->
+  <div class="tab-content" id="tab1">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="stat-label">Robots Totaux</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statMission">0</div>
+        <div class="stat-label">En Mission</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statAvailable">0</div>
+        <div class="stat-label">Disponibles</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statBattery">0%</div>
+        <div class="stat-label">Batterie Moy.</div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">📈 Performance Fleet</div>
+      <table class="fleet-table">
+        <thead>
+          <tr>
+            <th>Métrique</th>
+            <th>Valeur</th>
+            <th>Objectif</th>
+            <th>Amélioration</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Missions Complétées</strong></td>
+            <td>245</td>
+            <td>200/mois</td>
+            <td style="color: #34A853;">+22.5%</td>
+          </tr>
+          <tr>
+            <td><strong>Précision Topographique</strong></td>
+            <td>±2cm</td>
+            <td>±5cm</td>
+            <td style="color: #34A853;">2.5x meilleur</td>
+          </tr>
+          <tr>
+            <td><strong>Temps Vol Total</strong></td>
+            <td>1,247 heures</td>
+            <td>1,000h/mois</td>
+            <td style="color: #34A853;">+24.7%</td>
+          </tr>
+          <tr>
+            <td><strong>Incidents Sécurité</strong></td>
+            <td>0</td>
+            <td>0</td>
+            <td style="color: #34A853;">Parfait ✓</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 3: Flotte -->
+  <div class="tab-content" id="tab2">
+    <div class="form-section">
+      <div class="form-section-title">🤖 Flotte Complète (5/500 Robots)</div>
+      <table class="fleet-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Type</th>
+            <th>Batterie</th>
+            <th>Localisation</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>DRONE-001</strong></td>
+            <td>Survey Eagle 1</td>
+            <td>DJI Matrice 350</td>
+            <td>
+              <div class="battery-indicator">
+                <div class="battery-fill" style="width: 85%;"></div>
+              </div>
+              85%
+            </td>
+            <td>Zone Nord</td>
+            <td><span style="color: #FBBC04;">En mission</span></td>
+          </tr>
+          <tr>
+            <td><strong>SPOT-001</strong></td>
+            <td>Inspector Alpha</td>
+            <td>Boston Dynamics</td>
+            <td>
+              <div class="battery-indicator">
+                <div class="battery-fill" style="width: 92%;"></div>
+              </div>
+              92%
+            </td>
+            <td>Barrage Central</td>
+            <td><span style="color: #34A853;">Disponible</span></td>
+          </tr>
+          <tr>
+            <td><strong>DRONE-002</strong></td>
+            <td>Survey Eagle 2</td>
+            <td>DJI Matrice 350</td>
+            <td>
+              <div class="battery-indicator">
+                <div class="battery-fill" style="width: 45%;"></div>
+              </div>
+              45%
+            </td>
+            <td>Base Station 1</td>
+            <td><span style="color: #FF9800;">En charge</span></td>
+          </tr>
+          <tr>
+            <td><strong>EXCAV-001</strong></td>
+            <td>Digger Pro</td>
+            <td>Caterpillar 336</td>
+            <td>
+              <div class="battery-indicator">
+                <div class="battery-fill" style="width: 68%;"></div>
+              </div>
+              68%
+            </td>
+            <td>Infrastructure</td>
+            <td><span style="color: #FBBC04;">En mission</span></td>
+          </tr>
+          <tr>
+            <td><strong>PRINT-001</strong></td>
+            <td>Builder Vulcan</td>
+            <td>ICON Vulcan</td>
+            <td>
+              <div class="battery-indicator">
+                <div class="battery-fill" style="width: 100%;"></div>
+              </div>
+              100%
+            </td>
+            <td>Chantier Zone Est</td>
+            <td><span style="color: #34A853;">Disponible</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 4: Capteurs -->
+  <div class="tab-content" id="tab3">
+    <div class="form-section">
+      <div class="form-section-title">📡 Capteurs & Technologies</div>
+
+      <div class="sensor-list">
+        <div class="sensor-card">
+          <div class="sensor-name">🎯 LiDAR Velodyne VLP-32C</div>
+          <div class="sensor-spec">
+            600,000 pts/sec • Range 200m<br>
+            Accuracy ±3cm • SLAM 3D mapping
+          </div>
+        </div>
+
+        <div class="sensor-card">
+          <div class="sensor-name">📷 Zenmuse P1 Camera</div>
+          <div class="sensor-spec">
+            61 MP full-frame CMOS<br>
+            Mechanical global shutter
+          </div>
+        </div>
+
+        <div class="sensor-card">
+          <div class="sensor-name">📍 RTK GPS</div>
+          <div class="sensor-spec">
+            Precision ±2cm horizontal<br>
+            20 Hz update • Multi-GNSS
+          </div>
+        </div>
+
+        <div class="sensor-card">
+          <div class="sensor-name">👁️ Computer Vision YOLO v9</div>
+          <div class="sensor-spec">
+            Real-time object detection<br>
+            60 FPS processing
+          </div>
+        </div>
+
+        <div class="sensor-card">
+          <div class="sensor-name">🌡️ Thermal Camera FLIR</div>
+          <div class="sensor-spec">
+            Thermal imaging 640×512<br>
+            Temperature ±2°C
+          </div>
+        </div>
+
+        <div class="sensor-card">
+          <div class="sensor-name">📡 5G + LoRaWAN</div>
+          <div class="sensor-spec">
+            Latency <20ms • Range 50km<br>
+            Bandwidth 1 Gbps
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">🚀 Capacités Avancées</div>
+      <ul style="line-height: 2; color: #5f6368;">
+        <li>✓ <strong>ROS 2 Humble</strong> - Robot Operating System latest</li>
+        <li>✓ <strong>Autonomous Navigation</strong> - SLAM, path planning, obstacle avoidance</li>
+        <li>✓ <strong>Swarm Intelligence</strong> - Coordinated multi-robot missions</li>
+        <li>✓ <strong>AI Vision</strong> - Real-time defect detection, measurements</li>
+        <li>✓ <strong>Digital Twin</strong> - Live sync with virtual models</li>
+        <li>✓ <strong>Predictive Maintenance</strong> - ML-based failure prediction</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <h2 style="color: #2196F3; margin-bottom: 8px;">Lancement mission...</h2>
+      <p style="color: #5f6368;">
+        Upload waypoints...<br>
+        Initialisation robot...<br>
+        Décollage imminent...
+      </p>
+    </div>
+  </div>
+
+  <script>
+    let selectedMissionType = null;
+    let selectedRobot = null;
+
+    // Switch tabs
+    function switchTab(index) {
+      document.querySelectorAll('.tab').forEach((tab, i) => {
+        tab.classList.toggle('active', i === index);
+      });
+      document.querySelectorAll('.tab-content').forEach((content, i) => {
+        content.classList.toggle('active', i === index);
+      });
+
+      if (index === 1) {
+        loadStatistics();
+      }
+    }
+
+    // Select mission type
+    function selectMissionType(element, type) {
+      document.querySelectorAll('.mission-type').forEach(card => {
+        card.classList.remove('selected');
+      });
+      element.classList.add('selected');
+      selectedMissionType = type;
+    }
+
+    // Select robot
+    function selectRobot(element, robotId) {
+      // Check if available
+      if (element.querySelector('.status-busy')) {
+        alert('⚠️ Ce robot est actuellement en mission');
+        return;
+      }
+
+      document.querySelectorAll('.robot-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+      element.classList.add('selected');
+      selectedRobot = robotId;
+    }
+
+    // Load statistics
+    function loadStatistics() {
+      google.script.run
+        .withSuccessHandler(function(stats) {
+          if (!stats) return;
+          document.getElementById('statTotal').textContent = stats.totalRobots;
+          document.getElementById('statMission').textContent = stats.onMission;
+          document.getElementById('statAvailable').textContent = stats.activeRobots;
+          document.getElementById('statBattery').textContent = stats.avgBattery + '%';
+        })
+        .obtenirStatistiquesRobotique();
+    }
+
+    // Form submit
+    document.getElementById('missionForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      if (!selectedMissionType) {
+        alert('⚠️ Veuillez sélectionner un type de mission');
+        return;
+      }
+
+      if (!selectedRobot) {
+        alert('⚠️ Veuillez sélectionner un robot');
+        return;
+      }
+
+      const data = {
+        robotId: selectedRobot,
+        missionType: getMissionTypeName(selectedMissionType),
+        zone: document.getElementById('zone').value,
+        projectId: document.getElementById('projectId').value,
+        altitude: parseInt(document.getElementById('altitude').value) || 100,
+        speed: parseInt(document.getElementById('speed').value) || 30,
+        waypoints: document.getElementById('waypoints').value
+      };
+
+      document.getElementById('loadingOverlay').classList.add('active');
+
+      google.script.run
+        .withSuccessHandler(function(result) {
+          document.getElementById('loadingOverlay').classList.remove('active');
+
+          if (result.success) {
+            alert('✅ Mission assignée avec succès!\n\n' +
+                  'Mission ID: ' + result.missionId + '\n' +
+                  'Robot: ' + selectedRobot + '\n' +
+                  'Durée estimée: ' + result.estimatedDuration + '\n\n' +
+                  '🚀 Le robot démarre la mission...');
+            google.script.host.close();
+          } else {
+            alert('❌ Erreur: ' + result.error);
+          }
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('loadingOverlay').classList.remove('active');
+          alert('❌ Erreur: ' + error.message);
+        })
+        .assignerMission(data);
+    });
+
+    function getMissionTypeName(type) {
+      const names = {
+        'SURVEY': 'Relevé topographique aérien',
+        'INSPECTION': 'Inspection infrastructure',
+        'EXCAVATION': 'Excavation autonome',
+        'CONSTRUCTION': 'Impression 3D construction',
+        'DELIVERY': 'Livraison matériaux',
+        'MONITORING': 'Surveillance chantier 24/7'
+      };
+      return names[type] || 'Mission personnalisée';
+    }
+  </script>
+</body>
+</html>

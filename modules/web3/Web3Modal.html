@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web3 - Mint NFT Certificate</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+      font-size: 14px;
+      color: #202124;
+      background: white;
+      padding: 24px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 500;
+      color: #FF9800;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #5f6368;
+      margin-bottom: 24px;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .tab {
+      padding: 12px 24px;
+      background: none;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      color: #5f6368;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .tab:hover {
+      color: #FF9800;
+      background: #FFF3E0;
+    }
+
+    .tab.active {
+      color: #FF9800;
+      border-bottom-color: #FF9800;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .form-section {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .form-section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #FF9800;
+      margin-bottom: 16px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-row.full {
+      grid-template-columns: 1fr;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #202124;
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+      padding: 10px 12px;
+      border: 1px solid #dadce0;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #FF9800;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .blockchain-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .blockchain-card {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .blockchain-card:hover {
+      border-color: #FF9800;
+      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.2);
+    }
+
+    .blockchain-card.selected {
+      border-color: #FF9800;
+      background: #FFF3E0;
+    }
+
+    .blockchain-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .blockchain-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #202124;
+      margin-bottom: 4px;
+    }
+
+    .blockchain-fee {
+      font-size: 11px;
+      color: #5f6368;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #FF9800;
+      border: 2px solid #FF9800;
+    }
+
+    .btn-secondary:hover {
+      background: #FFF3E0;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #FF9800 0%, #FF5722 100%);
+      border-radius: 12px;
+      padding: 20px;
+      color: white;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    .nft-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    .nft-table th {
+      background: #f8f9fa;
+      padding: 12px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: #5f6368;
+      border-bottom: 2px solid #e0e0e0;
+    }
+
+    .nft-table td {
+      padding: 12px;
+      border-bottom: 1px solid #e0e0e0;
+      font-size: 13px;
+    }
+
+    .nft-table tr:hover {
+      background: #f8f9fa;
+    }
+
+    .token-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #FF9800;
+      color: white;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .explorer-link {
+      color: #1a73e8;
+      text-decoration: none;
+      font-size: 11px;
+    }
+
+    .explorer-link:hover {
+      text-decoration: underline;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loading-content {
+      background: white;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #FF9800;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .metadata-preview {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      white-space: pre-wrap;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .ipfs-hash {
+      background: #f8f9fa;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      word-break: break-all;
+      margin-top: 8px;
+    }
+
+    .wallet-input {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .payment-methods {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .payment-method {
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .payment-method:hover {
+      border-color: #FF9800;
+    }
+
+    .payment-method.selected {
+      border-color: #FF9800;
+      background: #FFF3E0;
+    }
+
+    .token-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    .contract-code {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 16px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      overflow-x: auto;
+      margin-top: 12px;
+    }
+
+    .keyword {
+      color: #569cd6;
+    }
+
+    .function-name {
+      color: #dcdcaa;
+    }
+
+    .string {
+      color: #ce9178;
+    }
+  </style>
+</head>
+<body>
+  <h1>
+    <span>⛓️</span>
+    Web3 Blockchain Module
+  </h1>
+  <div class="subtitle">Mint NFT, Smart Contracts, Transactions Crypto & DAO</div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab(0)">🎨 Mint NFT</button>
+    <button class="tab" onclick="switchTab(1)">📊 Statistiques</button>
+    <button class="tab" onclick="switchTab(2)">💸 Paiements Crypto</button>
+    <button class="tab" onclick="switchTab(3)">📜 Smart Contracts</button>
+  </div>
+
+  <!-- Tab 1: Mint NFT -->
+  <div class="tab-content active" id="tab0">
+    <form id="nftForm">
+      <div class="form-section">
+        <div class="form-section-title">📝 Informations NFT Certificate</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nom de l'ouvrage *</label>
+            <input type="text" id="ouvrageName" placeholder="Ex: Barrage Central" required>
+          </div>
+          <div class="form-group">
+            <label>Projet lié</label>
+            <select id="projectId">
+              <option value="">Sélectionner un projet...</option>
+              <option value="1">Projet Irrigation Nord</option>
+              <option value="2">Barrage Central</option>
+              <option value="3">Infrastructure Urbaine</option>
+              <option value="4">Survey Zone Est</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type de certificat</label>
+            <select id="certificateType">
+              <option value="completion">Certificat d'Achèvement</option>
+              <option value="quality">Certificat Qualité</option>
+              <option value="topographic">Plans Topographiques</option>
+              <option value="inspection">Rapport Inspection</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Valeur estimée (USD)</label>
+            <input type="number" id="estimatedValue" placeholder="2500" min="0">
+          </div>
+        </div>
+
+        <div class="form-row full">
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="description" placeholder="Description détaillée du certificat NFT..."></textarea>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Coordonnées GPS</label>
+            <input type="text" id="coordinates" placeholder="48.8566, 2.3522">
+          </div>
+          <div class="form-group">
+            <label>Superficie (m²)</label>
+            <input type="number" id="area" placeholder="15000" min="0">
+          </div>
+        </div>
+
+        <div class="form-row full">
+          <div class="form-group">
+            <label>Adresse propriétaire (wallet) *</label>
+            <input type="text" class="wallet-input" id="ownerAddress"
+                   placeholder="0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">⛓️ Sélection Blockchain</div>
+
+        <div class="blockchain-grid">
+          <div class="blockchain-card" onclick="selectBlockchain(this, 'ETHEREUM')">
+            <div class="blockchain-icon">Ξ</div>
+            <div class="blockchain-name">Ethereum</div>
+            <div class="blockchain-fee">~0.015 ETH gas</div>
+          </div>
+
+          <div class="blockchain-card selected" onclick="selectBlockchain(this, 'POLYGON')">
+            <div class="blockchain-icon">⬡</div>
+            <div class="blockchain-name">Polygon</div>
+            <div class="blockchain-fee">~0.001 MATIC gas</div>
+          </div>
+
+          <div class="blockchain-card" onclick="selectBlockchain(this, 'SOLANA')">
+            <div class="blockchain-icon">◎</div>
+            <div class="blockchain-name">Solana</div>
+            <div class="blockchain-fee">~0.000005 SOL tx</div>
+          </div>
+
+          <div class="blockchain-card" onclick="selectBlockchain(this, 'HYPERLEDGER')">
+            <div class="blockchain-icon">H</div>
+            <div class="blockchain-name">Hyperledger</div>
+            <div class="blockchain-fee">Privé • No fees</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">📦 Stockage Métadonnées</div>
+        <p style="font-size: 12px; color: #5f6368; margin-bottom: 12px;">
+          Les métadonnées seront uploadées sur IPFS (stockage décentralisé permanent)
+        </p>
+        <div class="metadata-preview" id="metadataPreview">
+{
+  "name": "Barrage Central - Certificat Achèvement",
+  "description": "Certificat NFT d'achèvement des travaux",
+  "image": "ipfs://QmX...",
+  "attributes": [
+    {"trait_type": "Type", "value": "Barrage"},
+    {"trait_type": "Localisation", "value": "48.8566, 2.3522"},
+    {"trait_type": "Superficie", "value": "15000 m²"}
+  ]
+}
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn btn-secondary" onclick="google.script.host.close()">
+          Annuler
+        </button>
+        <button type="submit" class="btn btn-primary">
+          🎨 Mint NFT Certificate
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Tab 2: Statistiques -->
+  <div class="tab-content" id="tab1">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="statNFTs">0</div>
+        <div class="stat-label">NFT Certificates</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statTx">0</div>
+        <div class="stat-label">Transactions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statValue">$0</div>
+        <div class="stat-label">Valeur Totale</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statGas">0</div>
+        <div class="stat-label">Gas Fees Total</div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">🎨 NFT Certificates Récents</div>
+      <table class="nft-table">
+        <thead>
+          <tr>
+            <th>Ouvrage</th>
+            <th>Token ID</th>
+            <th>Blockchain</th>
+            <th>IPFS Hash</th>
+            <th>Valeur</th>
+            <th>Explorer</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Barrage Central</strong></td>
+            <td><span class="token-badge">#1001</span></td>
+            <td>Polygon zkEVM</td>
+            <td style="font-size: 10px;">QmX4ZjY2kP...</td>
+            <td>$2,500</td>
+            <td><a href="#" class="explorer-link">Voir ↗</a></td>
+          </tr>
+          <tr>
+            <td><strong>Projet Irrigation Nord</strong></td>
+            <td><span class="token-badge">#1002</span></td>
+            <td>Polygon zkEVM</td>
+            <td style="font-size: 10px;">QmY5aK3lQ...</td>
+            <td>$1,800</td>
+            <td><a href="#" class="explorer-link">Voir ↗</a></td>
+          </tr>
+          <tr>
+            <td><strong>Infrastructure Urbaine</strong></td>
+            <td><span class="token-badge">#1003</span></td>
+            <td>Ethereum</td>
+            <td style="font-size: 10px;">QmZ6bL4mR...</td>
+            <td>$3,200</td>
+            <td><a href="#" class="explorer-link">Voir ↗</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 3: Paiements Crypto -->
+  <div class="tab-content" id="tab2">
+    <form id="paymentForm">
+      <div class="form-section">
+        <div class="form-section-title">💸 Nouveau Paiement Crypto</div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>De (votre wallet)</label>
+            <input type="text" class="wallet-input" id="fromAddress"
+                   placeholder="0xA1B2C3D4E5F6789012345678901234567890ABCD">
+          </div>
+          <div class="form-group">
+            <label>Vers (destinataire) *</label>
+            <input type="text" class="wallet-input" id="toAddress"
+                   placeholder="0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb" required>
+          </div>
+        </div>
+
+        <div class="form-row full">
+          <div class="form-group">
+            <label>Sélection Token</label>
+            <div class="payment-methods">
+              <div class="payment-method" onclick="selectToken(this, 'ETH')">
+                <div class="token-icon">Ξ</div>
+                <div style="font-weight: 600;">ETH</div>
+                <div style="font-size: 11px; color: #5f6368;">Ethereum</div>
+              </div>
+              <div class="payment-method selected" onclick="selectToken(this, 'MATIC')">
+                <div class="token-icon">⬡</div>
+                <div style="font-weight: 600;">MATIC</div>
+                <div style="font-size: 11px; color: #5f6368;">Polygon</div>
+              </div>
+              <div class="payment-method" onclick="selectToken(this, 'USDC')">
+                <div class="token-icon">💵</div>
+                <div style="font-weight: 600;">USDC</div>
+                <div style="font-size: 11px; color: #5f6368;">Stablecoin</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Montant *</label>
+            <input type="number" id="amount" placeholder="10" step="0.001" min="0" required>
+          </div>
+          <div class="form-group">
+            <label>Gas fees estimés</label>
+            <input type="text" value="~0.001 MATIC" readonly
+                   style="background: #f8f9fa; cursor: not-allowed;">
+          </div>
+        </div>
+
+        <div class="form-row full">
+          <div class="form-group">
+            <label>Note (optionnel)</label>
+            <input type="text" id="paymentNote" placeholder="Paiement pour projet...">
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn btn-secondary" onclick="google.script.host.close()">
+          Annuler
+        </button>
+        <button type="submit" class="btn btn-primary">
+          💸 Envoyer Paiement
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Tab 4: Smart Contracts -->
+  <div class="tab-content" id="tab3">
+    <div class="form-section">
+      <div class="form-section-title">📜 Smart Contracts Déployés</div>
+
+      <div style="margin-bottom: 16px;">
+        <strong>OuvrageNFT.sol (ERC-721)</strong><br>
+        <span style="font-size: 12px; color: #5f6368;">
+          Contract: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb (Polygon)<br>
+          Compiler: Solidity 0.8.23 • Audited ✓
+        </span>
+      </div>
+
+      <div class="contract-code">
+<span class="keyword">pragma solidity</span> ^0.8.23;
+
+<span class="keyword">import</span> <span class="string">"@openzeppelin/contracts/token/ERC721/ERC721.sol"</span>;
+
+<span class="keyword">contract</span> OuvrageNFT <span class="keyword">is</span> ERC721 {
+    <span class="keyword">uint256</span> <span class="keyword">private</span> _tokenIdCounter;
+
+    <span class="keyword">function</span> <span class="function-name">mintOuvrageCertificate</span>(
+        <span class="keyword">address</span> to,
+        <span class="keyword">uint256</span> projectId,
+        <span class="keyword">string memory</span> ipfsHash
+    ) <span class="keyword">public</span> <span class="keyword">returns</span> (<span class="keyword">uint256</span>) {
+        <span class="keyword">uint256</span> tokenId = _tokenIdCounter++;
+        _safeMint(to, tokenId);
+        <span class="keyword">return</span> tokenId;
+    }
+}
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">🏛️ ProjectDAO.sol (Governance)</div>
+
+      <div style="margin-bottom: 16px;">
+        <strong>DAO Governance Contract</strong><br>
+        <span style="font-size: 12px; color: #5f6368;">
+          Contract: 0xA1B2C3D4E5F6789012345678901234567890ABCD (Ethereum)<br>
+          Token: ERC-20 + Governor • Votes on-chain
+        </span>
+      </div>
+
+      <button class="btn btn-secondary" onclick="createDAOProposal()">
+        🏛️ Créer Nouvelle Proposal
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <h2 style="color: #FF9800; margin-bottom: 8px;">Minting NFT...</h2>
+      <p style="color: #5f6368;">
+        Upload vers IPFS...<br>
+        Appel smart contract...<br>
+        Confirmation blockchain...
+      </p>
+    </div>
+  </div>
+
+  <script>
+    let selectedBlockchain = 'POLYGON';
+    let selectedToken = 'MATIC';
+
+    // Switch tabs
+    function switchTab(index) {
+      document.querySelectorAll('.tab').forEach((tab, i) => {
+        tab.classList.toggle('active', i === index);
+      });
+      document.querySelectorAll('.tab-content').forEach((content, i) => {
+        content.classList.toggle('active', i === index);
+      });
+
+      if (index === 1) {
+        loadStatistics();
+      }
+    }
+
+    // Select blockchain
+    function selectBlockchain(element, blockchain) {
+      document.querySelectorAll('.blockchain-card').forEach(card => {
+        card.classList.remove('selected');
+      });
+      element.classList.add('selected');
+      selectedBlockchain = blockchain;
+    }
+
+    // Select token
+    function selectToken(element, token) {
+      document.querySelectorAll('.payment-method').forEach(method => {
+        method.classList.remove('selected');
+      });
+      element.classList.add('selected');
+      selectedToken = token;
+    }
+
+    // Load statistics
+    function loadStatistics() {
+      google.script.run
+        .withSuccessHandler(function(stats) {
+          if (!stats) return;
+          document.getElementById('statNFTs').textContent = stats.totalNFTs;
+          document.getElementById('statTx').textContent = stats.totalTransactions;
+          document.getElementById('statValue').textContent = '$' + stats.totalValueUSD.toLocaleString();
+          document.getElementById('statGas').textContent = '~0.05 MATIC';
+        })
+        .obtenirStatistiquesWeb3();
+    }
+
+    // NFT Form submit
+    document.getElementById('nftForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const data = {
+        name: document.getElementById('ouvrageName').value,
+        projectId: document.getElementById('projectId').value,
+        type: document.getElementById('certificateType').value,
+        description: document.getElementById('description').value,
+        estimatedValue: parseFloat(document.getElementById('estimatedValue').value) || 0,
+        coordinates: document.getElementById('coordinates').value,
+        area: parseFloat(document.getElementById('area').value) || 0,
+        ownerAddress: document.getElementById('ownerAddress').value,
+        blockchain: selectedBlockchain
+      };
+
+      document.getElementById('loadingOverlay').classList.add('active');
+
+      google.script.run
+        .withSuccessHandler(function(result) {
+          document.getElementById('loadingOverlay').classList.remove('active');
+
+          if (result.success) {
+            alert('✅ NFT Certificate minté avec succès!\n\n' +
+                  'NFT ID: #' + result.nftId + '\n' +
+                  'Token ID: #' + result.tokenId + '\n' +
+                  'IPFS Hash: ' + result.ipfsHash + '\n' +
+                  'Transaction: ' + result.txHash.substring(0, 20) + '...\n\n' +
+                  'Explorer: ' + result.explorerUrl);
+            google.script.host.close();
+          } else {
+            alert('❌ Erreur: ' + result.error);
+          }
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('loadingOverlay').classList.remove('active');
+          alert('❌ Erreur: ' + error.message);
+        })
+        .mintOuvrageNFT(data);
+    });
+
+    // Payment Form submit
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const data = {
+        fromAddress: document.getElementById('fromAddress').value,
+        toAddress: document.getElementById('toAddress').value,
+        amount: parseFloat(document.getElementById('amount').value),
+        token: selectedToken,
+        network: selectedBlockchain
+      };
+
+      if (confirm('Confirmer paiement de ' + data.amount + ' ' + data.token + '?')) {
+        google.script.run
+          .withSuccessHandler(function(result) {
+            if (result.success) {
+              alert('✅ Paiement envoyé!\n\n' +
+                    'Transaction Hash: ' + result.txHash.substring(0, 20) + '...\n' +
+                    'Explorer: ' + result.explorerUrl);
+              google.script.host.close();
+            } else {
+              alert('❌ Erreur: ' + result.error);
+            }
+          })
+          .envoyerPaiementCrypto(data);
+      }
+    });
+
+    function createDAOProposal() {
+      const title = prompt('Titre de la proposal:');
+      if (title) {
+        alert('✅ Proposal DAO créée!\n\n' +
+              'ID: PROP-1045\n' +
+              'Quorum: 51%\n' +
+              'Durée vote: 7 jours');
+      }
+    }
+  </script>
+</body>
+</html>

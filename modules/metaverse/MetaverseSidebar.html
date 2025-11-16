@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Metaverse & VR</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+      font-size: 13px;
+      color: #202124;
+      background: linear-gradient(135deg, #E91E63 0%, #9C27B0 100%);
+      padding: 16px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 500;
+      color: #E91E63;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: #5f6368;
+      margin-bottom: 20px;
+    }
+
+    .stats {
+      background: linear-gradient(135deg, #E91E63 0%, #9C27B0 100%);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+      color: white;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+
+    .stat-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .stat-label {
+      opacity: 0.9;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #E91E63;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .platform-card {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-left: 4px solid #E91E63;
+    }
+
+    .platform-name {
+      font-weight: 600;
+      color: #202124;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .platform-info {
+      font-size: 11px;
+      color: #5f6368;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+      background: #34A853;
+      color: white;
+    }
+
+    .live-badge {
+      background: #EA4335;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #E91E63 0%, #9C27B0 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(233, 30, 99, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(233, 30, 99, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #E91E63;
+      border: 2px solid #E91E63;
+    }
+
+    .btn-secondary:hover {
+      background: #FCE4EC;
+    }
+
+    .active-sessions {
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    .session-card {
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+
+    .session-title {
+      font-weight: 600;
+      color: #E91E63;
+      margin-bottom: 4px;
+    }
+
+    .session-detail {
+      color: #5f6368;
+      margin-bottom: 2px;
+    }
+
+    .participant-count {
+      display: inline-block;
+      padding: 2px 6px;
+      background: #34A853;
+      color: white;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .device-icons {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .device-icon {
+      width: 32px;
+      height: 32px;
+      background: white;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #E91E63;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #E91E63;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>
+      <span>🥽</span>
+      Metaverse & VR
+    </h2>
+    <div class="subtitle">Réunions VR, Visites Virtuelles & Collaboration 3D</div>
+
+    <!-- Statistiques -->
+    <div class="stats">
+      <div class="stat-row">
+        <span class="stat-label">Sessions Totales</span>
+        <span class="stat-value" id="totalSessions">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Sessions Actives</span>
+        <span class="stat-value" id="activeSessions">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Durée Moyenne</span>
+        <span class="stat-value" id="avgDuration">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Participants Totaux</span>
+        <span class="stat-value" id="totalParticipants">-</span>
+      </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="section">
+      <button class="btn btn-primary" onclick="createNewSession()">
+        🚀 Créer Session VR
+      </button>
+      <button class="btn btn-secondary" onclick="viewMetaverseSheet()">
+        📊 Voir Toutes Sessions
+      </button>
+    </div>
+
+    <!-- Plateformes VR/AR -->
+    <div class="section">
+      <div class="section-title">🖥️ Plateformes Disponibles</div>
+
+      <div class="platform-card">
+        <div class="platform-name">
+          Meta Quest 3
+          <span class="status-badge">Active</span>
+        </div>
+        <div class="platform-info">2064×2208/œil • 50 participants max</div>
+        <div class="device-icons">
+          <div class="device-icon">🥽</div>
+          <div class="device-icon">👋</div>
+          <div class="device-icon">🔊</div>
+        </div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-name">
+          Apple Vision Pro
+          <span class="status-badge">Active</span>
+        </div>
+        <div class="platform-info">3660×3200/œil • 32 participants max</div>
+        <div class="device-icons">
+          <div class="device-icon">🍎</div>
+          <div class="device-icon">👁️</div>
+          <div class="device-icon">⚡</div>
+        </div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-name">
+          Microsoft Mesh
+          <span class="status-badge">Active</span>
+        </div>
+        <div class="platform-info">HoloLens 2 • 30 participants max</div>
+        <div class="device-icons">
+          <div class="device-icon">🪟</div>
+          <div class="device-icon">🔷</div>
+          <div class="device-icon">☁️</div>
+        </div>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-name">
+          WebXR Browser
+          <span class="status-badge">Active</span>
+        </div>
+        <div class="platform-info">Multi-devices • 100 participants max</div>
+        <div class="device-icons">
+          <div class="device-icon">🌐</div>
+          <div class="device-icon">📱</div>
+          <div class="device-icon">💻</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sessions actives -->
+    <div class="section">
+      <div class="section-title">
+        🔴 Sessions Actives
+        <span class="live-badge" style="margin-left: auto;">LIVE</span>
+      </div>
+      <div class="active-sessions" id="activeSessions">
+        <div class="loading">
+          <div class="spinner"></div>
+          <div style="margin-top: 10px;">Chargement...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Types de sessions -->
+    <div class="section">
+      <div class="section-title">📋 Types de Sessions</div>
+      <div style="font-size: 11px; color: #5f6368; line-height: 1.6;">
+        ✓ Réunions VR (jusqu'à 50 personnes)<br>
+        ✓ Visites virtuelles chantiers<br>
+        ✓ Formations VR interactives<br>
+        ✓ Collaboration 3D en temps réel<br>
+        ✓ Présentations projet immersives<br>
+        ✓ Inspections AR sur terrain
+      </div>
+    </div>
+
+    <!-- Avatar -->
+    <div class="section">
+      <div class="section-title">👤 Mon Avatar</div>
+      <button class="btn btn-secondary" onclick="createAvatar()">
+        ✨ Créer/Modifier Avatar
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Charger statistiques au démarrage
+    window.onload = function() {
+      loadStatistics();
+      loadActiveSessions();
+    };
+
+    function loadStatistics() {
+      google.script.run
+        .withSuccessHandler(displayStatistics)
+        .withFailureHandler(showError)
+        .obtenirStatistiquesMetaverse();
+    }
+
+    function displayStatistics(stats) {
+      if (!stats) {
+        document.getElementById('totalSessions').textContent = '0';
+        document.getElementById('activeSessions').textContent = '0';
+        document.getElementById('avgDuration').textContent = '0 min';
+        document.getElementById('totalParticipants').textContent = '0';
+        return;
+      }
+
+      document.getElementById('totalSessions').textContent = stats.totalSessions;
+      document.getElementById('activeSessions').textContent = stats.activeSessions;
+      document.getElementById('avgDuration').textContent = stats.avgDuration + ' min';
+      document.getElementById('totalParticipants').textContent =
+        Object.values(stats.platforms).reduce((a, b) => a + b, 0);
+    }
+
+    function loadActiveSessions() {
+      // Simulation données sessions actives
+      const active = [
+        {
+          title: 'Collaboration 3D Infrastructure',
+          platform: 'Microsoft Mesh',
+          participants: 15,
+          duration: '23 min'
+        },
+        {
+          title: 'Visite Virtuelle Barrage Est',
+          platform: 'Apple Vision Pro',
+          participants: 8,
+          duration: '12 min'
+        }
+      ];
+
+      const html = active.map(session => `
+        <div class="session-card">
+          <div class="session-title">${session.title}</div>
+          <div class="session-detail">
+            <span class="participant-count">${session.participants} participants</span>
+          </div>
+          <div class="session-detail">
+            🖥️ ${session.platform} • ⏱️ ${session.duration}
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('activeSessions').innerHTML = html ||
+        '<div style="text-align:center; padding:20px; color:#5f6368;">Aucune session active</div>';
+    }
+
+    function createNewSession() {
+      google.script.run.afficherModalMetaverse();
+    }
+
+    function viewMetaverseSheet() {
+      google.script.run.naviguerVersMetaverse();
+    }
+
+    function createAvatar() {
+      if (confirm('Créer un nouvel avatar Ready Player Me?')) {
+        // Simuler création avatar
+        const avatarUrl = 'https://models.readyplayer.me/' +
+          Math.random().toString(36).substring(2, 15) + '.glb';
+
+        alert('✅ Avatar créé avec succès!\n\n' +
+              'URL: ' + avatarUrl + '\n' +
+              'Provider: Ready Player Me\n' +
+              'Type: Full Body Avatar');
+      }
+    }
+
+    function showError(error) {
+      console.error('Erreur:', error);
+      alert('❌ Erreur: ' + error.message);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robotique & Drones</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+      font-size: 13px;
+      color: #202124;
+      background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+      padding: 16px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 500;
+      color: #2196F3;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: #5f6368;
+      margin-bottom: 20px;
+    }
+
+    .stats {
+      background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+      color: white;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+
+    .stat-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .stat-label {
+      opacity: 0.9;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #2196F3;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .robot-card {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-left: 4px solid #2196F3;
+    }
+
+    .robot-name {
+      font-weight: 600;
+      color: #202124;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .robot-info {
+      font-size: 11px;
+      color: #5f6368;
+      margin-bottom: 4px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .status-active {
+      background: #34A853;
+      color: white;
+    }
+
+    .status-mission {
+      background: #FBBC04;
+      color: #202124;
+    }
+
+    .status-charging {
+      background: #FF9800;
+      color: white;
+    }
+
+    .battery-bar {
+      width: 100%;
+      height: 6px;
+      background: #e0e0e0;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .battery-fill {
+      height: 100%;
+      background: #34A853;
+      transition: width 0.3s;
+    }
+
+    .battery-fill.medium {
+      background: #FBBC04;
+    }
+
+    .battery-fill.low {
+      background: #EA4335;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #2196F3;
+      border: 2px solid #2196F3;
+    }
+
+    .btn-secondary:hover {
+      background: #E3F2FD;
+    }
+
+    .mission-list {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .mission-card {
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+
+    .mission-type {
+      font-weight: 600;
+      color: #2196F3;
+      margin-bottom: 4px;
+    }
+
+    .mission-detail {
+      color: #5f6368;
+      margin-bottom: 2px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 4px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #2196F3;
+      transition: width 0.3s;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #2196F3;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #2196F3;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    .robot-type-icon {
+      font-size: 20px;
+    }
+
+    .live-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #34A853;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+      margin-left: 4px;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>
+      <span>🤖</span>
+      Robotique & Drones
+    </h2>
+    <div class="subtitle">Fleet Management 500+ Robots & Drones Autonomes</div>
+
+    <!-- Statistiques -->
+    <div class="stats">
+      <div class="stat-row">
+        <span class="stat-label">Flotte Totale</span>
+        <span class="stat-value" id="totalRobots">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">En Mission</span>
+        <span class="stat-value" id="onMission">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Actifs Disponibles</span>
+        <span class="stat-value" id="activeRobots">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Batterie Moyenne</span>
+        <span class="stat-value" id="avgBattery">-</span>
+      </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="section">
+      <button class="btn btn-primary" onclick="createNewMission()">
+        🚀 Nouvelle Mission
+      </button>
+      <button class="btn btn-secondary" onclick="viewRobotFleet()">
+        📊 Voir Flotte Complète
+      </button>
+    </div>
+
+    <!-- Robots actifs -->
+    <div class="section">
+      <div class="section-title">
+        🤖 Robots Actifs
+        <span class="live-indicator"></span>
+      </div>
+
+      <div class="robot-card">
+        <div class="robot-name">
+          <span class="robot-type-icon">🚁</span>
+          Survey Eagle 1
+          <span class="status-badge status-mission" style="margin-left: auto;">En mission</span>
+        </div>
+        <div class="robot-info">DJI Matrice 350 RTK</div>
+        <div class="robot-info">📍 Zone Nord • 🔋 85%</div>
+        <div class="battery-bar">
+          <div class="battery-fill" style="width: 85%;"></div>
+        </div>
+      </div>
+
+      <div class="robot-card">
+        <div class="robot-name">
+          <span class="robot-type-icon">🐕</span>
+          Inspector Alpha
+          <span class="status-badge status-active" style="margin-left: auto;">Actif</span>
+        </div>
+        <div class="robot-info">Boston Dynamics Spot</div>
+        <div class="robot-info">📍 Barrage Central • 🔋 92%</div>
+        <div class="battery-bar">
+          <div class="battery-fill" style="width: 92%;"></div>
+        </div>
+      </div>
+
+      <div class="robot-card">
+        <div class="robot-name">
+          <span class="robot-type-icon">🚁</span>
+          Survey Eagle 2
+          <span class="status-badge status-charging" style="margin-left: auto;">En charge</span>
+        </div>
+        <div class="robot-info">DJI Matrice 350 RTK</div>
+        <div class="robot-info">📍 Base Station 1 • 🔋 45%</div>
+        <div class="battery-bar">
+          <div class="battery-fill medium" style="width: 45%;"></div>
+        </div>
+      </div>
+
+      <div class="robot-card">
+        <div class="robot-name">
+          <span class="robot-type-icon">🚜</span>
+          Digger Pro
+          <span class="status-badge status-mission" style="margin-left: auto;">En mission</span>
+        </div>
+        <div class="robot-info">Caterpillar 336 Auto</div>
+        <div class="robot-info">📍 Infrastructure • 🔋 68%</div>
+        <div class="battery-bar">
+          <div class="battery-fill medium" style="width: 68%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Missions en cours -->
+    <div class="section">
+      <div class="section-title">📋 Missions en Cours</div>
+      <div class="mission-list" id="activeMissions">
+        <div class="loading">
+          <div class="spinner"></div>
+          <div style="margin-top: 10px;">Chargement...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Types d'équipements -->
+    <div class="section">
+      <div class="section-title">🔧 Types d'Équipements</div>
+      <div style="font-size: 11px; color: #5f6368; line-height: 1.6;">
+        ✓ Drones Survey (DJI Matrice 350 RTK)<br>
+        ✓ Robots Inspection (Boston Dynamics Spot)<br>
+        ✓ Excavateurs Autonomes (Caterpillar)<br>
+        ✓ Imprimantes 3D Béton (ICON Vulcan)<br>
+        ✓ Drones Livraison (Wing Delivery)<br>
+        ✓ Capteurs LiDAR + RTK GPS ±2cm
+      </div>
+    </div>
+
+    <!-- Capacités -->
+    <div class="section">
+      <div class="section-title">⚡ Capacités Avancées</div>
+      <div style="font-size: 11px; color: #5f6368; line-height: 1.6;">
+        🎯 Précision topographique ±2cm<br>
+        🗺️ Cartographie 3D LiDAR SLAM<br>
+        🤖 Missions autonomes programmables<br>
+        📡 Télémétrie temps réel 5G/LoRaWAN<br>
+        👁️ Computer Vision YOLO v9<br>
+        🔋 Autonomie jusqu'à 90 min vol/travail
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Charger statistiques au démarrage
+    window.onload = function() {
+      loadStatistics();
+      loadActiveMissions();
+      startTelemetryUpdates();
+    };
+
+    function loadStatistics() {
+      google.script.run
+        .withSuccessHandler(displayStatistics)
+        .withFailureHandler(showError)
+        .obtenirStatistiquesRobotique();
+    }
+
+    function displayStatistics(stats) {
+      if (!stats) {
+        document.getElementById('totalRobots').textContent = '0';
+        document.getElementById('onMission').textContent = '0';
+        document.getElementById('activeRobots').textContent = '0';
+        document.getElementById('avgBattery').textContent = '0%';
+        return;
+      }
+
+      document.getElementById('totalRobots').textContent = stats.totalRobots;
+      document.getElementById('onMission').textContent = stats.onMission;
+      document.getElementById('activeRobots').textContent = stats.activeRobots;
+      document.getElementById('avgBattery').textContent = stats.avgBattery + '%';
+    }
+
+    function loadActiveMissions() {
+      // Simulation missions actives
+      const missions = [
+        {
+          type: 'Topographie Zone Nord',
+          robot: 'Survey Eagle 1',
+          progress: 75
+        },
+        {
+          type: 'Inspection Barrage',
+          robot: 'Inspector Alpha',
+          progress: 45
+        },
+        {
+          type: 'Excavation Infrastructure',
+          robot: 'Digger Pro',
+          progress: 60
+        }
+      ];
+
+      const html = missions.map(mission => `
+        <div class="mission-card">
+          <div class="mission-type">${mission.type}</div>
+          <div class="mission-detail">
+            🤖 ${mission.robot}
+          </div>
+          <div class="mission-detail">
+            📊 Progression: ${mission.progress}%
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${mission.progress}%;"></div>
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('activeMissions').innerHTML = html;
+    }
+
+    function startTelemetryUpdates() {
+      // Simulation mises à jour télémétrie temps réel
+      setInterval(function() {
+        // Mettre à jour batteries aléatoirement
+        const batteryBars = document.querySelectorAll('.battery-fill');
+        batteryBars.forEach(bar => {
+          const currentWidth = parseFloat(bar.style.width);
+          const newWidth = Math.max(20, currentWidth - Math.random() * 0.5);
+          bar.style.width = newWidth + '%';
+
+          // Changer couleur selon niveau
+          if (newWidth < 30) {
+            bar.className = 'battery-fill low';
+          } else if (newWidth < 60) {
+            bar.className = 'battery-fill medium';
+          } else {
+            bar.className = 'battery-fill';
+          }
+        });
+      }, 5000); // Update every 5s
+    }
+
+    function createNewMission() {
+      google.script.run.afficherModalRobotique();
+    }
+
+    function viewRobotFleet() {
+      google.script.run.naviguerVersRobotique();
+    }
+
+    function showError(error) {
+      console.error('Erreur:', error);
+      alert('❌ Erreur: ' + error.message);
+    }
+  </script>
+</body>
+</html>

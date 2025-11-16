@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quantum Computing</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+      font-size: 13px;
+      color: #202124;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 16px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      font-size: 20px;
+      font-weight: 500;
+      color: #673AB7;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      color: #5f6368;
+      margin-bottom: 20px;
+    }
+
+    .stats {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+      color: white;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+
+    .stat-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .stat-label {
+      opacity: 0.9;
+    }
+
+    .stat-value {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .section {
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #673AB7;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .provider-card {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-left: 4px solid #673AB7;
+    }
+
+    .provider-name {
+      font-weight: 600;
+      color: #202124;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .provider-info {
+      font-size: 11px;
+      color: #5f6368;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+      background: #34A853;
+      color: white;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #673AB7;
+      border: 2px solid #673AB7;
+    }
+
+    .btn-secondary:hover {
+      background: #f3e5f5;
+    }
+
+    .algorithm-list {
+      list-style: none;
+    }
+
+    .algorithm-item {
+      padding: 8px;
+      margin-bottom: 6px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .algorithm-icon {
+      width: 24px;
+      height: 24px;
+      background: #673AB7;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 10px;
+      flex-shrink: 0;
+    }
+
+    .recent-optimizations {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    .optimization-item {
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 11px;
+    }
+
+    .optimization-type {
+      font-weight: 600;
+      color: #673AB7;
+      margin-bottom: 4px;
+    }
+
+    .optimization-detail {
+      color: #5f6368;
+      margin-bottom: 2px;
+    }
+
+    .precision-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      background: #34A853;
+      color: white;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #673AB7;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #673AB7;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>
+      <span>🔮</span>
+      Quantum Computing
+    </h2>
+    <div class="subtitle">Optimisation Quantique & Post-Quantum Crypto</div>
+
+    <!-- Statistiques -->
+    <div class="stats">
+      <div class="stat-row">
+        <span class="stat-label">Total Optimisations</span>
+        <span class="stat-value" id="totalOpt">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Taux Succès</span>
+        <span class="stat-value" id="successRate">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Précision Moyenne</span>
+        <span class="stat-value" id="avgPrecision">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Qubits Moyens</span>
+        <span class="stat-value" id="avgQubits">-</span>
+      </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="section">
+      <button class="btn btn-primary" onclick="openOptimizationModal()">
+        ⚡ Nouvelle Optimisation Quantique
+      </button>
+      <button class="btn btn-secondary" onclick="viewQuantumSheet()">
+        📊 Voir Historique Complet
+      </button>
+    </div>
+
+    <!-- Providers Quantum -->
+    <div class="section">
+      <div class="section-title">🖥️ Quantum Providers</div>
+
+      <div class="provider-card">
+        <div class="provider-name">
+          IBM Quantum
+          <span class="status-badge">Active</span>
+        </div>
+        <div class="provider-info">127 qubits • ibm_brisbane</div>
+      </div>
+
+      <div class="provider-card">
+        <div class="provider-name">
+          Google Quantum AI
+          <span class="status-badge">Active</span>
+        </div>
+        <div class="provider-info">70 qubits • Cirq 1.3</div>
+      </div>
+
+      <div class="provider-card">
+        <div class="provider-name">
+          Azure Quantum
+          <span class="status-badge">Active</span>
+        </div>
+        <div class="provider-info">100 qubits • Q# Language</div>
+      </div>
+    </div>
+
+    <!-- Algorithmes -->
+    <div class="section">
+      <div class="section-title">🧬 Algorithmes Quantiques</div>
+      <ul class="algorithm-list">
+        <li class="algorithm-item">
+          <div class="algorithm-icon">Q1</div>
+          <div>
+            <div style="font-weight: 600;">QAOA</div>
+            <div style="color: #5f6368;">Optimisation Approximative</div>
+          </div>
+        </li>
+        <li class="algorithm-item">
+          <div class="algorithm-icon">Q2</div>
+          <div>
+            <div style="font-weight: 600;">VQE</div>
+            <div style="color: #5f6368;">Variational Eigensolver</div>
+          </div>
+        </li>
+        <li class="algorithm-item">
+          <div class="algorithm-icon">Q3</div>
+          <div>
+            <div style="font-weight: 600;">Grover</div>
+            <div style="color: #5f6368;">Recherche Quantique</div>
+          </div>
+        </li>
+        <li class="algorithm-item">
+          <div class="algorithm-icon">Q4</div>
+          <div>
+            <div style="font-weight: 600;">Shor</div>
+            <div style="color: #5f6368;">Factorisation</div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Optimisations récentes -->
+    <div class="section">
+      <div class="section-title">📈 Optimisations Récentes</div>
+      <div class="recent-optimizations" id="recentOpt">
+        <div class="loading">
+          <div class="spinner"></div>
+          <div style="margin-top: 10px;">Chargement...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Post-Quantum Crypto -->
+    <div class="section">
+      <div class="section-title">🔐 Post-Quantum Crypto</div>
+      <div class="provider-card">
+        <div class="provider-name">CRYSTALS-Kyber</div>
+        <div class="provider-info">
+          3072-bit keys • 256-bit security<br>
+          Résistant attaques quantum
+        </div>
+      </div>
+      <button class="btn btn-secondary" onclick="generateQuantumKeys()">
+        🔑 Générer Clés Post-Quantum
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Charger statistiques au démarrage
+    window.onload = function() {
+      loadStatistics();
+      loadRecentOptimizations();
+    };
+
+    function loadStatistics() {
+      google.script.run
+        .withSuccessHandler(displayStatistics)
+        .withFailureHandler(showError)
+        .obtenirStatistiquesQuantum();
+    }
+
+    function displayStatistics(stats) {
+      if (!stats) {
+        document.getElementById('totalOpt').textContent = '0';
+        document.getElementById('successRate').textContent = '0%';
+        document.getElementById('avgPrecision').textContent = '0%';
+        document.getElementById('avgQubits').textContent = '0';
+        return;
+      }
+
+      document.getElementById('totalOpt').textContent = stats.totalOptimizations;
+      document.getElementById('successRate').textContent = stats.successRate + '%';
+      document.getElementById('avgPrecision').textContent = stats.avgPrecision.toFixed(2) + '%';
+      document.getElementById('avgQubits').textContent = Math.round(stats.avgQubits);
+    }
+
+    function loadRecentOptimizations() {
+      // Simulation données récentes
+      const recent = [
+        {
+          type: 'Planning Projet',
+          precision: 99.8,
+          improvement: '1247x',
+          time: '847ms'
+        },
+        {
+          type: 'Simulation Hydraulique',
+          precision: 99.5,
+          improvement: 'Nanométrique',
+          time: '1203ms'
+        },
+        {
+          type: 'Routage Drones',
+          precision: 99.2,
+          improvement: '2145x',
+          time: '1567ms'
+        }
+      ];
+
+      const html = recent.map(opt => `
+        <div class="optimization-item">
+          <div class="optimization-type">${opt.type}</div>
+          <div class="optimization-detail">
+            <span class="precision-badge">${opt.precision}% précision</span>
+          </div>
+          <div class="optimization-detail">
+            ⚡ ${opt.improvement} plus rapide • ${opt.time}
+          </div>
+        </div>
+      `).join('');
+
+      document.getElementById('recentOpt').innerHTML = html;
+    }
+
+    function openOptimizationModal() {
+      google.script.run.afficherModalQuantum();
+    }
+
+    function viewQuantumSheet() {
+      google.script.run.naviguerVersQuantum();
+    }
+
+    function generateQuantumKeys() {
+      if (confirm('Générer nouvelle paire de clés post-quantique (CRYSTALS-Kyber)?')) {
+        google.script.run
+          .withSuccessHandler(function(keys) {
+            alert('✅ Clés post-quantiques générées!\n\n' +
+                  'Algorithme: ' + keys.algorithm + '\n' +
+                  'Sécurité: ' + keys.securityLevel + '-bit\n' +
+                  'Résistant Quantum: Oui');
+          })
+          .generatePostQuantumKeys();
+      }
+    }
+
+    function showError(error) {
+      console.error('Erreur:', error);
+      alert('❌ Erreur: ' + error.message);
+    }
+  </script>
+</body>
+</html>
