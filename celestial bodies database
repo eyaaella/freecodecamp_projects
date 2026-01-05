@@ -53,7 +53,7 @@ CREATE TABLE public.galaxy (
     has_life boolean,
     distance_from_earth numeric,
     galaxy_id integer NOT NULL,
-    is_spheric text,
+    is_spheric boolean,
     diameter integer,
     volume integer
 );
@@ -280,12 +280,12 @@ ALTER TABLE ONLY public.star ALTER COLUMN star_id SET DEFAULT nextval('public.st
 -- Data for Name: galaxy; Type: TABLE DATA; Schema: public; Owner: freecodecamp
 --
 
-INSERT INTO public.galaxy VALUES ('minko', 'mon patriarche', false, 4578.12, 1, 'no', 1245, 12233);
-INSERT INTO public.galaxy VALUES ('beka', 'le cadet du patriarche', false, 4578.102, 2, 'yes', 4785, 4578);
-INSERT INTO public.galaxy VALUES ('ossima', 'le benjamin de minko', false, 4156.10, 3, 'no', 4589, 4589);
-INSERT INTO public.galaxy VALUES ('eyaa', 'premier cousin', false, 12445.32, 4, 'yes', 9669, 45789);
-INSERT INTO public.galaxy VALUES ('moto', 'deuxieme cousin', false, 4152.10, 5, 'no', 4554, 122);
-INSERT INTO public.galaxy VALUES ('ngou', 'demi-cousin', false, 145.25, 6, 'yes', 7747, 744);
+INSERT INTO public.galaxy VALUES ('minko', 'mon patriarche', false, 4578.12, 1, false, 1245, 12233);
+INSERT INTO public.galaxy VALUES ('beka', 'le cadet du patriarche', false, 4578.102, 2, true, 4785, 4578);
+INSERT INTO public.galaxy VALUES ('ossima', 'le benjamin de minko', false, 4156.10, 3, false, 4589, 4589);
+INSERT INTO public.galaxy VALUES ('eyaa', 'premier cousin', false, 12445.32, 4, true, 9669, 45789);
+INSERT INTO public.galaxy VALUES ('moto', 'deuxieme cousin', false, 4152.10, 5, false, 4554, 122);
+INSERT INTO public.galaxy VALUES ('ngou', 'demi-cousin', false, 145.25, 6, true, 7747, 744);
 
 
 --
